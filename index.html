@@ -164,6 +164,21 @@
         <code>dxcli -s</code> コマンドで DEEPX NPU（例：DX-M1）が正しく認識されていることを前提としています。
         SDK/ドライバのインストール手順はここでは<strong>扱いません</strong>——環境構築が完了した後の性能評価のみに焦点を当てます。
       </p>
+      <p data-lang-en style="font-size:13.5px;font-weight:700;color:var(--dx-navy);margin-bottom:6px;">Quick self-check before you start:</p>
+      <p data-lang-ko style="font-size:13.5px;font-weight:700;color:var(--dx-navy);margin-bottom:6px;">시작하기 전 빠른 자가진단:</p>
+      <p data-lang-zh style="font-size:13.5px;font-weight:700;color:var(--dx-navy);margin-bottom:6px;">开始前的快速自检：</p>
+      <p data-lang-ja style="font-size:13.5px;font-weight:700;color:var(--dx-navy);margin-bottom:6px;">開始前のクイックセルフチェック：</p>
+      <div class="dx-code-wrap" style="margin-bottom:10px;">
+<pre><code>dxcli -s</code></pre>
+      </div>
+      <div class="dx-output" style="margin-bottom:0;">DXRT v3.4.2
+=======================================================
+ * Device 0: M1, Accelerator type
+...</div>
+      <p data-lang-en style="font-size:13px;margin:10px 0 0;">Seeing a <code>Device 0</code> line like this means you're ready. Nothing listed? See <a href="basic.html#prereq">Basic → Step 0</a> for the full expected output and troubleshooting.</p>
+      <p data-lang-ko style="font-size:13px;margin:10px 0 0;">위와 같이 <code>Device 0</code> 줄이 보이면 준비된 것입니다. 아무것도 안 보인다면 <a href="basic.html#prereq">Basic → Step 0</a>에서 전체 예상 출력과 문제 해결 방법을 확인하세요.</p>
+      <p data-lang-zh style="font-size:13px;margin:10px 0 0;">如果看到类似上面的 <code>Device 0</code> 行，说明环境已就绪。什么都没显示？请参阅 <a href="basic.html#prereq">Basic → Step 0</a> 获取完整的预期输出和故障排查方法。</p>
+      <p data-lang-ja style="font-size:13px;margin:10px 0 0;">上記のような <code>Device 0</code> の行が表示されれば準備完了です。何も表示されない場合は、<a href="basic.html#prereq">Basic → Step 0</a> で完全な期待出力とトラブルシューティングを確認してください。</p>
     </div>
 
     <div class="dx-cards">
@@ -392,10 +407,10 @@
           <h4 data-lang-zh>评估板</h4>
           <h4 data-lang-ja>評価ボード</h4>
         </div>
-        <p class="dx-ref-desc" data-lang-en>x86_64 / aarch64 hardware options.</p>
-        <p class="dx-ref-desc" data-lang-ko>x86_64/aarch64 하드웨어 옵션.</p>
-        <p class="dx-ref-desc" data-lang-zh>x86_64 / aarch64 硬件选项。</p>
-        <p class="dx-ref-desc" data-lang-ja>x86_64 / aarch64 のハードウェアオプション。</p>
+        <p class="dx-ref-desc" data-lang-en>Carrier / host board options for DX-M1 (x86_64 &amp; aarch64).</p>
+        <p class="dx-ref-desc" data-lang-ko>DX-M1용 캐리어/호스트 보드 옵션 (x86_64 &amp; aarch64).</p>
+        <p class="dx-ref-desc" data-lang-zh>面向 DX-M1 的载板/主机板选项 (x86_64 &amp; aarch64)。</p>
+        <p class="dx-ref-desc" data-lang-ja>DX-M1 向けのキャリア/ホストボードオプション (x86_64 &amp; aarch64)。</p>
         <div class="dx-ref-links">
           <a class="dx-ref-chip" href="https://deepx.ai/products/dx-aiplayer/" target="_blank" rel="noopener">x86_64 · DX-AIPlayer ↗</a>
           <a class="dx-ref-chip" href="https://deepx.ai/shop_now/" target="_blank" rel="noopener">
@@ -463,10 +478,10 @@
       <div class="dx-ref-card">
         <div class="dx-ref-head">
           <span class="dx-ref-emoji">🔗</span>
-          <h4 data-lang-en>Etc.</h4>
-          <h4 data-lang-ko>기타</h4>
-          <h4 data-lang-zh>其他</h4>
-          <h4 data-lang-ja>その他</h4>
+          <h4 data-lang-en>Additional Resources</h4>
+          <h4 data-lang-ko>추가 자료</h4>
+          <h4 data-lang-zh>更多资源</h4>
+          <h4 data-lang-ja>追加リソース</h4>
         </div>
         <p class="dx-ref-desc" data-lang-en>Online documentation and DX AI Studio.</p>
         <p class="dx-ref-desc" data-lang-ko>온라인 문서와 DX AI Studio.</p>

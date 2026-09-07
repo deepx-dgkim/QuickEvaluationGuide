@@ -254,10 +254,10 @@
       その素の性能を測定します——周囲のアプリケーションロジックに左右されない、モデルレベルの数値です。
     </p>
 
-    <h3 data-lang-en>2.1 Maximum performance (benchmark mode)</h3>
-    <h3 data-lang-ko>2.1 최대 성능 확인 (benchmark 모드)</h3>
-    <h3 data-lang-zh>2.1 最大性能(benchmark 模式)</h3>
-    <h3 data-lang-ja>2.1 最大性能の確認(benchmark モード)</h3>
+    <h3 data-lang-en>2.1 Maximum throughput (benchmark mode)</h3>
+    <h3 data-lang-ko>2.1 최대 처리량 확인 (benchmark 모드)</h3>
+    <h3 data-lang-zh>2.1 最大吞吐量(benchmark 模式)</h3>
+    <h3 data-lang-ja>2.1 最大スループットの確認(benchmark モード)</h3>
     <p data-lang-en>
       Benchmark mode (<code>-b</code>) is the <strong>default</strong> when
       neither <code>--single</code> nor <code>--fps &gt; 0</code> is given. It
@@ -331,6 +331,45 @@ dxrun -m model.dxnn --use-ort -t 30 --buffer-count 8</code></pre>
   - NPU Processing Time  : 7.238 ms          (Actual NPU core computation time for a single request)
   - Latency              : 11.638 ms         (End-to-end time per request including data transfer and overheads)
   - FPS                  : 84.86             (Overall user-observed inference throughput (inputs/second), reflecting perceived speed)</div>
+    <div class="dx-callout">
+      <strong class="dx-callout-title" data-lang-en>About these numbers</strong>
+      <strong class="dx-callout-title" data-lang-ko>이 수치에 대하여</strong>
+      <strong class="dx-callout-title" data-lang-zh>关于这些数据</strong>
+      <strong class="dx-callout-title" data-lang-ja>この数値について</strong>
+      <p data-lang-en>
+        The performance numbers shown throughout this guide (FPS, latency, NPU
+        Processing Time, temperatures, etc.) are reference measurements from
+        one specific test system, captured for demonstration purposes. Results
+        will vary depending on host CPU, PCIe configuration, DX-RT/driver
+        version, model compilation settings, and overall system configuration
+        — use them to understand the shape of the results, not as an official
+        performance specification for DX-M1 or YOLO26n.
+      </p>
+      <p data-lang-ko>
+        이 가이드 전체에서 보이는 성능 수치(FPS, 지연시간, NPU Processing Time,
+        온도 등)는 특정 하나의 테스트 시스템에서 측정한 참고용 예시입니다.
+        호스트 CPU, PCIe 구성, DX-RT/드라이버 버전, 모델 컴파일 설정, 전체
+        시스템 구성에 따라 결과가 달라질 수 있습니다 — 이 수치를 DX-M1이나
+        YOLO26n의 공식 성능 사양으로 받아들이지 말고, 결과의 전체적인 경향을
+        이해하는 용도로 참고하세요.
+      </p>
+      <p data-lang-zh>
+        本指南中出现的所有性能数据(FPS、延迟、NPU Processing Time、温度等)
+        均来自某一台特定测试系统,仅用于演示目的。实际结果会因主机 CPU、PCIe
+        配置、DX-RT/驱动版本、模型编译设置以及整体系统配置而有所不同——请将
+        这些数字用于理解结果的整体趋势,而不要将其视为 DX-M1 或 YOLO26n 的
+        官方性能规格。
+      </p>
+      <p data-lang-ja>
+        本ガイド全体に登場する性能数値(FPS、レイテンシ、NPU Processing Time、
+        温度など)は、特定の1台のテストシステムで取得した参考測定値であり、
+        デモンストレーション目的で提示しています。実際の結果は、ホスト CPU、
+        PCIe 構成、DX-RT/ドライバのバージョン、モデルのコンパイル設定、システム
+        構成全体によって変動します——これらの数値は結果の傾向を把握するための
+        参考としてご利用いただき、DX-M1 や YOLO26n の公式な性能仕様として扱わ
+        ないようにしてください。
+      </p>
+    </div>
     <p data-lang-en>
       Notice the label changed to <strong>"Benchmark Result (single input)"</strong>
       — with <code>-s</code>, <code>dxrun</code> still loops <code>-l 300</code>
@@ -432,32 +471,38 @@ dxrun -m model.dxnn --use-ort -t 30 --buffer-count 8</code></pre>
     <h3 data-lang-zh>2.3 FPS 限制模式 (-f, --fps)</h3>
     <h3 data-lang-ja>2.3 FPS 制限モード (-f, --fps)</h3>
     <p data-lang-en>
-      Maximum throughput is rarely how a model runs in production — a 30 fps
-      camera feed doesn't need (or want) the NPU running flat-out. Target-FPS
-      mode caps the input rate to a fixed FPS so you can check
-      <strong>latency and stability under a realistic, capped load</strong>
-      instead of a saturated one, on the exact same model you benchmarked in
-      <strong>2.1</strong>.
+      For many camera-based edge applications, maximum throughput is rarely
+      how a model runs in production — a 30 fps camera feed doesn't need the
+      NPU running flat-out, since inference demand is bounded by the input
+      frame rate. Target-FPS mode caps the input rate to a fixed FPS so you
+      can check <strong>latency and stability under a representative, capped
+      load</strong> instead of a saturated one, on the exact same model you
+      benchmarked in <strong>2.1</strong>.
     </p>
     <p data-lang-ko>
-      실제 운영 환경에서는 최대 처리량으로 모델을 돌리는 경우가 드뭅니다 — 30fps 카메라
-      입력이라면 NPU가 최대 속도로 동작할 필요가 없습니다. target-FPS 모드는 입력 속도를
-      고정된 FPS로 제한하여, <strong>2.1</strong>에서 벤치마크한 것과 동일한 모델에 대해
-      포화 상태가 아닌 <strong>현실적인 제한된 부하에서의 지연시간과 안정성</strong>을
-      확인할 수 있게 해줍니다.
+      많은 카메라 기반 엣지 애플리케이션에서는 실제 운영 환경에서 최대
+      처리량으로 모델을 돌리는 경우가 드뭅니다 — 추론 수요가 입력 프레임
+      속도에 의해 제한되기 때문에, 30fps 카메라 입력이라면 NPU가 최대
+      속도로 동작할 필요가 없습니다. target-FPS 모드는 입력 속도를 고정된
+      FPS로 제한하여, <strong>2.1</strong>에서 벤치마크한 것과 동일한 모델에
+      대해 포화 상태가 아닌 <strong>대표적이고 제한된 부하에서의 지연시간과
+      안정성</strong>을 확인할 수 있게 해줍니다.
     </p>
     <p data-lang-zh>
-      在生产环境中,模型很少以最大吞吐量运行——30fps 的摄像头输入并不需要(也不希望)NPU
-      全力运转。target-FPS 模式会将输入速率限制在固定的 FPS,让您可以针对<strong>2.1</strong>
-      中基准测试过的同一模型,检查<strong>在现实的、受限负载下的延迟和稳定性</strong>,
-      而不是饱和状态下的表现。
+      对于许多基于摄像头的边缘应用而言,在生产环境中模型很少以最大吞吐量
+      运行——由于推理需求受输入帧率限制,30fps 的摄像头输入并不需要 NPU
+      全力运转。target-FPS 模式会将输入速率限制在固定的 FPS,让您可以针对
+      <strong>2.1</strong> 中基准测试过的同一模型,检查<strong>在具有代表性
+      且受限的负载下的延迟和稳定性</strong>,而不是饱和状态下的表现。
     </p>
     <p data-lang-ja>
-      本番環境でモデルが最大スループットで動作することはほとんどありません——30fpsのカメラ
-      入力ではNPUをフル稼働させる必要も、それを望むこともありません。target-FPSモードは
-      入力レートを一定のFPSに制限することで、<strong>2.1</strong>でベンチマークしたのと
-      同じモデルについて、飽和状態ではなく<strong>現実的で制限された負荷下でのレイテンシと
-      安定性</strong>を確認できます。
+      多くのカメラベースのエッジアプリケーションでは、推論需要が入力
+      フレームレートによって制限されるため、本番環境でモデルが最大
+      スループットで動作することはほとんどなく、30fpsのカメラ入力では
+      NPUをフル稼働させる必要はありません。target-FPSモードは入力レートを
+      一定のFPSに制限することで、<strong>2.1</strong>でベンチマークしたのと
+      同じモデルについて、飽和状態ではなく<strong>代表的で制限された負荷下
+      でのレイテンシと安定性</strong>を確認できます。
     </p>
     <p data-lang-en>
       Target-FPS mode automatically activates whenever <code>-f</code> is
@@ -642,22 +687,22 @@ Profiler data has been written to profiler.json
           <tr>
             <td data-lang-en>Benchmark (2.1)</td><td data-lang-en><code>dxrun -m ... --use-ort -t 30</code></td>
             <td data-lang-en>~100% (99.9 / 99.6 / 99.8%)</td><td data-lang-en>Rises to 45–46&nbsp;°C</td>
-            <td data-lang-en>The model's absolute performance ceiling</td>
+            <td data-lang-en>The model's maximum throughput ceiling</td>
           </tr>
           <tr data-lang-ko>
             <td data-lang-ko>Benchmark (2.1)</td><td data-lang-ko><code>dxrun -m ... --use-ort -t 30</code></td>
             <td data-lang-ko>~100% (99.9 / 99.6 / 99.8%)</td><td data-lang-ko>45–46°C까지 상승</td>
-            <td data-lang-ko>모델의 절대적인 성능 한계</td>
+            <td data-lang-ko>모델의 최대 처리량 한계</td>
           </tr>
           <tr data-lang-zh>
             <td data-lang-zh>Benchmark (2.1)</td><td data-lang-zh><code>dxrun -m ... --use-ort -t 30</code></td>
             <td data-lang-zh>~100%(99.9 / 99.6 / 99.8%)</td><td data-lang-zh>上升至 45–46°C</td>
-            <td data-lang-zh>模型的绝对性能上限</td>
+            <td data-lang-zh>模型的最大吞吐量上限</td>
           </tr>
           <tr data-lang-ja>
             <td data-lang-ja>Benchmark (2.1)</td><td data-lang-ja><code>dxrun -m ... --use-ort -t 30</code></td>
             <td data-lang-ja>~100%(99.9 / 99.6 / 99.8%)</td><td data-lang-ja>45–46°Cまで上昇</td>
-            <td data-lang-ja>モデルの絶対的な性能上限</td>
+            <td data-lang-ja>モデルの最大スループット上限</td>
           </tr>
           <tr>
             <td data-lang-en>Target-FPS (2.3, 30 fps)</td><td data-lang-en><code>dxrun -m ... --use-ort -f 30 -t 30</code></td>
@@ -683,39 +728,40 @@ Profiler data has been written to profiler.json
       </table>
     </div>
     <div class="dx-callout tip">
-      <strong class="dx-callout-title" data-lang-en>Field tip: handling a "too hot" complaint</strong>
-      <strong class="dx-callout-title" data-lang-ko>실무 팁: "너무 뜨겁다"는 문의 대응</strong>
-      <strong class="dx-callout-title" data-lang-zh>实用技巧:应对"太热"投诉</strong>
-      <strong class="dx-callout-title" data-lang-ja>実務のコツ:「熱すぎる」という問い合わせへの対応</strong>
+      <strong class="dx-callout-title" data-lang-en>Understanding NPU temperature during benchmarking</strong>
+      <strong class="dx-callout-title" data-lang-ko>벤치마크 중 NPU 온도 이해하기</strong>
+      <strong class="dx-callout-title" data-lang-zh>理解 benchmark 过程中的 NPU 温度</strong>
+      <strong class="dx-callout-title" data-lang-ja>ベンチマーク中の NPU 温度について理解する</strong>
       <p data-lang-en>
-        The next time a customer reports the NPU running hot, the first
-        question is: <em>which test were they running?</em> Nine times out of
-        ten it's a plain <code>dxrun</code> benchmark — ask them to re-run
-        with <code>--use-ort -f &lt;their real camera fps&gt;</code> and compare
-        against <code>dxtop</code>. It usually resolves the concern immediately,
-        and gives you a concrete, reproducible number to share back with them.
+        If the NPU temperature rises during a benchmark run, first check
+        whether the workload is running in maximum-throughput mode.
+        Maximum-throughput benchmarking intentionally drives NPU utilization
+        close to 100%. To evaluate thermal behavior under a representative
+        deployment workload, use <code>-f &lt;target fps&gt;</code> and monitor
+        utilization and temperature with <code>dxtop</code>.
       </p>
       <p data-lang-ko>
-        다음에 고객이 "NPU가 너무 뜨겁다"고 문의하면, 가장 먼저 확인할 것은
-        <em>어떤 테스트를 실행했는가</em>입니다. 대부분은 옵션 없는
-        <code>dxrun</code> benchmark 테스트입니다 — <code>--use-ort -f &lt;실제
-        카메라 fps&gt;</code>로 다시 실행해보고 <code>dxtop</code>과 함께 비교해보라고
-        안내하세요. 보통 이것만으로 우려가 바로 해소되며, 고객에게 다시 전달할
-        수 있는 구체적이고 재현 가능한 수치도 얻게 됩니다.
+        벤치마크 실행 중 NPU 온도가 상승한다면, 먼저 해당 워크로드가 최대
+        처리량(maximum-throughput) 모드로 실행 중인지 확인하세요. 최대 처리량
+        벤치마크는 의도적으로 NPU 활용률을 100%에 가깝게 끌어올립니다. 대표적인
+        배포 워크로드 기준으로 발열 특성을 평가하려면 <code>-f &lt;목표
+        fps&gt;</code>를 사용하고, <code>dxtop</code>으로 활용률과 온도를 함께
+        확인하세요.
       </p>
       <p data-lang-zh>
-        下次客户反馈 NPU 运行过热时,首先要问的是:<em>他们运行的是哪个测试?</em>
-        十有八九是不带任何参数的普通 <code>dxrun</code> benchmark——请他们改用
-        <code>--use-ort -f &lt;实际摄像头 fps&gt;</code> 重新运行,并与 <code>dxtop</code>
-        对比。这通常能立即消除他们的担忧,同时也能给你一个可以反馈给客户的、具体且可
-        复现的数值。
+        如果在 benchmark 运行过程中 NPU 温度上升，首先请确认该负载是否运行在
+        最大吞吐量(maximum-throughput)模式下。最大吞吐量 benchmark 会刻意将
+        NPU 利用率推高到接近 100%。若要在具有代表性的部署负载下评估发热情况，
+        请使用 <code>-f &lt;目标 fps&gt;</code>，并通过 <code>dxtop</code> 同时
+        观察利用率与温度。
       </p>
       <p data-lang-ja>
-        次にNPUが熱くなっているという顧客からの報告を受けたら、まず確認すべきは
-        <em>どのテストを実行していたか</em>です。十中八九、オプションなしの通常の
-        <code>dxrun</code> benchmarkです——<code>--use-ort -f &lt;実際のカメラfps&gt;</code>
-        で再実行し、<code>dxtop</code>と比較してもらいましょう。たいていはこれだけで
-        懸念がすぐに解消され、顧客に伝えられる具体的で再現可能な数値も得られます。
+        benchmark 実行中に NPU 温度が上昇する場合は、まずそのワークロードが
+        最大スループット(maximum-throughput)モードで動作していないか確認して
+        ください。最大スループットのベンチマークは、意図的に NPU 使用率を
+        100%近くまで引き上げます。代表的なデプロイワークロードにおける発熱の
+        挙動を評価するには、<code>-f &lt;目標 fps&gt;</code> を使用し、
+        <code>dxtop</code> で使用率と温度を併せて確認してください。
       </p>
     </div>
 
