@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DEEPX NPU Performance Evaluation Guide</title>
+<title>DEEPX NPU(DX-M1) Quick Evaluation Guide</title>
 <link rel="stylesheet" href="assets/style.css">
 <style>
   /* Quick References — scoped to this page only */
@@ -76,7 +76,7 @@
 
 <nav class="dx-nav">
   <div class="dx-nav__inner">
-    <div class="dx-logo">DEEPX <small>Performance Guide</small></div>
+    <div class="dx-logo">DEEPX <small>Quick Evaluation Guide</small></div>
     <div class="dx-nav__links">
       <a href="index.html">Overview</a>
       <a href="basic.html">Basic</a>
@@ -97,29 +97,33 @@
     <span class="dx-eyebrow" data-lang-ko>성능 평가</span>
     <span class="dx-eyebrow" data-lang-zh>性能评估</span>
     <span class="dx-eyebrow" data-lang-ja>パフォーマンス評価</span>
-    <h1 data-lang-en>DEEPX NPU Performance Evaluation Guide</h1>
-    <h1 data-lang-ko>DEEPX NPU 성능 평가 가이드</h1>
-    <h1 data-lang-zh>DEEPX NPU 性能评估指南</h1>
-    <h1 data-lang-ja>DEEPX NPU パフォーマンス評価ガイド</h1>
+    <h1 data-lang-en>DEEPX NPU(DX-M1) Quick Evaluation Guide</h1>
+    <h1 data-lang-ko>DEEPX NPU(DX-M1) 빠른 평가 가이드</h1>
+    <h1 data-lang-zh>DEEPX NPU(DX-M1) 快速评估指南</h1>
+    <h1 data-lang-ja>DEEPX NPU(DX-M1) クイック評価ガイド</h1>
+    <p class="dx-hero__subtitle" data-lang-en>Performance Evaluation and Benchmarking with DEEPX NPU</p>
+    <p class="dx-hero__subtitle" data-lang-ko>DEEPX NPU를 활용한 성능 평가 및 벤치마킹</p>
+    <p class="dx-hero__subtitle" data-lang-zh>使用 DEEPX NPU 进行性能评估与基准测试</p>
+    <p class="dx-hero__subtitle" data-lang-ja>DEEPX NPU を用いた性能評価とベンチマーキング</p>
     <p data-lang-en>
-      A hands-on guide to measuring real inference performance on DEEPX NPUs —
+      A hands-on guide to evaluating inference performance on DEEPX NPUs —
       from downloading a model to reading your first FPS number, all the way to
-      profiling, batch benchmarking, and full end-to-end pipeline testing.
+      profiling, multi-model benchmarking, and full end-to-end pipeline testing.
     </p>
     <p data-lang-ko>
-      DEEPX NPU의 실제 추론 성능을 직접 측정해보는 실습형 가이드입니다.
-      모델을 내려받아 첫 FPS 숫자를 확인하는 것부터, 프로파일링과 배치 벤치마크,
+      DEEPX NPU의 추론 성능을 평가해보는 실습형 가이드입니다.
+      모델을 내려받아 첫 FPS 숫자를 확인하는 것부터, 프로파일링과 multi-model 벤치마크,
       전체 E2E 파이프라인 테스트까지 다룹니다.
     </p>
     <p data-lang-zh>
-      本指南通过实际操作，演示如何测量 DEEPX NPU 的真实推理性能——
+      本指南通过实际操作，演示如何评估 DEEPX NPU 的推理性能——
       从下载模型、看到第一个 FPS 数值开始，一路涵盖性能剖析（profiling）、
-      批量基准测试（batch benchmarking），直到完整的端到端（E2E）流水线测试。
+      multi-model benchmarking，直到完整的端到端（E2E）流水线测试。
     </p>
     <p data-lang-ja>
-      DEEPX NPU における実際の推論性能を測定するための実践的なガイドです。
+      DEEPX NPU における推論性能を評価するための実践的なガイドです。
       モデルのダウンロードから最初の FPS 値を確認するところに始まり、
-      プロファイリングやバッチベンチマーク、E2E パイプラインテストまでを扱います。
+      プロファイリングや multi-model ベンチマーク、E2E パイプラインテストまでを扱います。
     </p>
     <div class="dx-hero__meta">
       <span data-lang-en>⏱️ <b>Basic</b>: ~15 minutes to your first result</span>
@@ -215,10 +219,10 @@
           <li data-lang-ko>Model Zoo 다운로드 (빠른 방법)</li>
           <li data-lang-zh>Model Zoo 下载（快速方式）</li>
           <li data-lang-ja>Model Zoo ダウンロード（クイックパス）</li>
-          <li data-lang-en><code>dxrun</code> maximum performance check</li>
-          <li data-lang-ko><code>dxrun</code> 최대 성능 확인</li>
-          <li data-lang-zh><code>dxrun</code> 最大性能检查</li>
-          <li data-lang-ja><code>dxrun</code> 最大性能チェック</li>
+          <li data-lang-en><code>dxrun</code> maximum throughput check</li>
+          <li data-lang-ko><code>dxrun</code> 최대 처리량 확인</li>
+          <li data-lang-zh><code>dxrun</code> 最大吞吐量检查</li>
+          <li data-lang-ja><code>dxrun</code> 最大スループットチェック</li>
           <li data-lang-en><code>dx_app</code> / <code>dx_stream</code> quick demos</li>
           <li data-lang-ko><code>dx_app</code> / <code>dx_stream</code> 빠른 데모 실행</li>
           <li data-lang-zh><code>dx_app</code> / <code>dx_stream</code> 快速演示</li>
@@ -239,24 +243,24 @@
         <h3 data-lang-zh>深入学习完整工具链</h3>
         <h3 data-lang-ja>ツールチェーン全体を深く学ぶ</h3>
         <p data-lang-en>
-          Every model-download path, every <code>dxrun</code> option, batch
-          benchmarking with <code>dxbenchmark</code>, extracting standalone
+          Every model-download path, every <code>dxrun</code> option,
+          multi-model benchmarking with <code>dxbenchmark</code>, extracting standalone
           samples with <code>dx_tool.sh</code>, and full GStreamer-level
           profiling for <code>dx_stream</code> pipelines.
         </p>
         <p data-lang-ko>
           모든 모델 다운로드 경로, <code>dxrun</code>의 모든 옵션, <code>dxbenchmark</code>를
-          이용한 배치 벤치마크, <code>dx_tool.sh</code>를 이용한 단독 샘플 추출,
+          이용한 multi-model 벤치마크, <code>dx_tool.sh</code>를 이용한 단독 샘플 추출,
           그리고 <code>dx_stream</code> 파이프라인의 GStreamer 레벨 프로파일링까지 다룹니다.
         </p>
         <p data-lang-zh>
           涵盖所有模型下载路径、<code>dxrun</code> 的全部选项、使用 <code>dxbenchmark</code>
-          进行的批量基准测试、使用 <code>dx_tool.sh</code> 提取独立示例，
+          进行的 multi-model benchmarking、使用 <code>dx_tool.sh</code> 提取独立示例，
           以及针对 <code>dx_stream</code> 流水线的完整 GStreamer 级性能剖析。
         </p>
         <p data-lang-ja>
           すべてのモデルダウンロード経路、<code>dxrun</code> の全オプション、
-          <code>dxbenchmark</code> によるバッチベンチマーク、<code>dx_tool.sh</code> による
+          <code>dxbenchmark</code> による multi-model ベンチマーク、<code>dx_tool.sh</code> による
           スタンドアロンサンプルの抽出、そして <code>dx_stream</code> パイプラインの
           GStreamer レベルでの完全なプロファイリングまでを扱います。
         </p>
@@ -315,19 +319,19 @@
             <td data-lang-ja>この <code>.dxnn</code> モデル単体で NPU 上でどれだけ速く動作するか（スループット/レイテンシ）?</td>
           </tr>
           <tr>
-            <td data-lang-en>Model-level (batch)</td><td data-lang-en><code>dxbenchmark</code></td>
+            <td data-lang-en>Model-level (multi-model)</td><td data-lang-en><code>dxbenchmark</code></td>
             <td data-lang-en>How do many models compare, all at once, with a shareable HTML report?</td>
           </tr>
           <tr data-lang-ko>
-            <td data-lang-ko>모델 레벨 (일괄)</td><td data-lang-ko><code>dxbenchmark</code></td>
+            <td data-lang-ko>모델 레벨 (multi-model)</td><td data-lang-ko><code>dxbenchmark</code></td>
             <td data-lang-ko>여러 모델을 한 번에 비교하고, 공유 가능한 HTML 리포트로 남기려면?</td>
           </tr>
           <tr data-lang-zh>
-            <td data-lang-zh>模型级别（批量）</td><td data-lang-zh><code>dxbenchmark</code></td>
+            <td data-lang-zh>模型级别（multi-model）</td><td data-lang-zh><code>dxbenchmark</code></td>
             <td data-lang-zh>如何一次性比较多个模型，并生成可分享的 HTML 报告？</td>
           </tr>
           <tr data-lang-ja>
-            <td data-lang-ja>モデルレベル（バッチ）</td><td data-lang-ja><code>dxbenchmark</code></td>
+            <td data-lang-ja>モデルレベル（multi-model）</td><td data-lang-ja><code>dxbenchmark</code></td>
             <td data-lang-ja>複数のモデルを一度に比較し、共有可能な HTML レポートとして残すには?</td>
           </tr>
           <tr>
@@ -501,10 +505,10 @@
 </main>
 
 <footer class="dx-footer">
-  <span data-lang-en>DEEPX NPU Performance Evaluation Guide · For use with DEEPX NPU products.</span>
-  <span data-lang-ko>DEEPX NPU 성능 평가 가이드 · DEEPX NPU 제품과 함께 사용하세요.</span>
-  <span data-lang-zh>DEEPX NPU 性能评估指南 · 适用于 DEEPX NPU 产品。</span>
-  <span data-lang-ja>DEEPX NPU パフォーマンス評価ガイド · DEEPX NPU 製品でご利用ください。</span>
+  <span data-lang-en>DEEPX NPU(DX-M1) Quick Evaluation Guide · For use with DEEPX NPU products.</span>
+  <span data-lang-ko>DEEPX NPU(DX-M1) 빠른 평가 가이드 · DEEPX NPU 제품과 함께 사용하세요.</span>
+  <span data-lang-zh>DEEPX NPU(DX-M1) 快速评估指南 · 适用于 DEEPX NPU 产品。</span>
+  <span data-lang-ja>DEEPX NPU(DX-M1) クイック評価ガイド · DEEPX NPU 製品でご利用ください。</span>
 </footer>
 
 <script src="assets/script.js"></script>

@@ -269,6 +269,13 @@ html[data-lang="ja"] strong[data-lang-ja] { display: block !important; }
   color: rgba(255,255,255,0.88);
   margin: 0 0 26px;
 }
+.dx-hero p.dx-hero__subtitle {
+  font-size: 19px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.95);
+  max-width: 680px;
+  margin: 0 0 18px;
+}
 .dx-hero__meta {
   display: flex;
   gap: 22px;

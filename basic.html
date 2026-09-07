@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Basic — DEEPX NPU Performance Evaluation Guide</title>
+<title>Basic — DEEPX NPU(DX-M1) Quick Evaluation Guide</title>
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 
 <nav class="dx-nav">
   <div class="dx-nav__inner">
-    <div class="dx-logo">DEEPX <small>Performance Guide</small></div>
+    <div class="dx-logo">DEEPX <small>Quick Evaluation Guide</small></div>
     <div class="dx-nav__links">
       <a href="index.html">Overview</a>
       <a href="basic.html">Basic</a>
@@ -40,28 +40,32 @@
       — DEEPX's YOLO26n object detector — from download, to a live NPU dashboard
       with <code>dxtop</code>, to maximum throughput, to a representative 30&nbsp;fps
       deployment test, all the way to a real application and a real video pipeline.
-      Every number you see is meant to be reproduced on your own board.
+      The results shown in this guide are reference measurements. Exact
+      values may vary depending on the host system, software version, and
+      system configuration.
     </p>
     <p data-lang-ko>
       추상적인 명령어 나열 대신, DEEPX의 YOLO26n 객체 검출 모델 <strong>하나</strong>를
       기준으로 다운로드부터 <code>dxtop</code> 실시간 대시보드 확인, 최대 처리량 측정,
       대표적인 30fps 테스트, 그리고 실제 애플리케이션·비디오 파이프라인
-      실행까지 끝까지 따라가 봅니다. 여러분의 보드에서 직접 재현해 보시기 바랍니다.
+      실행까지 끝까지 따라가 봅니다. 이 가이드에 나오는 결과는 참고용 측정치이며,
+      정확한 수치는 호스트 시스템, 소프트웨어 버전, 시스템 구성에 따라 달라질 수 있습니다.
     </p>
     <p data-lang-zh>
       本指南不罗列抽象的命令，而是以<strong>一个真实模型</strong> —— DEEPX 的
       YOLO26n 目标检测器 —— 为主线，从下载模型开始，到用 <code>dxtop</code>
       查看实时 NPU 仪表盘，再到测试最大吞吐量，然后进行具有代表性的
-      30&nbsp;fps 测试，最后延伸到真实应用和真实视频流水线。你在本文中看到的
-      每一个数字，都可以在自己的板卡上复现。
+      30&nbsp;fps 测试，最后延伸到真实应用和真实视频流水线。本指南中展示的结果均为
+      参考测量值，具体数值可能因主机系统、软件版本及系统配置的不同而有所差异。
     </p>
     <p data-lang-ja>
       本ガイドでは、抽象的なコマンドの羅列ではなく、<strong>1つの実際のモデル</strong>
       ——DEEPX の YOLO26n 物体検出器——を通して、ダウンロードから
       <code>dxtop</code> によるライブ NPU ダッシュボードの確認、最大スループットの計測、
       代表的な 30&nbsp;fps でのデプロイテスト、そして実際のアプリケーションと
-      実際のビデオパイプラインまでを一貫して解説します。ここに示すすべての数値は、
-      お手元のボードで再現できます。
+      実際のビデオパイプラインまでを一貫して解説します。本ガイドに示す結果は
+      参考測定値であり、実際の数値はホストシステム、ソフトウェアバージョン、
+      システム構成によって異なる場合があります。
     </p>
   </div>
 </header>
@@ -595,22 +599,22 @@ cd dx_app
           <tr>
             <td data-lang-en>Benchmark (max)</td><td data-lang-en><code>dxrun -m ... --use-ort -t 30</code></td>
             <td data-lang-en>~100%</td><td data-lang-en>Rises steadily</td>
-            <td data-lang-en>The model's maximum throughput ceiling</td>
+            <td data-lang-en>Maximum inference throughput under this benchmark configuration</td>
           </tr>
           <tr data-lang-ko>
             <td data-lang-ko>Benchmark (최대)</td><td data-lang-ko><code>dxrun -m ... --use-ort -t 30</code></td>
             <td data-lang-ko>~100%</td><td data-lang-ko>꾸준히 상승</td>
-            <td data-lang-ko>모델의 최대 처리량 한계</td>
+            <td data-lang-ko>이 benchmark 설정에서의 최대 추론 처리량</td>
           </tr>
           <tr data-lang-zh>
             <td data-lang-zh>Benchmark（最大）</td><td data-lang-zh><code>dxrun -m ... --use-ort -t 30</code></td>
             <td data-lang-zh>~100%</td><td data-lang-zh>持续上升</td>
-            <td data-lang-zh>模型的最大吞吐量上限</td>
+            <td data-lang-zh>此 benchmark 配置下的最大推理吞吐量</td>
           </tr>
           <tr data-lang-ja>
             <td data-lang-ja>Benchmark（最大）</td><td data-lang-ja><code>dxrun -m ... --use-ort -t 30</code></td>
             <td data-lang-ja>~100%</td><td data-lang-ja>着実に上昇</td>
-            <td data-lang-ja>モデルの最大スループット上限</td>
+            <td data-lang-ja>この benchmark 設定における最大推論スループット</td>
           </tr>
           <tr>
             <td data-lang-en>Target-FPS (30 fps)</td><td data-lang-en><code>dxrun -m ... --use-ort -f 30 -t 30</code></td>
@@ -984,10 +988,10 @@ cd dx_app
         <h4 data-lang-ko>더 깊이 알아보고 싶으신가요?</h4>
         <h4 data-lang-zh>想深入了解更多？</h4>
         <h4 data-lang-ja>さらに深く知りたいですか？</h4>
-        <p data-lang-en>The Advanced guide covers every dxrun / dxbenchmark option in full, batch benchmarking across many models, standalone sample extraction, and GStreamer-level pipeline profiling.</p>
-        <p data-lang-ko>Advanced 가이드에서는 dxrun / dxbenchmark의 모든 옵션, 여러 모델에 대한 배치 벤치마크, 단독 샘플 추출, GStreamer 레벨 파이프라인 프로파일링까지 다룹니다.</p>
-        <p data-lang-zh>Advanced 指南完整涵盖了 dxrun / dxbenchmark 的所有选项、面向多个模型的批量基准测试、独立样本提取，以及 GStreamer 层级的流水线性能剖析。</p>
-        <p data-lang-ja>Advanced ガイドでは、dxrun / dxbenchmark の全オプション、複数モデルに対するバッチベンチマーク、単独でのサンプル抽出、GStreamer レベルのパイプラインプロファイリングまで、余すところなく解説しています。</p>
+        <p data-lang-en>The Advanced guide covers every dxrun / dxbenchmark option in full, multi-model benchmarking, standalone sample extraction, and GStreamer-level pipeline profiling.</p>
+        <p data-lang-ko>Advanced 가이드에서는 dxrun / dxbenchmark의 모든 옵션, multi-model 벤치마크, 단독 샘플 추출, GStreamer 레벨 파이프라인 프로파일링까지 다룹니다.</p>
+        <p data-lang-zh>Advanced 指南完整涵盖了 dxrun / dxbenchmark 的所有选项、multi-model benchmarking、独立样本提取，以及 GStreamer 层级的流水线性能剖析。</p>
+        <p data-lang-ja>Advanced ガイドでは、dxrun / dxbenchmark の全オプション、multi-model ベンチマーク、単独でのサンプル抽出、GStreamer レベルのパイプラインプロファイリングまで、余すところなく解説しています。</p>
       </div>
       <a class="dx-btn" href="advanced.html">
         <span data-lang-en>Continue to Advanced →</span>
@@ -1001,10 +1005,10 @@ cd dx_app
 </div>
 
 <footer class="dx-footer">
-  <span data-lang-en>DEEPX NPU Performance Evaluation Guide · For use with DEEPX NPU products.</span>
-  <span data-lang-ko>DEEPX NPU 성능 평가 가이드 · DEEPX NPU 제품과 함께 사용하세요.</span>
-  <span data-lang-zh>DEEPX NPU 性能评测指南 · 适用于 DEEPX NPU 产品。</span>
-  <span data-lang-ja>DEEPX NPU 性能評価ガイド · DEEPX NPU 製品とともにご使用ください。</span>
+  <span data-lang-en>DEEPX NPU(DX-M1) Quick Evaluation Guide · For use with DEEPX NPU products.</span>
+  <span data-lang-ko>DEEPX NPU(DX-M1) 빠른 평가 가이드 · DEEPX NPU 제품과 함께 사용하세요.</span>
+  <span data-lang-zh>DEEPX NPU(DX-M1) 快速评估指南 · 适用于 DEEPX NPU 产品。</span>
+  <span data-lang-ja>DEEPX NPU(DX-M1) クイック評価ガイド · DEEPX NPU 製品とともにご使用ください。</span>
 </footer>
 
 <script src="assets/script.js"></script>

@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Advanced — DEEPX NPU Performance Evaluation Guide</title>
+<title>Advanced — DEEPX NPU(DX-M1) Quick Evaluation Guide</title>
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 
 <nav class="dx-nav">
   <div class="dx-nav__inner">
-    <div class="dx-logo">DEEPX <small>Performance Guide</small></div>
+    <div class="dx-logo">DEEPX <small>Quick Evaluation Guide</small></div>
     <div class="dx-nav__links">
       <a href="index.html">Overview</a>
       <a href="basic.html">Basic</a>
@@ -686,22 +686,22 @@ Profiler data has been written to profiler.json
           <tr>
             <td data-lang-en>Benchmark (2.1)</td><td data-lang-en><code>dxrun -m ... --use-ort -t 30</code></td>
             <td data-lang-en>~100% (99.9 / 99.6 / 99.8%)</td><td data-lang-en>Rises to 45–46&nbsp;°C</td>
-            <td data-lang-en>The model's maximum throughput ceiling</td>
+            <td data-lang-en>Maximum inference throughput under this benchmark configuration</td>
           </tr>
           <tr data-lang-ko>
             <td data-lang-ko>Benchmark (2.1)</td><td data-lang-ko><code>dxrun -m ... --use-ort -t 30</code></td>
             <td data-lang-ko>~100% (99.9 / 99.6 / 99.8%)</td><td data-lang-ko>45–46°C까지 상승</td>
-            <td data-lang-ko>모델의 최대 처리량 한계</td>
+            <td data-lang-ko>이 benchmark 설정에서의 최대 추론 처리량</td>
           </tr>
           <tr data-lang-zh>
             <td data-lang-zh>Benchmark (2.1)</td><td data-lang-zh><code>dxrun -m ... --use-ort -t 30</code></td>
             <td data-lang-zh>~100%(99.9 / 99.6 / 99.8%)</td><td data-lang-zh>上升至 45–46°C</td>
-            <td data-lang-zh>模型的最大吞吐量上限</td>
+            <td data-lang-zh>此 benchmark 配置下的最大推理吞吐量</td>
           </tr>
           <tr data-lang-ja>
             <td data-lang-ja>Benchmark (2.1)</td><td data-lang-ja><code>dxrun -m ... --use-ort -t 30</code></td>
             <td data-lang-ja>~100%(99.9 / 99.6 / 99.8%)</td><td data-lang-ja>45–46°Cまで上昇</td>
-            <td data-lang-ja>モデルの最大スループット上限</td>
+            <td data-lang-ja>この benchmark 設定における最大推論スループット</td>
           </tr>
           <tr>
             <td data-lang-en>Target-FPS (2.3, 30 fps)</td><td data-lang-en><code>dxrun -m ... --use-ort -f 30 -t 30</code></td>
@@ -1174,8 +1174,8 @@ Done.</div>
       <img src="assets/profiler_timeline.png" alt="Example plot.py output: a Gantt-style timeline of Device 0's pipeline stages (NPU Input/Output Format Handler, NPU Task, CPU Dispatch/Task, Buffer Pool Wait, D2H/H2D, Inference Core 0-2), one colored bar per job, showing how jobs pipeline across stages and cores over time" style="display:block;width:100%;border-radius:8px;">
       <figcaption>
         <span data-lang-en>Real <code>plot.py</code> output (Device 0, jobs 0–199) from a <strong>2.1</strong> benchmark-mode run. Each row is a pipeline stage; each color is one job. Notice how <strong>Inference Core 0/1/2</strong> interleave — that's the NPU pipelining consecutive jobs across its 3 cores to keep throughput high, the same overlap that makes the benchmark-mode ceiling in 2.1 possible.</span>
-        <span data-lang-ko>실제 <code>plot.py</code> 출력 결과입니다 (Device 0, jobs 0–199, <strong>2.1</strong>의 benchmark 모드 실행). 각 행은 파이프라인 단계, 각 색상은 하나의 작업입니다. <strong>Inference Core 0/1/2</strong>가 서로 겹쳐 실행되는 것을 확인할 수 있습니다 — NPU가 3개 코어에 걸쳐 연속된 작업을 파이프라이닝하여 처리량을 높이는 것으로, 2.1의 benchmark 모드 최대 성능을 가능하게 하는 것과 동일한 원리입니다.</span>
-        <span data-lang-zh>来自 <strong>2.1</strong> benchmark 模式运行的真实 <code>plot.py</code> 输出(Device 0,jobs 0–199)。每一行是一个流水线阶段,每种颜色代表一个任务。请注意 <strong>Inference Core 0/1/2</strong> 是如何交错排列的——这正是 NPU 在 3 个核心之间对连续任务进行流水线化以维持高吞吐量的体现,也是 2.1 中 benchmark 模式性能上限得以实现的同一种重叠机制。</span>
+        <span data-lang-ko>실제 <code>plot.py</code> 출력 결과입니다 (Device 0, jobs 0–199, <strong>2.1</strong>의 benchmark 모드 실행). 각 행은 파이프라인 단계, 각 색상은 하나의 작업입니다. <strong>Inference Core 0/1/2</strong>가 서로 겹쳐 실행되는 것을 확인할 수 있습니다 — NPU가 3개 코어에 걸쳐 연속된 작업을 파이프라이닝하여 처리량을 높이는 것으로, 2.1의 benchmark 모드 최대 처리량을 가능하게 하는 것과 동일한 원리입니다.</span>
+        <span data-lang-zh>来自 <strong>2.1</strong> benchmark 模式运行的真实 <code>plot.py</code> 输出(Device 0,jobs 0–199)。每一行是一个流水线阶段,每种颜色代表一个任务。请注意 <strong>Inference Core 0/1/2</strong> 是如何交错排列的——这正是 NPU 在 3 个核心之间对连续任务进行流水线化以维持高吞吐量的体现,也是 2.1 中 benchmark 模式吞吐量上限得以实现的同一种重叠机制。</span>
         <span data-lang-ja><strong>2.1</strong>のbenchmarkモード実行から得られた実際の<code>plot.py</code>出力(Device 0、jobs 0–199)です。各行がパイプラインステージ、各色が1つのジョブを表します。<strong>Inference Core 0/1/2</strong>が互い違いに配置されていることに注目してください——これはNPUが3つのコアにまたがって連続するジョブをパイプライン化し、スループットを高く保っている様子であり、2.1のbenchmarkモードの上限を可能にしているのと同じ重なりです。</span>
       </figcaption>
     </figure>
@@ -1260,10 +1260,10 @@ Done.</div>
 
     <hr class="dx-sep">
 
-    <h2 id="dxbenchmark" data-lang-en>3. dxbenchmark — batch benchmarking</h2>
-    <h2 data-lang-ko>3. dxbenchmark — 배치 벤치마크</h2>
-    <h2 data-lang-zh>3. dxbenchmark — 批量基准测试</h2>
-    <h2 data-lang-ja>3. dxbenchmark — バッチベンチマーク</h2>
+    <h2 id="dxbenchmark" data-lang-en>3. dxbenchmark — multi-model benchmarking</h2>
+    <h2 data-lang-ko>3. dxbenchmark — multi-model 벤치마크</h2>
+    <h2 data-lang-zh>3. dxbenchmark — multi-model benchmarking</h2>
+    <h2 data-lang-ja>3. dxbenchmark — multi-model ベンチマーク</h2>
     <p data-lang-en>
       When you need to compare <strong>many</strong> models at once — instead
       of running <code>dxrun</code> one model at a time — <code>dxbenchmark</code>
@@ -3001,10 +3001,10 @@ gst-launch-1.0 filesrc location=./dx_stream/samples/videos/codec_test_clip_h264_
 </div>
 
 <footer class="dx-footer">
-  <span data-lang-en>DEEPX NPU Performance Evaluation Guide · For use with DEEPX NPU products.</span>
-  <span data-lang-ko>DEEPX NPU 성능 평가 가이드 · DEEPX NPU 제품과 함께 사용하세요.</span>
-  <span data-lang-zh>DEEPX NPU 性能评估指南 · 供 DEEPX NPU 产品配套使用。</span>
-  <span data-lang-ja>DEEPX NPU 性能評価ガイド · DEEPX NPU製品と併せてご利用ください。</span>
+  <span data-lang-en>DEEPX NPU(DX-M1) Quick Evaluation Guide · For use with DEEPX NPU products.</span>
+  <span data-lang-ko>DEEPX NPU(DX-M1) 빠른 평가 가이드 · DEEPX NPU 제품과 함께 사용하세요.</span>
+  <span data-lang-zh>DEEPX NPU(DX-M1) 快速评估指南 · 供 DEEPX NPU 产品配套使用。</span>
+  <span data-lang-ja>DEEPX NPU(DX-M1) クイック評価ガイド · DEEPX NPU製品と併せてご利用ください。</span>
 </footer>
 
 <script src="assets/script.js"></script>
