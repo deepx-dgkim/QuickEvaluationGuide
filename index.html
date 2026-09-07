@@ -126,10 +126,10 @@
       プロファイリングや multi-model ベンチマーク、E2E パイプラインテストまでを扱います。
     </p>
     <div class="dx-hero__meta">
-      <span data-lang-en>⏱️ <b>Basic</b>: ~15 minutes to your first result</span>
-      <span data-lang-ko>⏱️ <b>Basic</b>: 첫 결과까지 약 15분</span>
-      <span data-lang-zh>⏱️ <b>Basic</b>: 约 15 分钟即可获得第一个结果</span>
-      <span data-lang-ja>⏱️ <b>Basic</b>: 最初の結果まで約15分</span>
+      <span data-lang-en>⏱️ <b>Basic</b>: ~15 minutes to your first result (excluding model download time)</span>
+      <span data-lang-ko>⏱️ <b>Basic</b>: 첫 결과까지 약 15분 (모델 다운로드 시간 제외)</span>
+      <span data-lang-zh>⏱️ <b>Basic</b>: 约 15 分钟即可获得第一个结果（不含模型下载时间）</span>
+      <span data-lang-ja>⏱️ <b>Basic</b>: 最初の結果まで約15分（モデルのダウンロード時間を除く）</span>
       <span data-lang-en>🧪 <b>Advanced</b>: full toolchain deep-dive</span>
       <span data-lang-ko>🧪 <b>Advanced</b>: 전체 툴체인 심화</span>
       <span data-lang-zh>🧪 <b>Advanced</b>: 完整工具链深入讲解</span>
@@ -167,6 +167,26 @@
         本ガイドは、<strong>DX-AllSuite（DX-RT / dx_app / dx_stream）がすでにインストールされており</strong>、
         <code>dxcli -s</code> コマンドで DEEPX NPU（例：DX-M1）が正しく認識されていることを前提としています。
         SDK/ドライバのインストール手順はここでは<strong>扱いません</strong>——環境構築が完了した後の性能評価のみに焦点を当てます。
+      </p>
+      <p data-lang-en style="font-size:13px;color:var(--dx-ink-soft);">
+        This guide was written and validated against <strong>DX-RT v3.4.2</strong>.
+        Command syntax and output should be broadly similar on other DX-RT
+        versions, but exact version strings, options, or behavior may differ.
+      </p>
+      <p data-lang-ko style="font-size:13px;color:var(--dx-ink-soft);">
+        이 가이드는 <strong>DX-RT v3.4.2</strong> 기준으로 작성 및 검증되었습니다.
+        다른 DX-RT 버전에서도 명령어 구문과 출력은 대체로 유사하지만, 정확한
+        버전 문자열, 옵션, 동작은 다를 수 있습니다.
+      </p>
+      <p data-lang-zh style="font-size:13px;color:var(--dx-ink-soft);">
+        本指南基于 <strong>DX-RT v3.4.2</strong> 编写并验证。在其他 DX-RT
+        版本上，命令语法和输出应大致相似，但具体的版本字符串、选项或行为可能
+        有所不同。
+      </p>
+      <p data-lang-ja style="font-size:13px;color:var(--dx-ink-soft);">
+        本ガイドは <strong>DX-RT v3.4.2</strong> を基準に作成・検証されています。
+        他の DX-RT バージョンでもコマンドの構文や出力はおおむね同様ですが、
+        正確なバージョン文字列、オプション、動作が異なる場合があります。
       </p>
       <p data-lang-en style="font-size:13.5px;font-weight:700;color:var(--dx-navy);margin-bottom:6px;">Quick self-check before you start:</p>
       <p data-lang-ko style="font-size:13.5px;font-weight:700;color:var(--dx-navy);margin-bottom:6px;">시작하기 전 빠른 자가진단:</p>
