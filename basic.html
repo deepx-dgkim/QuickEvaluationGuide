@@ -32,9 +32,9 @@
     <span class="dx-tier-badge basic" data-lang-zh>Basic · 实战案例</span>
     <span class="dx-tier-badge basic" data-lang-ja>Basic · ハンズオン事例</span>
     <h1 data-lang-en>Hands-on: benchmark YOLO26n object detection end-to-end</h1>
-    <h1 data-lang-ko>실습으로 따라하기: YOLO26n 객체 검출 모델 처음부터 끝까지 벤치마크</h1>
+    <h1 data-lang-ko>실습으로 따라하기: YOLO26n 객체 검출 모델 처음부터 끝까지 benchmark</h1>
     <h1 data-lang-zh>实战教程：从头到尾对 YOLO26n 目标检测模型进行端到端性能评测</h1>
-    <h1 data-lang-ja>ハンズオンチュートリアル：YOLO26n 物体検出モデルをエンドツーエンドでベンチマークする</h1>
+    <h1 data-lang-ja>ハンズオンチュートリアル：YOLO26n 物体検出モデルをエンドツーエンドで benchmark する</h1>
     <p data-lang-en>
       Instead of abstract commands, this guide follows <strong>one real model</strong>
       — DEEPX's YOLO26n object detector — from download, to a live NPU dashboard
@@ -426,10 +426,10 @@ cd dx_app
         이해하는 용도로 참고하세요.
       </p>
       <p data-lang-zh>
-        本指南中出现的所有性能数据(FPS、延迟、NPU Processing Time、温度等)
-        均来自某一台特定测试系统,仅用于演示目的。实际结果会因主机 CPU、PCIe
+        本指南中出现的所有性能数据（FPS、延迟、NPU Processing Time、温度等）
+        均来自某一台特定测试系统，仅用于演示目的。实际结果会因主机 CPU、PCIe
         配置、DX-RT/驱动版本、模型编译设置以及整体系统配置而有所不同——请将
-        这些数字用于理解结果的整体趋势,而不要将其视为 DX-M1 或 YOLO26n 的
+        这些数字用于理解结果的整体趋势，而不要将其视为 DX-M1 或 YOLO26n 的
         官方性能规格。
       </p>
       <p data-lang-ja>
@@ -438,7 +438,7 @@ cd dx_app
         デモンストレーション目的で提示しています。実際の結果は、ホスト CPU、
         PCIe 構成、DX-RT/ドライバのバージョン、モデルのコンパイル設定、システム
         構成全体によって変動します——これらの数値は結果の傾向を把握するための
-        参考としてご利用いただき、DX-M1 や YOLO26n の公式な性能仕様として扱わ
+        参考として利用し、DX-M1 や YOLO26n の公式な性能仕様として扱わ
         ないようにしてください。
       </p>
     </div>
@@ -482,7 +482,7 @@ cd dx_app
         the <em>same</em> model so you can see the difference for yourself.
       </p>
       <p data-lang-ko>
-        지속적인 최대 처리량 벤치마크 중에는 NPU 온도가 상승하는 것이 정상적인
+        지속적인 최대 처리량 benchmark 중에는 NPU 온도가 상승하는 것이 정상적인
         현상입니다 — benchmark 모드는 최대 처리량을 측정하기 위해 NPU 활용률을
         의도적으로 100%에 가깝게 끌어올립니다. 반면 많은 카메라 기반 엣지
         애플리케이션은 추론 수요가 입력 프레임 속도에 의해 제한되기 때문에 더
@@ -497,7 +497,7 @@ cd dx_app
         受限的工作负载，方便你亲自对比差异。
       </p>
       <p data-lang-ja>
-        持続的な最大スループットベンチマーク中に NPU 温度が上昇するのは想定内
+        持続的な最大スループット benchmark 中に NPU 温度が上昇するのは想定内
         の現象です —— benchmark モードは最大スループットを測定するために、
         意図的に NPU 使用率を100%近くまで引き上げます。一方、多くのカメラ
         ベースのエッジアプリケーションは、推論需要が入力フレームレートによって
@@ -590,9 +590,9 @@ cd dx_app
         <thead>
           <tr>
             <th data-lang-en>Mode</th><th data-lang-en>Command</th><th data-lang-en>NPU Util (dxtop)</th><th data-lang-en>Temp trend</th><th data-lang-en>What it tells you</th>
-            <th data-lang-ko>모드</th><th data-lang-ko>명령어</th><th data-lang-ko>NPU 사용률 (dxtop)</th><th data-lang-ko>온도 추이</th><th data-lang-ko>확인할 수 있는 것</th>
-            <th data-lang-zh>模式</th><th data-lang-zh>命令</th><th data-lang-zh>NPU 使用率 (dxtop)</th><th data-lang-zh>温度趋势</th><th data-lang-zh>反映的信息</th>
-            <th data-lang-ja>モード</th><th data-lang-ja>コマンド</th><th data-lang-ja>NPU 使用率 (dxtop)</th><th data-lang-ja>温度の傾向</th><th data-lang-ja>わかること</th>
+            <th data-lang-ko>모드</th><th data-lang-ko>명령어</th><th data-lang-ko>NPU Util (dxtop)</th><th data-lang-ko>온도 추이</th><th data-lang-ko>확인할 수 있는 것</th>
+            <th data-lang-zh>模式</th><th data-lang-zh>命令</th><th data-lang-zh>NPU Util (dxtop)</th><th data-lang-zh>温度趋势</th><th data-lang-zh>反映的信息</th>
+            <th data-lang-ja>モード</th><th data-lang-ja>コマンド</th><th data-lang-ja>NPU Util (dxtop)</th><th data-lang-ja>温度の傾向</th><th data-lang-ja>わかること</th>
           </tr>
         </thead>
         <tbody>
@@ -641,9 +641,9 @@ cd dx_app
     </div>
     <div class="dx-callout tip">
       <strong class="dx-callout-title" data-lang-en>Understanding NPU temperature during benchmarking</strong>
-      <strong class="dx-callout-title" data-lang-ko>벤치마크 중 NPU 온도 이해하기</strong>
+      <strong class="dx-callout-title" data-lang-ko>benchmark 중 NPU 온도 이해하기</strong>
       <strong class="dx-callout-title" data-lang-zh>理解 benchmark 过程中的 NPU 温度</strong>
-      <strong class="dx-callout-title" data-lang-ja>ベンチマーク中の NPU 温度について理解する</strong>
+      <strong class="dx-callout-title" data-lang-ja>benchmark 中の NPU 温度について理解する</strong>
       <p data-lang-en>
         If the NPU temperature rises during a benchmark run, first check
         whether the workload is running in maximum-throughput mode.
@@ -653,15 +653,15 @@ cd dx_app
         utilization and temperature with dxtop.
       </p>
       <p data-lang-ko>
-        벤치마크 실행 중 NPU 온도가 상승한다면, 먼저 해당 워크로드가 최대
+        benchmark 실행 중 NPU 온도가 상승한다면, 먼저 해당 워크로드가 최대
         처리량(maximum-throughput) 모드로 실행 중인지 확인하세요. 최대 처리량
-        벤치마크는 의도적으로 NPU 활용률을 100%에 가깝게 끌어올립니다. 대표적인
+        benchmark는 의도적으로 NPU 활용률을 100%에 가깝게 끌어올립니다. 대표적인
         배포 워크로드 기준으로 발열 특성을 평가하려면 <code>-f &lt;목표
         fps&gt;</code>를 사용하고, dxtop으로 활용률과 온도를 함께 확인하세요.
       </p>
       <p data-lang-zh>
         如果在 benchmark 运行过程中 NPU 温度上升，首先请确认该负载是否运行在
-        最大吞吐量(maximum-throughput)模式下。最大吞吐量 benchmark 会刻意将
+        最大吞吐量（maximum-throughput）模式下。最大吞吐量 benchmark 会刻意将
         NPU 利用率推高到接近 100%。若要在具有代表性的部署负载下评估发热情况，
         请使用 <code>-f &lt;目标 fps&gt;</code>，并通过 dxtop 同时观察利用率
         与温度。
@@ -669,7 +669,7 @@ cd dx_app
       <p data-lang-ja>
         benchmark 実行中に NPU 温度が上昇する場合は、まずそのワークロードが
         最大スループット(maximum-throughput)モードで動作していないか確認して
-        ください。最大スループットのベンチマークは、意図的に NPU 使用率を
+        ください。最大スループットの benchmark は、意図的に NPU 使用率を
         100%近くまで引き上げます。代表的なデプロイワークロードにおける発熱の
         挙動を評価するには、<code>-f &lt;目標 fps&gt;</code> を使用し、dxtop
         で使用率と温度を併せて確認してください。
@@ -845,7 +845,7 @@ cd dx_app
     </p>
     <p data-lang-ko>
       내부적으로는 하나의 <code>gst-launch-1.0</code> 체인이며, 지금까지의
-      흐름과 구조가 같습니다: 비디오를 읽고 디코딩한 뒤, 3단계부터 벤치마크해온
+      흐름과 구조가 같습니다: 비디오를 읽고 디코딩한 뒤, 3단계부터 benchmark해온
       바로 그 NPU를 감싸는 동일한 <code>dxinfer</code>를 포함한 DEEPX
       <code>dx_stream</code> 플러그인들에 전달하고, 화면에 렌더링합니다.
     </p>
@@ -859,7 +859,7 @@ cd dx_app
       その内部では実質的に1本の <code>gst-launch-1.0</code> チェーンが動いて
       おり、構造自体はこれまでと似ています：ビデオを読み込んでデコードし、
       DEEPX の <code>dx_stream</code> プラグイン群に渡します —— ステップ3から
-      ずっとベンチマークしてきたのと同じ NPU をラップする <code>dxinfer</code>
+      ずっと benchmark してきたのと同じ NPU をラップする <code>dxinfer</code>
       要素も含まれます —— 最後に画面へレンダリングします。
     </p>
     <figure class="dx-figure">
@@ -989,9 +989,9 @@ cd dx_app
         <h4 data-lang-zh>想深入了解更多？</h4>
         <h4 data-lang-ja>さらに深く知りたいですか？</h4>
         <p data-lang-en>The Advanced guide covers every dxrun / dxbenchmark option in full, multi-model benchmarking, standalone sample extraction, and GStreamer-level pipeline profiling.</p>
-        <p data-lang-ko>Advanced 가이드에서는 dxrun / dxbenchmark의 모든 옵션, multi-model 벤치마크, 단독 샘플 추출, GStreamer 레벨 파이프라인 프로파일링까지 다룹니다.</p>
+        <p data-lang-ko>Advanced 가이드에서는 dxrun / dxbenchmark의 모든 옵션, multi-model benchmarking, 단독 샘플 추출, GStreamer 레벨 파이프라인 프로파일링까지 다룹니다.</p>
         <p data-lang-zh>Advanced 指南完整涵盖了 dxrun / dxbenchmark 的所有选项、multi-model benchmarking、独立样本提取，以及 GStreamer 层级的流水线性能剖析。</p>
-        <p data-lang-ja>Advanced ガイドでは、dxrun / dxbenchmark の全オプション、multi-model ベンチマーク、単独でのサンプル抽出、GStreamer レベルのパイプラインプロファイリングまで、余すところなく解説しています。</p>
+        <p data-lang-ja>Advanced ガイドでは、dxrun / dxbenchmark の全オプション、multi-model benchmarking、単独でのサンプル抽出、GStreamer レベルのパイプラインプロファイリングまで、余すところなく解説しています。</p>
       </div>
       <a class="dx-btn" href="advanced.html">
         <span data-lang-en>Continue to Advanced →</span>

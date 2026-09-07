@@ -748,10 +748,10 @@ Profiler data has been written to profiler.json
         확인하세요.
       </p>
       <p data-lang-zh>
-        如果在 benchmark 运行过程中 NPU 温度上升，首先请确认该负载是否运行在
+        如果在 benchmark 运行过程中 NPU 温度上升,首先请确认该负载是否运行在
         最大吞吐量(maximum-throughput)模式下。最大吞吐量 benchmark 会刻意将
-        NPU 利用率推高到接近 100%。若要在具有代表性的部署负载下评估发热情况，
-        请使用 <code>-f &lt;目标 fps&gt;</code>，并通过 <code>dxtop</code> 同时
+        NPU 利用率推高到接近 100%。若要在具有代表性的部署负载下评估发热情况,
+        请使用 <code>-f &lt;目标 fps&gt;</code>,并通过 <code>dxtop</code> 同时
         观察利用率与温度。
       </p>
       <p data-lang-ja>
@@ -2910,7 +2910,7 @@ dxgather name=gather ! dxosd ! videoconvert ! fpsdisplaysink</code></pre>
       の<strong>一致するペア</strong>を必要とします——ここで動作する3つのモデル
       (プライマリ、分類、顔)の間でこれらのIDを混同すると、クラッシュではなく
       <strong>気づかれないまま誤った結果</strong>になります。<code>dxgather</code>は、
-      すべてのsinkパッドで<strong>PTSが完全に一致する</strong>バッファのみを統合します
+      すべての sink pad で<strong>PTSが完全に一致する</strong>バッファのみを統合します
       ——すべてのブランチが同じ<code>tee</code>から複製されたものであることを前提と
       しているため、異なるソースからのストリームを統合したり、一致しないタイムスタンプ
       を並べ替えたりすることはできません。
