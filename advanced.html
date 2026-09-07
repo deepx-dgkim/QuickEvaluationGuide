@@ -77,7 +77,6 @@
       <li><a href="#dxbenchmark" data-lang-en>3. dxbenchmark</a><a href="#dxbenchmark" data-lang-ko>3. dxbenchmark</a><a href="#dxbenchmark" data-lang-zh>3. dxbenchmark</a><a href="#dxbenchmark" data-lang-ja>3. dxbenchmark</a></li>
       <li><a href="#dx-app-e2e" data-lang-en>4. dx_app E2E</a><a href="#dx-app-e2e" data-lang-ko>4. dx_app E2E</a><a href="#dx-app-e2e" data-lang-zh>4. dx_app E2E</a><a href="#dx-app-e2e" data-lang-ja>4. dx_app E2E</a></li>
       <li><a href="#dx-stream-e2e" data-lang-en>5. dx_stream E2E</a><a href="#dx-stream-e2e" data-lang-ko>5. dx_stream E2E</a><a href="#dx-stream-e2e" data-lang-zh>5. dx_stream E2E</a><a href="#dx-stream-e2e" data-lang-ja>5. dx_stream E2E</a></li>
-      <li><a href="#decision" data-lang-en>6. Which tool do I use?</a><a href="#decision" data-lang-ko>6. 어떤 도구를 써야 할까?</a><a href="#decision" data-lang-zh>6. 该用哪个工具?</a><a href="#decision" data-lang-ja>6. どのツールを使うべきか?</a></li>
     </ol>
   </aside>
 
@@ -2917,104 +2916,86 @@ dxgather name=gather ! dxosd ! videoconvert ! fpsdisplaysink</code></pre>
       を並べ替えたりすることはできません。
     </p>
 
-    <h3 data-lang-en>5.5 Deep pipeline profiling with GstShark</h3>
-    <h3 data-lang-ko>5.5 GstShark를 이용한 파이프라인 심층 프로파일링</h3>
-    <h3 data-lang-zh>5.5 使用 GstShark 进行深度流水线剖析</h3>
-    <h3 data-lang-ja>5.5 GstSharkによるパイプライン詳細プロファイリング</h3>
-    <p data-lang-en>
-      For a per-element breakdown of where time actually goes in a GStreamer
-      pipeline (decode vs. <code>dxpreprocess</code> vs. <code>dxinfer</code> vs.
-      queueing), install and use GstShark:
-    </p>
-    <p data-lang-ko>
-      GStreamer 파이프라인에서 시간이 실제로 어디에(디코딩, <code>dxpreprocess</code>,
-      <code>dxinfer</code>, 큐잉 등) 소요되는지 요소별로 분석하려면 GstShark를 설치하여 사용하세요:
-    </p>
-    <p data-lang-zh>
-      如果需要按元素(element)细分,查看时间在 GStreamer 流水线中实际都花在了哪里
-      (解码、<code>dxpreprocess</code>、<code>dxinfer</code>、排队等各占多少),请安装
-      并使用 GstShark:
-    </p>
-    <p data-lang-ja>
-      GStreamerパイプライン内で時間が実際にどこに使われているか(デコード、
-      <code>dxpreprocess</code>、<code>dxinfer</code>、キューイングなど)を要素
-      (element)ごとに細かく分析するには、GstSharkをインストールして使用してください:
-    </p>
-    <div class="dx-code-wrap">
-<pre><code># One-time install
-./install_gstshark.sh
-
-# Analyze the DX-STREAM NPU elements with cpuusage / proctime / framerate / queuelevel
-GST_DEBUG="GST_TRACER:7" GST_TRACERS="cpuusage;proctime;framerate;queuelevel" \
+    <details class="dx-details">
+      <summary>
+        <span data-lang-en>5.5 Optional: pipeline latency check with GStreamer's built-in tracer</span>
+        <span data-lang-ko>5.5 선택 사항: GStreamer 내장 tracer로 파이프라인 latency 확인하기</span>
+        <span data-lang-zh>5.5 可选:使用 GStreamer 内置 tracer 检查流水线 latency</span>
+        <span data-lang-ja>5.5 オプション:GStreamer 内蔵 tracer によるパイプライン latency の確認</span>
+      </summary>
+      <div class="dx-details-body">
+        <p data-lang-en>
+          GStreamer ships a <code>latency</code> tracer as a built-in part of
+          the core tracing subsystem (available since GStreamer 1.14) — no
+          extra plugin install required. Enabling it prints a log line for
+          every buffer showing the accumulated latency from the pipeline's
+          source up to that point, which is enough to tell whether decode or
+          the dx_stream inference elements are adding the most delay:
+        </p>
+        <p data-lang-ko>
+          GStreamer는 코어 트레이싱 서브시스템의 일부로 <code>latency</code>
+          tracer를 기본 내장하고 있습니다(GStreamer 1.14부터 제공) — 별도의
+          플러그인 설치가 필요하지 않습니다. 이를 활성화하면 파이프라인의
+          source부터 해당 지점까지 누적된 latency를 버퍼마다 로그로 출력해주며,
+          디코딩과 dx_stream 추론 요소 중 어느 쪽이 지연을 더 많이 유발하는지
+          확인하는 데 충분합니다:
+        </p>
+        <p data-lang-zh>
+          GStreamer 的核心 tracing 子系统内置了 <code>latency</code>
+          tracer(自 GStreamer 1.14 起提供)——无需额外安装插件。启用后,
+          会为每个缓冲区打印一条日志,显示从流水线的 source 到该位置为止累积的
+          latency,足以判断解码环节和 dx_stream 推理相关元素中,哪一个才是
+          延迟的主要来源:
+        </p>
+        <p data-lang-ja>
+          GStreamer にはコアのトレーシングサブシステムの一部として
+          <code>latency</code> tracer が標準搭載されています(GStreamer 1.14
+          以降)——別途プラグインをインストールする必要はありません。これを
+          有効にすると、パイプラインの source からその地点までに累積した
+          latency がバッファごとにログ出力され、デコードと dx_stream の
+          推論系エレメントのどちらが遅延の主な原因かを判断するのに十分な
+          情報が得られます:
+        </p>
+        <div class="dx-code-wrap">
+<pre><code>GST_DEBUG="GST_TRACER:7" GST_TRACERS="latency" \
 gst-launch-1.0 filesrc location=./dx_stream/samples/videos/codec_test_clip_h264_16Mbps.mp4 ! \
     qtdemux ! h264parse ! avdec_h264 ! \
     dxpreprocess config-file-path=./dx_stream/configs/Object_Detection/YoloV7/preprocess_config.json ! \
     dxinfer config-file-path=./dx_stream/configs/Object_Detection/YoloV7/inference_config.json ! \
     dxpostprocess config-file-path=./dx_stream/configs/Object_Detection/YoloV7/postprocess_config.json ! \
-    dxosd ! fakesink
-
-# Save results + generate graphical reports
-mkdir -p /tmp/gst-shark-results
-GST_DEBUG="GST_TRACER:7" GST_TRACERS="cpuusage;proctime;framerate;bitrate" \
-GST_SHARK_LOCATION="/tmp/gst-shark-results" \
-gst-launch-1.0 ...   # (same pipeline as above)
-
-gstshark-plot /tmp/gst-shark-results/ -s pdf</code></pre>
-    </div>
-    <div class="dx-table-wrap">
-      <table>
-        <thead><tr><th data-lang-en>Tracer</th><th data-lang-en>Reveals</th><th data-lang-ko>트레이서</th><th data-lang-ko>확인 가능한 정보</th><th data-lang-zh>追踪器 (Tracer)</th><th data-lang-zh>可揭示的信息</th><th data-lang-ja>トレーサー</th><th data-lang-ja>わかること</th></tr></thead>
-        <tbody>
-          <tr><td><code>proctime</code></td><td data-lang-en>Processing time (latency) spent inside each element — find the slow one</td><td><code>proctime</code></td><td data-lang-ko>각 요소 내부에서 소요된 처리 시간(지연) — 느린 요소를 찾음</td><td><code>proctime</code></td><td data-lang-zh>每个元素内部所花费的处理时间(延迟)——找出速度慢的元素</td><td><code>proctime</code></td><td data-lang-ja>各要素の内部で費やされた処理時間(レイテンシ)——遅い要素を特定する</td></tr>
-          <tr><td><code>cpuusage</code></td><td data-lang-en>CPU used per element — spot CPU hotspots like software decode</td><td><code>cpuusage</code></td><td data-lang-ko>요소별 CPU 사용량 — 소프트웨어 디코딩 등 CPU 핫스팟 확인</td><td><code>cpuusage</code></td><td data-lang-zh>各元素使用的 CPU——发现软件解码等 CPU 热点</td><td><code>cpuusage</code></td><td data-lang-ja>要素ごとのCPU使用量——ソフトウェアデコードなどのCPUホットスポットを特定</td></tr>
-          <tr><td><code>framerate</code></td><td data-lang-en>Actual vs. expected frame rate</td><td><code>framerate</code></td><td data-lang-ko>실제 프레임 속도와 기대 프레임 속도 비교</td><td><code>framerate</code></td><td data-lang-zh>实际帧率与预期帧率的对比</td><td><code>framerate</code></td><td data-lang-ja>実際のフレームレートと期待するフレームレートの比較</td></tr>
-          <tr><td><code>queuelevel</code></td><td data-lang-en>Queue buffer levels — detects backpressure / bottlenecks</td><td><code>queuelevel</code></td><td data-lang-ko>큐 버퍼 레벨 — 백프레셔/병목 감지</td><td><code>queuelevel</code></td><td data-lang-zh>队列缓冲区水位——检测背压 (backpressure) / 瓶颈</td><td><code>queuelevel</code></td><td data-lang-ja>キューバッファのレベル——バックプレッシャー/ボトルネックを検出</td></tr>
-          <tr><td><code>bitrate</code></td><td data-lang-en>Stream data throughput</td><td><code>bitrate</code></td><td data-lang-ko>스트림 데이터 처리량</td><td><code>bitrate</code></td><td data-lang-zh>流数据吞吐量</td><td><code>bitrate</code></td><td data-lang-ja>ストリームのデータスループット</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <hr class="dx-sep">
-
-    <h2 id="decision" data-lang-en>6. Which tool do I use?</h2>
-    <h2 data-lang-ko>6. 어떤 도구를 써야 할까?</h2>
-    <h2 data-lang-zh>6. 该使用哪个工具?</h2>
-    <h2 data-lang-ja>6. どのツールを使うべきか?</h2>
-    <div class="dx-table-wrap">
-      <table class="dx-goal-table">
-        <thead><tr><th data-lang-en>Your question</th><th data-lang-en>Use</th><th data-lang-ko>확인하고 싶은 것</th><th data-lang-ko>사용할 도구</th><th data-lang-zh>您想确认什么</th><th data-lang-zh>使用的工具</th><th data-lang-ja>確認したいこと</th><th data-lang-ja>使うツール</th></tr></thead>
-        <tbody>
-          <tr><td data-lang-en>"What's the absolute fastest this model can go?"</td><td data-lang-en><code>dxrun -t &lt;N&gt;</code></td></tr>
-          <tr data-lang-ko><td data-lang-ko>"이 모델이 낼 수 있는 최대 속도는?"</td><td data-lang-ko><code>dxrun -t &lt;N&gt;</code></td></tr>
-          <tr data-lang-zh><td data-lang-zh>"这个模型能达到的绝对最快速度是多少?"</td><td data-lang-zh><code>dxrun -t &lt;N&gt;</code></td></tr>
-          <tr data-lang-ja><td data-lang-ja>「このモデルが出せる絶対的な最高速度は?」</td><td data-lang-ja><code>dxrun -t &lt;N&gt;</code></td></tr>
-          <tr><td data-lang-en>"What if my camera only delivers 30 fps — is latency stable?"</td><td data-lang-en><code>dxrun -f 30 -v</code></td></tr>
-          <tr data-lang-ko><td data-lang-ko>"카메라가 30fps만 제공한다면 지연시간은 안정적인가?"</td><td data-lang-ko><code>dxrun -f 30 -v</code></td></tr>
-          <tr data-lang-zh><td data-lang-zh>"如果我的摄像头只能提供 30fps,延迟是否稳定?"</td><td data-lang-zh><code>dxrun -f 30 -v</code></td></tr>
-          <tr data-lang-ja><td data-lang-ja>「カメラが30fpsしか出せない場合、レイテンシは安定しているか?」</td><td data-lang-ja><code>dxrun -f 30 -v</code></td></tr>
-          <tr><td data-lang-en>"Where exactly does time go inside one inference?"</td><td data-lang-en><code>dxrun --profiler</code></td></tr>
-          <tr data-lang-ko><td data-lang-ko>"추론 1회 안에서 정확히 시간이 어디에 쓰이는가?"</td><td data-lang-ko><code>dxrun --profiler</code></td></tr>
-          <tr data-lang-zh><td data-lang-zh>"在一次推理内部,时间究竟花在了哪里?"</td><td data-lang-zh><code>dxrun --profiler</code></td></tr>
-          <tr data-lang-ja><td data-lang-ja>「1回の推論の中で、時間は正確にどこに使われているか?」</td><td data-lang-ja><code>dxrun --profiler</code></td></tr>
-          <tr><td data-lang-en>"How do 20 different models compare, in one report?"</td><td data-lang-en><code>dxbenchmark --dir ...</code></td></tr>
-          <tr data-lang-ko><td data-lang-ko>"20개 모델을 하나의 리포트로 비교하려면?"</td><td data-lang-ko><code>dxbenchmark --dir ...</code></td></tr>
-          <tr data-lang-zh><td data-lang-zh>"如何在一份报告中比较 20 个不同的模型?"</td><td data-lang-zh><code>dxbenchmark --dir ...</code></td></tr>
-          <tr data-lang-ja><td data-lang-ja>「20個の異なるモデルを1つのレポートで比較するには?」</td><td data-lang-ja><code>dxbenchmark --dir ...</code></td></tr>
-          <tr><td data-lang-en>"What FPS will my real app get, with actual pre/post-processing?"</td><td data-lang-en><code>dx_app</code> (<code>run_demo.sh</code> / extracted sample)</td></tr>
-          <tr data-lang-ko><td data-lang-ko>"실제 전/후처리를 포함한 애플리케이션은 FPS가 얼마나 나올까?"</td><td data-lang-ko><code>dx_app</code> (<code>run_demo.sh</code> / 추출된 샘플)</td></tr>
-          <tr data-lang-zh><td data-lang-zh>"包含实际前/后处理的真实应用能跑出多少 FPS?"</td><td data-lang-zh><code>dx_app</code>(<code>run_demo.sh</code> / 提取的示例)</td></tr>
-          <tr data-lang-ja><td data-lang-ja>「実際の前後処理を含む自分のアプリでは、どれくらいのFPSが出るか?」</td><td data-lang-ja><code>dx_app</code>(<code>run_demo.sh</code> / 抽出したサンプル)</td></tr>
-          <tr><td data-lang-en>"What FPS will a real video pipeline sustain end-to-end?"</td><td data-lang-en><code>dx_stream</code> (<code>run_demo.sh</code>)</td></tr>
-          <tr data-lang-ko><td data-lang-ko>"실제 비디오 파이프라인은 E2E로 얼마나 유지되는가?"</td><td data-lang-ko><code>dx_stream</code> (<code>run_demo.sh</code>)</td></tr>
-          <tr data-lang-zh><td data-lang-zh>"真实的视频流水线端到端能持续维持多少 FPS?"</td><td data-lang-zh><code>dx_stream</code>(<code>run_demo.sh</code>)</td></tr>
-          <tr data-lang-ja><td data-lang-ja>「実際の映像パイプラインはエンドツーエンドでどれくらいのFPSを維持できるか?」</td><td data-lang-ja><code>dx_stream</code>(<code>run_demo.sh</code>)</td></tr>
-          <tr><td data-lang-en>"Which GStreamer element is the pipeline's actual bottleneck?"</td><td data-lang-en>GstShark</td></tr>
-          <tr data-lang-ko><td data-lang-ko>"파이프라인의 실제 병목이 되는 GStreamer 요소는?"</td><td data-lang-ko>GstShark</td></tr>
-          <tr data-lang-zh><td data-lang-zh>"流水线中真正的瓶颈是哪个 GStreamer 元素?"</td><td data-lang-zh>GstShark</td></tr>
-          <tr data-lang-ja><td data-lang-ja>「パイプラインの実際のボトルネックとなっているGStreamer要素はどれか?」</td><td data-lang-ja>GstShark</td></tr>
-        </tbody>
-      </table>
-    </div>
+    dxosd ! fakesink 2>&1 | grep "latency,"</code></pre>
+        </div>
+        <p data-lang-en>
+          Each matching line contains a <code>time=</code> field (in
+          nanoseconds) — the end-to-end latency measured at that point in the
+          pipeline for that buffer. Watch how this number changes as you
+          enable/disable elements (e.g. compare with <code>avdec_h264</code>
+          swapped for a hardware decoder) to isolate where the latency comes
+          from.
+        </p>
+        <p data-lang-ko>
+          출력되는 각 줄에는 <code>time=</code> 필드(나노초 단위)가 포함되어
+          있으며, 이는 해당 버퍼가 파이프라인의 그 지점에 도달했을 때 측정된
+          end-to-end latency입니다. 요소를 켜고 끄면서(예: <code>avdec_h264</code>를
+          하드웨어 디코더로 교체) 이 수치가 어떻게 변하는지 관찰하면 latency가
+          어디서 발생하는지 좁혀 나갈 수 있습니다.
+        </p>
+        <p data-lang-zh>
+          输出的每一行都包含一个 <code>time=</code> 字段(单位为纳秒)——即该
+          缓冲区到达流水线该位置时所测得的端到端 latency。可以尝试启用/禁用
+          不同元素(例如将 <code>avdec_h264</code> 换成硬件解码器)来观察这个
+          数值的变化,从而定位延迟的来源。
+        </p>
+        <p data-lang-ja>
+          出力される各行には <code>time=</code> フィールド(単位はナノ秒)が
+          含まれており、これはそのバッファがパイプラインのその地点に到達した
+          時点で計測された end-to-end latency です。要素を有効/無効に切り替え
+          ながら(例:<code>avdec_h264</code> をハードウェアデコーダーに置き換える
+          など)この数値の変化を観察することで、latency の発生箇所を絞り込め
+          ます。
+        </p>
+      </div>
+    </details>
 
   </main>
 </div>
