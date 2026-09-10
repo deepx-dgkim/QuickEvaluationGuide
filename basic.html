@@ -21,6 +21,7 @@
       <button type="button" data-lang="ko">한국어</button>
       <button type="button" data-lang="zh">中文</button>
       <button type="button" data-lang="ja">日本語</button>
+      <button type="button" data-lang="vi">Tiếng Việt</button>
     </div>
   </div>
 </nav>
@@ -31,10 +32,12 @@
     <span class="dx-tier-badge basic" data-lang-ko>Basic · 실습 예제</span>
     <span class="dx-tier-badge basic" data-lang-zh>Basic · 实战案例</span>
     <span class="dx-tier-badge basic" data-lang-ja>Basic · ハンズオン事例</span>
+    <span class="dx-tier-badge basic" data-lang-vi>Basic · Case Study thực hành</span>
     <h1 data-lang-en>Hands-on: benchmark YOLO26n object detection end-to-end</h1>
     <h1 data-lang-ko>실습으로 따라하기: YOLO26n 객체 검출 모델 처음부터 끝까지 benchmark</h1>
     <h1 data-lang-zh>实战教程：从头到尾对 YOLO26n 目标检测模型进行端到端性能评测</h1>
     <h1 data-lang-ja>ハンズオンチュートリアル：YOLO26n 物体検出モデルをエンドツーエンドで benchmark する</h1>
+    <h1 data-lang-vi>Thực hành: benchmark object detection YOLO26n từ đầu đến cuối</h1>
     <p data-lang-en>
       Instead of abstract commands, this guide follows <strong>one real model</strong>
       — DEEPX's YOLO26n object detector — from download, to a live NPU dashboard
@@ -67,6 +70,14 @@
       参考測定値であり、実際の数値はホストシステム、ソフトウェアバージョン、
       システム構成によって異なる場合があります。
     </p>
+    <p data-lang-vi>
+      Thay vì các lệnh trừu tượng, hướng dẫn này bám theo <strong>một model thực tế</strong> —
+      bộ object detector YOLO26n của DEEPX — từ lúc tải về, đến dashboard NPU thời gian thực với
+      <code>dxtop</code>, đến throughput tối đa, đến bài kiểm thử triển khai tiêu biểu ở 30&nbsp;fps,
+      và cuối cùng là một ứng dụng thực tế cùng một pipeline video thực tế.
+      Các kết quả trong hướng dẫn này là số đo tham khảo. Giá trị cụ thể có thể thay đổi tùy theo
+      host system, phiên bản phần mềm và cấu hình hệ thống.
+    </p>
   </div>
 </header>
 
@@ -76,15 +87,24 @@
     <h4 data-lang-ko>목차</h4>
     <h4 data-lang-zh>目录</h4>
     <h4 data-lang-ja>目次</h4>
+    <h4 data-lang-vi>Nội dung trang này</h4>
     <ol>
-      <li><a href="#prereq" data-lang-en>0. Before you start</a><a href="#prereq" data-lang-ko>0. 시작하기 전에</a><a href="#prereq" data-lang-zh>0. 开始之前</a><a href="#prereq" data-lang-ja>0. 始める前に</a></li>
-      <li><a href="#get-model" data-lang-en>1. Download the case-study model</a><a href="#get-model" data-lang-ko>1. 실습 모델 다운로드</a><a href="#get-model" data-lang-zh>1. 下载案例模型</a><a href="#get-model" data-lang-ja>1. 実習用モデルのダウンロード</a></li>
-      <li><a href="#dxtop" data-lang-en>2. Meet dxtop</a><a href="#dxtop" data-lang-ko>2. dxtop 알아보기</a><a href="#dxtop" data-lang-zh>2. 认识 dxtop</a><a href="#dxtop" data-lang-ja>2. dxtop を使ってみる</a></li>
-      <li><a href="#dxrun-max" data-lang-en>3. Maximum throughput</a><a href="#dxrun-max" data-lang-ko>3. 최대 처리량 확인</a><a href="#dxrun-max" data-lang-zh>3. 测试最大吞吐量</a><a href="#dxrun-max" data-lang-ja>3. 最大スループットを確認する</a></li>
-      <li><a href="#dxrun-fps30" data-lang-en>4. Representative 30 fps workload</a><a href="#dxrun-fps30" data-lang-ko>4. 대표 워크로드: 30fps</a><a href="#dxrun-fps30" data-lang-zh>4. 代表性负载：30fps</a><a href="#dxrun-fps30" data-lang-ja>4. 代表的なワークロード：30fps</a></li>
-      <li><a href="#dx-app-quick" data-lang-en>5. dx_app quick demo</a><a href="#dx-app-quick" data-lang-ko>5. dx_app 빠른 데모</a><a href="#dx-app-quick" data-lang-zh>5. dx_app 快速演示</a><a href="#dx-app-quick" data-lang-ja>5. dx_app クイックデモ</a></li>
-      <li><a href="#dx-stream-quick" data-lang-en>6. dx_stream quick demo</a><a href="#dx-stream-quick" data-lang-ko>6. dx_stream 빠른 데모</a><a href="#dx-stream-quick" data-lang-zh>6. dx_stream 快速演示</a><a href="#dx-stream-quick" data-lang-ja>6. dx_stream クイックデモ</a></li>
-      <li><a href="#next" data-lang-en>Next steps</a><a href="#next" data-lang-ko>다음 단계</a><a href="#next" data-lang-zh>下一步</a><a href="#next" data-lang-ja>次のステップ</a></li>
+      <li><a href="#prereq" data-lang-en>0. Before you start</a><a href="#prereq" data-lang-ko>0. 시작하기 전에</a><a href="#prereq" data-lang-zh>0. 开始之前</a><a href="#prereq" data-lang-ja>0. 始める前に</a>
+<a href="#prereq" data-lang-vi>0. Trước khi bắt đầu</a></li>
+      <li><a href="#get-model" data-lang-en>1. Download the case-study model</a><a href="#get-model" data-lang-ko>1. 실습 모델 다운로드</a><a href="#get-model" data-lang-zh>1. 下载案例模型</a><a href="#get-model" data-lang-ja>1. 実習用モデルのダウンロード</a>
+<a href="#get-model" data-lang-vi>1. Tải model dùng cho case study</a></li>
+      <li><a href="#dxtop" data-lang-en>2. Meet dxtop</a><a href="#dxtop" data-lang-ko>2. dxtop 알아보기</a><a href="#dxtop" data-lang-zh>2. 认识 dxtop</a><a href="#dxtop" data-lang-ja>2. dxtop を使ってみる</a>
+<a href="#dxtop" data-lang-vi>2. Làm quen với dxtop</a></li>
+      <li><a href="#dxrun-max" data-lang-en>3. Maximum throughput</a><a href="#dxrun-max" data-lang-ko>3. 최대 처리량 확인</a><a href="#dxrun-max" data-lang-zh>3. 测试最大吞吐量</a><a href="#dxrun-max" data-lang-ja>3. 最大スループットを確認する</a>
+<a href="#dxrun-max" data-lang-vi>3. Throughput tối đa</a></li>
+      <li><a href="#dxrun-fps30" data-lang-en>4. Representative 30 fps workload</a><a href="#dxrun-fps30" data-lang-ko>4. 대표 워크로드: 30fps</a><a href="#dxrun-fps30" data-lang-zh>4. 代表性负载：30fps</a><a href="#dxrun-fps30" data-lang-ja>4. 代表的なワークロード：30fps</a>
+<a href="#dxrun-fps30" data-lang-vi>4. Workload tiêu biểu 30 fps</a></li>
+      <li><a href="#dx-app-quick" data-lang-en>5. dx_app quick demo</a><a href="#dx-app-quick" data-lang-ko>5. dx_app 빠른 데모</a><a href="#dx-app-quick" data-lang-zh>5. dx_app 快速演示</a><a href="#dx-app-quick" data-lang-ja>5. dx_app クイックデモ</a>
+<a href="#dx-app-quick" data-lang-vi>5. Demo nhanh dx_app</a></li>
+      <li><a href="#dx-stream-quick" data-lang-en>6. dx_stream quick demo</a><a href="#dx-stream-quick" data-lang-ko>6. dx_stream 빠른 데모</a><a href="#dx-stream-quick" data-lang-zh>6. dx_stream 快速演示</a><a href="#dx-stream-quick" data-lang-ja>6. dx_stream クイックデモ</a>
+<a href="#dx-stream-quick" data-lang-vi>6. Demo nhanh dx_stream</a></li>
+      <li><a href="#next" data-lang-en>Next steps</a><a href="#next" data-lang-ko>다음 단계</a><a href="#next" data-lang-zh>下一步</a><a href="#next" data-lang-ja>次のステップ</a>
+<a href="#next" data-lang-vi>Bước tiếp theo</a></li>
     </ol>
   </aside>
 
@@ -94,23 +114,28 @@
     <h2 data-lang-ko>0. 시작하기 전에</h2>
     <h2 data-lang-zh>0. 开始之前</h2>
     <h2 data-lang-ja>0. 始める前に</h2>
+    <h2 data-lang-vi>0. Trước khi bắt đầu</h2>
     <p data-lang-en>Confirm your environment is ready:</p>
     <p data-lang-ko>환경이 준비되었는지 먼저 확인하세요:</p>
     <p data-lang-zh>请先确认环境已准备就绪：</p>
     <p data-lang-ja>まず環境が準備できているか確認しましょう：</p>
+    <p data-lang-vi>Xác nhận môi trường của bạn đã sẵn sàng:</p>
     <ul class="dx-checklist">
       <li data-lang-en>DX-AllSuite is installed (<code>dx-runtime</code> at minimum: DX-RT, dx_app, dx_stream).</li>
       <li data-lang-ko>DX-AllSuite가 설치되어 있습니다 (최소 <code>dx-runtime</code>: DX-RT, dx_app, dx_stream).</li>
       <li data-lang-zh>已安装 DX-AllSuite（至少包含 <code>dx-runtime</code>：DX-RT、dx_app、dx_stream）。</li>
       <li data-lang-ja>DX-AllSuite がインストールされています（少なくとも <code>dx-runtime</code>：DX-RT、dx_app、dx_stream）。</li>
+      <li data-lang-vi>DX-AllSuite đã được cài đặt (tối thiểu là <code>dx-runtime</code>: DX-RT, dx_app, dx_stream).</li>
       <li data-lang-en>Your NPU is recognized — run <code>dxcli -s</code> and check that a device (e.g. <code>Device 0: M1</code>) is listed.</li>
       <li data-lang-ko>NPU가 인식되고 있습니다 — <code>dxcli -s</code> 실행 후 <code>Device 0: M1</code>과 같은 장치가 표시되는지 확인하세요.</li>
       <li data-lang-zh>NPU 已被正确识别 —— 运行 <code>dxcli -s</code>，确认列表中显示了类似 <code>Device 0: M1</code> 的设备。</li>
       <li data-lang-ja>NPU が認識されています —— <code>dxcli -s</code> を実行し、<code>Device 0: M1</code> のようなデバイスが表示されることを確認してください。</li>
+      <li data-lang-vi>NPU đã được nhận diện — chạy <code>dxcli -s</code> và kiểm tra xem thiết bị (ví dụ <code>Device 0: M1</code>) có được liệt kê không.</li>
       <li data-lang-en>You have <strong>two terminals</strong> open in your <code>dx-runtime</code> (or <code>dx-all-suite/dx-runtime</code>) directory — one to run commands, one to watch <code>dxtop</code> live (Step 2).</li>
       <li data-lang-ko><code>dx-runtime</code>(또는 <code>dx-all-suite/dx-runtime</code>) 디렉터리에서 <strong>터미널 2개</strong>를 열어둡니다 — 하나는 명령 실행용, 하나는 2단계의 <code>dxtop</code>을 실시간으로 지켜보는 용도입니다.</li>
       <li data-lang-zh>在 <code>dx-runtime</code>（或 <code>dx-all-suite/dx-runtime</code>）目录下打开<strong>两个终端</strong> —— 一个用于执行命令，另一个用于实时查看第 2 步中的 <code>dxtop</code>。</li>
       <li data-lang-ja><code>dx-runtime</code>（または <code>dx-all-suite/dx-runtime</code>）ディレクトリで<strong>2つのターミナル</strong>を開いておきます —— 1つはコマンド実行用、もう1つはステップ2の <code>dxtop</code> をリアルタイムで確認するためのものです。</li>
+      <li data-lang-vi>Bạn đang mở <strong>hai terminal</strong> trong thư mục <code>dx-runtime</code> (hoặc <code>dx-all-suite/dx-runtime</code>) — một để chạy lệnh, một để theo dõi <code>dxtop</code> theo thời gian thực (Step 2).</li>
     </ul>
     <div class="dx-code-wrap">
 <pre><code>dxcli -s</code></pre>
@@ -154,6 +179,11 @@ NPU 2: voltage 750 mV, clock 1000 MHz, temperature 36'C
       DX-RT リリースでも変わり得ます —— 数値そのものではなく、デバイス/バージョンの
       行が正しく表示されているかを確認してください。
     </p>
+    <p data-lang-vi style="font-size:12.5px;color:var(--dx-ink-soft);margin-top:-8px;">
+      ↑ Ví dụ được ghi lại trên DX-RT v3.4.2 với board DX-M1 3 core. Chuỗi phiên bản, số lượng thiết bị
+      và giá trị cảm biến cụ thể sẽ khác trên hệ thống của bạn và thay đổi ở các bản DX-RT sau này —
+      hãy xem các dòng device/version, không phải các con số nguyên văn.
+    </p>
 
     <hr class="dx-sep">
 
@@ -161,6 +191,7 @@ NPU 2: voltage 750 mV, clock 1000 MHz, temperature 36'C
     <h2 data-lang-ko>1. 실습 모델 다운로드: YOLO26n</h2>
     <h2 data-lang-zh>1. 下载案例模型：YOLO26n</h2>
     <h2 data-lang-ja>1. 実習用モデルのダウンロード：YOLO26n</h2>
+    <h2 data-lang-vi>1. Tải model dùng cho case study: YOLO26n</h2>
     <p data-lang-en>
       We'll use <strong>YOLO26n</strong> — DEEPX's compact "nano" object
       detector, 640×640 input — as the running example for the rest of this
@@ -193,10 +224,18 @@ NPU 2: voltage 750 mV, clock 1000 MHz, temperature 36'C
       <code>dx_stream</code> —— が最初から最後まで<strong>まったく同じモデル
       ファイル</strong>を使用します。
     </p>
+    <p data-lang-vi>
+      Chúng ta sẽ dùng <strong>YOLO26n</strong> — bộ object detector "nano" gọn nhẹ của DEEPX, input 640×640 —
+      làm ví dụ xuyên suốt phần còn lại của hướng dẫn. Đây cũng là model mà demo nhanh của
+      <code>dx_stream</code> chạy mặc định (Step 6), nên mọi công cụ trong bài — <code>dxrun</code>,
+      <code>dxtop</code>, <code>dx_app</code> và <code>dx_stream</code> — đều thao tác trên
+      <strong>đúng cùng một file model</strong> từ đầu đến cuối.
+    </p>
     <p data-lang-en>Pick either download path — both end up with the same file:</p>
     <p data-lang-ko>두 방법 중 하나를 선택하세요 — 결과적으로 같은 파일을 받게 됩니다:</p>
     <p data-lang-zh>任选一种下载方式 —— 最终得到的都是同一个文件：</p>
     <p data-lang-ja>どちらの方法を選んでも構いません —— 最終的に同じファイルが得られます：</p>
+    <p data-lang-vi>Chọn một trong hai cách tải — cả hai đều cho ra cùng một file:</p>
     <div class="dx-code-wrap">
 <pre><code># Option A — DEEPX Model Zoo (web): search "YOLO26n" at
 # https://developer.deepx.ai/modelzoo/ and download its .dxnn file directly
@@ -210,6 +249,7 @@ cd dx_app
     <p data-lang-ko>이후 실습에서 사용할 경로에 파일이 제대로 받아졌는지 확인하세요:</p>
     <p data-lang-zh>确认文件已下载到本指南后续步骤所期望的路径：</p>
     <p data-lang-ja>以降の手順で使用するパスにファイルが正しくダウンロードされているか確認しましょう：</p>
+    <p data-lang-vi>Kiểm tra file đã nằm đúng vị trí mà phần còn lại của hướng dẫn mong đợi:</p>
     <div class="dx-code-wrap">
 <pre><code>ls -la assets/models/yolo26-n_640x640.dxnn</code></pre>
     </div>
@@ -220,6 +260,7 @@ cd dx_app
     <h2 data-lang-ko>2. dxtop — 실시간 NPU 대시보드</h2>
     <h2 data-lang-zh>2. 认识 dxtop —— 实时 NPU 仪表盘</h2>
     <h2 data-lang-ja>2. dxtop を知る —— リアルタイム NPU ダッシュボード</h2>
+    <h2 data-lang-vi>2. Làm quen với dxtop — dashboard NPU thời gian thực</h2>
     <p data-lang-en>
       Before running anything performance-related, open <strong>a second
       terminal</strong> and start <code>dxtop</code> — a live, terminal-based
@@ -244,6 +285,12 @@ cd dx_app
       したままにしておき、各テストを実行するたびにリアルタイムで反応する様子を
       確認します。
     </p>
+    <p data-lang-vi>
+      Trước khi chạy bất cứ thứ gì liên quan đến hiệu năng, hãy mở <strong>terminal thứ hai</strong>
+      và khởi động <code>dxtop</code> — công cụ giám sát DEEPX NPU theo thời gian thực trên terminal.
+      Cứ để nó chạy trong suốt phần còn lại của hướng dẫn: bạn sẽ thấy nó phản ứng theo thời gian thực
+      khi ta chạy từng bài kiểm thử.
+    </p>
     <div class="dx-code-wrap">
 <pre><code>dxtop</code></pre>
     </div>
@@ -251,11 +298,14 @@ cd dx_app
     <p data-lang-ko>다음 단계로 넘어가기 전에, 유휴 상태의 기준값을 코어별로 확인해 두세요 — 3~4단계에서 이 값과 비교하게 됩니다:</p>
     <p data-lang-zh>在进入下一步之前，先记录每个 NPU 核心的空闲基线值 —— 第 3～4 步会与这些数值进行比较：</p>
     <p data-lang-ja>次に進む前に、各 NPU コアのアイドル時のベースライン値を確認しておきましょう —— ステップ3〜4でこれらの数値と比較します：</p>
+    <p data-lang-vi>Ở trạng thái idle, hãy ghi lại giá trị nền của từng NPU core trước khi đi tiếp — bạn sẽ so sánh với các con số này ở Step 3–4:</p>
     <div class="dx-table-wrap">
       <table>
-        <thead><tr><th data-lang-en>Field</th><th data-lang-en>What to watch for</th><th data-lang-ko>항목</th><th data-lang-ko>확인할 내용</th><th data-lang-zh>项目</th><th data-lang-zh>需要关注的内容</th><th data-lang-ja>項目</th><th data-lang-ja>確認すべき内容</th></tr></thead>
+        <thead><tr><th data-lang-en>Field</th><th data-lang-en>What to watch for</th><th data-lang-ko>항목</th><th data-lang-ko>확인할 내용</th><th data-lang-zh>项目</th><th data-lang-zh>需要关注的内容</th><th data-lang-ja>項目</th>
+<th data-lang-vi>Trường</th><th data-lang-ja>確認すべき内容</th>
+<th data-lang-vi>Cần chú ý điều gì</th></tr></thead>
         <tbody>
-          <tr>
+          <tr data-lang-en>
             <td data-lang-en><strong>Util</strong> (per core)</td>
             <td data-lang-en>Idle: near 0%. This is the number that will jump the most between Steps 3 and 4.</td>
           </tr>
@@ -271,7 +321,11 @@ cd dx_app
             <td data-lang-ja><strong>Util</strong>（コア別）</td>
             <td data-lang-ja>アイドル時：0%に近い値。ステップ3とステップ4の間で最も大きく変化する数値です。</td>
           </tr>
-          <tr>
+          <tr data-lang-vi>
+            <td data-lang-vi><strong>Util</strong> (theo từng core)</td>
+            <td data-lang-vi>Idle: gần 0%. Đây là con số sẽ thay đổi nhiều nhất giữa Step 3 và Step 4.</td>
+          </tr>
+          <tr data-lang-en>
             <td data-lang-en><strong>Temp</strong> (°C)</td>
             <td data-lang-en>Idle: close to ambient/board baseline. Watch this climb under sustained load — this is the number behind "the NPU feels hot" reports.</td>
           </tr>
@@ -287,7 +341,11 @@ cd dx_app
             <td data-lang-ja><strong>Temp</strong>（°C）</td>
             <td data-lang-ja>アイドル時：周囲温度・ボードのベースラインに近い値。継続的な負荷をかけた際の上昇幅を確認してください —— これが「NPU が熱い」という声の根拠となる数値です。</td>
           </tr>
-          <tr>
+          <tr data-lang-vi>
+            <td data-lang-vi><strong>Temp</strong> (°C)</td>
+            <td data-lang-vi>Idle: gần với nhiệt độ môi trường/mức nền của board. Hãy theo dõi giá trị này tăng lên khi tải kéo dài — đây chính là con số đằng sau các phản hồi kiểu "NPU thấy nóng".</td>
+          </tr>
+          <tr data-lang-en>
             <td data-lang-en><strong>Clock</strong> (MHz)</td>
             <td data-lang-en>Should stay at the nominal rated clock under load. A drop below nominal under sustained load indicates thermal throttling.</td>
           </tr>
@@ -303,7 +361,11 @@ cd dx_app
             <td data-lang-ja><strong>Clock</strong>（MHz）</td>
             <td data-lang-ja>負荷がかかっている状態でも定格クロックを維持しているはずです。継続的な負荷の下で定格を下回る場合はサーマルスロットリングを疑ってください。</td>
           </tr>
-          <tr>
+          <tr data-lang-vi>
+            <td data-lang-vi><strong>Clock</strong> (MHz)</td>
+            <td data-lang-vi>Nên giữ ở mức clock danh định khi có tải. Nếu tụt xuống dưới mức danh định khi tải kéo dài thì đó là dấu hiệu thermal throttling.</td>
+          </tr>
+          <tr data-lang-en>
             <td data-lang-en><strong>Voltage</strong> (mV)</td>
             <td data-lang-en>Reflects power management state alongside load.</td>
           </tr>
@@ -319,6 +381,10 @@ cd dx_app
             <td data-lang-ja><strong>Voltage</strong>（mV）</td>
             <td data-lang-ja>負荷に応じた電源管理の状態を示します。</td>
           </tr>
+          <tr data-lang-vi>
+            <td data-lang-vi><strong>Voltage</strong> (mV)</td>
+            <td data-lang-vi>Phản ánh trạng thái quản lý điện năng tương ứng với tải.</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -327,10 +393,12 @@ cd dx_app
       <strong class="dx-callout-title" data-lang-ko>단축키</strong>
       <strong class="dx-callout-title" data-lang-zh>快捷键</strong>
       <strong class="dx-callout-title" data-lang-ja>キー操作</strong>
+      <strong class="dx-callout-title" data-lang-vi>Phím tắt</strong>
       <p data-lang-en><code>q</code> quit · <code>n</code> / <code>p</code> next / previous page (multi-device systems) · <code>h</code> help.</p>
       <p data-lang-ko><code>q</code> 종료 · <code>n</code> / <code>p</code> 다음/이전 페이지(다중 장치 환경) · <code>h</code> 도움말.</p>
       <p data-lang-zh><code>q</code> 退出 · <code>n</code> / <code>p</code> 下一页/上一页（多设备系统）· <code>h</code> 帮助。</p>
       <p data-lang-ja><code>q</code> 終了 · <code>n</code> / <code>p</code> 次/前ページ（複数デバイス環境）· <code>h</code> ヘルプ。</p>
+      <p data-lang-vi><code>q</code> thoát · <code>n</code> / <code>p</code> trang kế / trang trước (hệ thống nhiều thiết bị) · <code>h</code> trợ giúp.</p>
     </div>
 
     <hr class="dx-sep">
@@ -339,6 +407,7 @@ cd dx_app
     <h2 data-lang-ko>3. 최대 처리량 확인</h2>
     <h2 data-lang-zh>3. 测试最大吞吐量</h2>
     <h2 data-lang-ja>3. 最大スループットを確認する</h2>
+    <h2 data-lang-vi>3. Throughput tối đa</h2>
     <p data-lang-en>
       In your <strong>first terminal</strong>, run <code>dxrun</code> against
       the model — with no special flags, this is benchmark mode: the NPU runs
@@ -358,11 +427,16 @@ cd dx_app
       を実行します —— 特別なオプションを付けずに実行すると benchmark モードに
       なり、NPU が全力で稼働してその性能上限を測定します。
     </p>
+    <p data-lang-vi>
+      Trong <strong>terminal thứ nhất</strong>, chạy <code>dxrun</code> với model — không kèm cờ đặc biệt nào,
+      đây chính là benchmark mode: NPU chạy hết công suất để tìm ra giới hạn trên của nó.
+    </p>
     <div class="dx-callout tip">
       <strong class="dx-callout-title" data-lang-en>Always add --use-ort</strong>
       <strong class="dx-callout-title" data-lang-ko>--use-ort는 항상 붙이세요</strong>
       <strong class="dx-callout-title" data-lang-zh>请务必加上 --use-ort</strong>
       <strong class="dx-callout-title" data-lang-ja>--use-ort は必ず付けてください</strong>
+      <strong class="dx-callout-title" data-lang-vi>Luôn thêm --use-ort</strong>
       <p data-lang-en>
         Some model graphs include a few CPU-side operators alongside the NPU
         ops. <code>--use-ort</code> enables ONNX Runtime to execute CPU offloading
@@ -395,6 +469,13 @@ cd dx_app
         ます。正確な <em>total</em> 推論性能を得るには、常に <code>--use-ort</code>
         を併用してください。
       </p>
+      <p data-lang-vi>
+        Một số graph của model có kèm vài operator chạy trên CPU bên cạnh các op chạy trên NPU.
+        <code>--use-ort</code> bật ONNX Runtime để thực thi phần offload sang CPU;
+        <strong>nếu không có nó, chỉ phần graph chạy trên NPU được thực thi</strong>, khiến hiệu năng
+        inference E2E thực sự của model bị đánh giá thấp hơn thực tế. Để có con số inference
+        <em>tổng thể</em> chính xác, hãy luôn thêm <code>--use-ort</code>.
+      </p>
     </div>
     <div class="dx-code-wrap">
 <pre><code>dxrun -m assets/models/yolo26-n_640x640.dxnn --use-ort -t 30 -v</code></pre>
@@ -408,6 +489,7 @@ cd dx_app
       <strong class="dx-callout-title" data-lang-ko>이 수치에 대하여</strong>
       <strong class="dx-callout-title" data-lang-zh>关于这些数据</strong>
       <strong class="dx-callout-title" data-lang-ja>この数値について</strong>
+      <strong class="dx-callout-title" data-lang-vi>Về các con số này</strong>
       <p data-lang-en>
         The performance numbers shown throughout this guide (FPS, latency, NPU
         Processing Time, temperatures, etc.) are reference measurements from
@@ -441,6 +523,13 @@ cd dx_app
         参考として利用し、DX-M1 や YOLO26n の公式な性能仕様として扱わ
         ないようにしてください。
       </p>
+      <p data-lang-vi>
+        Các con số hiệu năng trong hướng dẫn này (FPS, latency, NPU Processing Time, nhiệt độ, v.v.)
+        là số đo tham khảo từ một hệ thống thử nghiệm cụ thể, ghi lại nhằm mục đích minh họa.
+        Kết quả sẽ thay đổi tùy theo CPU của host, cấu hình PCIe, phiên bản DX-RT/driver,
+        thiết lập biên dịch model và cấu hình hệ thống tổng thể — hãy dùng chúng để hiểu
+        xu hướng của kết quả, chứ không phải như thông số hiệu năng chính thức của DX-M1 hay YOLO26n.
+      </p>
     </div>
     <p data-lang-en>
       <strong>The instant this starts, switch to your dxtop terminal.</strong>
@@ -467,11 +556,18 @@ cd dx_app
       <strong>Temp</strong> が着実に上昇していく様子が見えます —— ステップ2で確認
       したアイドル時のベースラインとの違いが、リアルタイムではっきりと確認できます。
     </p>
+    <p data-lang-vi>
+      <strong>Ngay khi lệnh này bắt đầu, hãy chuyển sang terminal dxtop.</strong> Bạn sẽ thấy
+      <strong>Util</strong> vọt lên gần 100% chỉ trong một, hai giây, và <strong>Temp</strong> tăng đều
+      suốt 30 giây — một sự thay đổi trước/sau rõ ràng theo thời gian thực so với mức nền idle
+      bạn đã ghi lại ở Step 2.
+    </p>
     <div class="dx-callout warn">
       <strong class="dx-callout-title" data-lang-en>"Why does the NPU feel so hot?"</strong>
       <strong class="dx-callout-title" data-lang-ko>"왜 이렇게 NPU가 뜨거워지나요?"</strong>
       <strong class="dx-callout-title" data-lang-zh>"为什么 NPU 会这么热？"</strong>
       <strong class="dx-callout-title" data-lang-ja>「どうして NPU がこんなに熱くなるのですか？」</strong>
+      <strong class="dx-callout-title" data-lang-vi>"Tại sao NPU lại nóng như vậy?"</strong>
       <p data-lang-en>
         An increase in NPU temperature is expected during sustained
         maximum-throughput benchmarking — benchmark mode deliberately drives
@@ -505,6 +601,13 @@ cd dx_app
         では、<em>同じモデル</em>でそのような制限されたワークロードを
         再現し、その違いをご自身の目で確認できます。
       </p>
+      <p data-lang-vi>
+        Nhiệt độ NPU tăng lên là điều bình thường khi benchmark ở throughput tối đa kéo dài —
+        benchmark mode chủ ý đẩy mức sử dụng NPU lên gần 100% để đo throughput tối đa.
+        Nhiều ứng dụng edge dùng camera chạy ở mức sử dụng thấp hơn, vì nhu cầu inference bị giới hạn
+        bởi frame rate đầu vào chứ không chạy hết công suất. Step 4 tái hiện đúng loại workload có giới hạn đó
+        trên <em>cùng một</em> model để bạn tự thấy sự khác biệt.
+      </p>
     </div>
 
     <hr class="dx-sep">
@@ -513,6 +616,7 @@ cd dx_app
     <h2 data-lang-ko>4. 대표적인 카메라 워크로드: 30 FPS</h2>
     <h2 data-lang-zh>4. 具有代表性的摄像头负载：30 FPS</h2>
     <h2 data-lang-ja>4. 代表的なカメラワークロード：30 FPS</h2>
+    <h2 data-lang-vi>4. Workload camera tiêu biểu: 30 FPS</h2>
     <p data-lang-en>
       Many camera-based edge AI applications feed the NPU from a
       30&nbsp;fps camera or video stream — the NPU only needs to keep up
@@ -541,6 +645,12 @@ cd dx_app
       <code>dxrun</code> の target-FPS モード（<code>-f</code>）は入力レートを
       制限し、同一モデルで<strong>代表的かつ制限された</strong>負荷を計測
       できるようにします：
+    </p>
+    <p data-lang-vi>
+      Nhiều ứng dụng Edge AI dùng camera đưa dữ liệu vào NPU từ camera hoặc luồng video 30&nbsp;fps —
+      NPU chỉ cần theo kịp frame rate đầu vào, không cần chạy hết công suất. Chế độ target-FPS của
+      <code>dxrun</code> (<code>-f</code>) giới hạn tốc độ đầu vào để bạn đo được tải triển khai
+      <strong>tiêu biểu, có giới hạn</strong> trên đúng model đó:
     </p>
     <div class="dx-code-wrap">
 <pre><code>dxrun -m assets/models/yolo26-n_640x640.dxnn --use-ort -f 30 -t 30 -v</code></pre>
@@ -576,6 +686,11 @@ cd dx_app
       比率に相当します —— そして <strong>Temp</strong> は上昇せず、アイドル時の
       ベースラインに近い状態を保ちます。
     </p>
+    <p data-lang-vi>
+      <strong>Hãy chuyển sang dxtop lần nữa.</strong> Lần này, <strong>Util trung bình của 3 core</strong>
+      giữ ở mức thấp hơn 20% — xấp xỉ tỉ lệ giữa mục tiêu 30&nbsp;fps và giới hạn trên ở benchmark mode
+      bạn đo được ở Step 3 — còn <strong>Temp</strong> giữ gần mức nền idle thay vì tăng lên.
+    </p>
     <figure class="dx-figure" style="padding:12px;">
       <img src="assets/dxtop.png" alt="dxtop live NPU dashboard during the target-FPS (30 fps) test, showing per-core Util well below 20% and Temp near the idle baseline" style="display:block;width:100%;border-radius:8px;">
       <figcaption>
@@ -583,6 +698,7 @@ cd dx_app
         <span data-lang-ko>이 단계의 30fps target-FPS 실행 중 dxtop 화면 — 3단계 benchmark 실행에서 본 ~100%와 달리, 코어별 Util이 20%에 훨씬 못 미치는 수준을 유지합니다.</span>
         <span data-lang-zh>本步骤中 30&nbsp;fps target-FPS 运行期间的 dxtop 界面 —— 与第 3 步 benchmark 运行中出现的约 100% 不同，各核心的 Util 维持在远低于 20% 的水平。</span>
         <span data-lang-ja>このステップでの 30&nbsp;fps target-FPS 実行中の dxtop 画面 —— ステップ3の benchmark 実行で見られた約100%とは異なり、コアごとの Util は20%を大きく下回る水準を維持しています。</span>
+        <span data-lang-vi>dxtop trong lần chạy target-FPS 30&nbsp;fps ở bước này — Util của từng core giữ ở mức thấp hơn 20%, khác hẳn mức ~100% thấy ở lần chạy benchmark tại Step 3.</span>
       </figcaption>
     </figure>
     <div class="dx-table-wrap">
@@ -592,11 +708,16 @@ cd dx_app
             <th data-lang-en>Mode</th><th data-lang-en>Command</th><th data-lang-en>NPU Util (dxtop)</th><th data-lang-en>Temp trend</th><th data-lang-en>What it tells you</th>
             <th data-lang-ko>모드</th><th data-lang-ko>명령어</th><th data-lang-ko>NPU Util (dxtop)</th><th data-lang-ko>온도 추이</th><th data-lang-ko>확인할 수 있는 것</th>
             <th data-lang-zh>模式</th><th data-lang-zh>命令</th><th data-lang-zh>NPU Util (dxtop)</th><th data-lang-zh>温度趋势</th><th data-lang-zh>反映的信息</th>
-            <th data-lang-ja>モード</th><th data-lang-ja>コマンド</th><th data-lang-ja>NPU Util (dxtop)</th><th data-lang-ja>温度の傾向</th><th data-lang-ja>わかること</th>
+            <th data-lang-ja>モード</th>
+            <th data-lang-vi>Chế độ</th><th data-lang-ja>コマンド</th>
+<th data-lang-vi>Lệnh</th><th data-lang-ja>NPU Util (dxtop)</th>
+<th data-lang-vi>NPU Util (dxtop)</th><th data-lang-ja>温度の傾向</th>
+<th data-lang-vi>Xu hướng nhiệt độ</th><th data-lang-ja>わかること</th>
+<th data-lang-vi>Cho bạn biết điều gì</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
+          <tr data-lang-en>
             <td data-lang-en>Benchmark (max)</td><td data-lang-en><code>dxrun -m ... --use-ort -t 30</code></td>
             <td data-lang-en>~100%</td><td data-lang-en>Rises steadily</td>
             <td data-lang-en>Maximum inference throughput under this benchmark configuration</td>
@@ -616,7 +737,12 @@ cd dx_app
             <td data-lang-ja>~100%</td><td data-lang-ja>着実に上昇</td>
             <td data-lang-ja>この benchmark 設定における最大推論スループット</td>
           </tr>
-          <tr>
+          <tr data-lang-vi>
+            <td data-lang-vi>Benchmark (tối đa)</td><td data-lang-vi><code>dxrun -m ... --use-ort -t 30</code></td>
+            <td data-lang-vi>~100%</td><td data-lang-vi>Tăng đều</td>
+            <td data-lang-vi>Throughput inference tối đa với cấu hình benchmark này</td>
+          </tr>
+          <tr data-lang-en>
             <td data-lang-en>Target-FPS (30 fps)</td><td data-lang-en><code>dxrun -m ... --use-ort -f 30 -t 30</code></td>
             <td data-lang-en>below 20%</td><td data-lang-en>Stays near idle</td>
             <td data-lang-en>Real deployment headroom &amp; thermal picture</td>
@@ -636,6 +762,11 @@ cd dx_app
             <td data-lang-ja>20%未満</td><td data-lang-ja>アイドル状態に近い</td>
             <td data-lang-ja>実運用時の余裕度と発熱傾向</td>
           </tr>
+          <tr data-lang-vi>
+            <td data-lang-vi>Target-FPS (30 fps)</td><td data-lang-vi><code>dxrun -m ... --use-ort -f 30 -t 30</code></td>
+            <td data-lang-vi>dưới 20%</td><td data-lang-vi>Giữ gần mức idle</td>
+            <td data-lang-vi>Dư địa hiệu năng khi triển khai thực tế &amp; bức tranh nhiệt</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -644,6 +775,7 @@ cd dx_app
       <strong class="dx-callout-title" data-lang-ko>benchmark 중 NPU 온도 이해하기</strong>
       <strong class="dx-callout-title" data-lang-zh>理解 benchmark 过程中的 NPU 温度</strong>
       <strong class="dx-callout-title" data-lang-ja>benchmark 中の NPU 温度について理解する</strong>
+      <strong class="dx-callout-title" data-lang-vi>Hiểu đúng về nhiệt độ NPU khi benchmark</strong>
       <p data-lang-en>
         If the NPU temperature rises during a benchmark run, first check
         whether the workload is running in maximum-throughput mode.
@@ -674,12 +806,19 @@ cd dx_app
         挙動を評価するには、<code>-f &lt;目標 fps&gt;</code> を使用し、dxtop
         で使用率と温度を併せて確認してください。
       </p>
+      <p data-lang-vi>
+        Nếu nhiệt độ NPU tăng trong lúc benchmark, trước hết hãy kiểm tra xem workload có đang chạy ở
+        chế độ throughput tối đa hay không. Benchmark throughput tối đa chủ ý đẩy mức sử dụng NPU lên gần 100%.
+        Để đánh giá đặc tính nhiệt dưới một workload triển khai tiêu biểu, hãy dùng
+        <code>-f &lt;target fps&gt;</code> và theo dõi mức sử dụng cùng nhiệt độ bằng dxtop.
+      </p>
     </div>
     <div class="dx-callout">
       <strong class="dx-callout-title" data-lang-en>Want more?</strong>
       <strong class="dx-callout-title" data-lang-ko>더 알아보기</strong>
       <strong class="dx-callout-title" data-lang-zh>想了解更多？</strong>
       <strong class="dx-callout-title" data-lang-ja>さらに詳しく知りたい方へ</strong>
+      <strong class="dx-callout-title" data-lang-vi>Muốn tìm hiểu thêm?</strong>
       <p data-lang-en>
         The Advanced guide covers every <code>dxrun</code> option, latency-only
         single-core testing, and the built-in profiler for a per-stage timing
@@ -701,6 +840,11 @@ cd dx_app
         プロファイラまでを取り上げています。詳しくは
         <a href="advanced.html#dxrun">Advanced → dxrun 詳解</a> をご覧ください。
       </p>
+      <p data-lang-vi>
+        Hướng dẫn Advanced trình bày mọi tùy chọn của <code>dxrun</code>, cách kiểm thử single-core chỉ đo latency,
+        và profiler tích hợp cho bảng phân tích thời gian theo từng stage. Xem
+        <a href="advanced.html#dxrun">Advanced → dxrun deep dive</a>.
+      </p>
     </div>
 
     <hr class="dx-sep">
@@ -709,6 +853,7 @@ cd dx_app
     <h2 data-lang-ko>5. 동일한 모델을 실제 애플리케이션에서: dx_app</h2>
     <h2 data-lang-zh>5. 同一模型，运行在真实应用中：dx_app</h2>
     <h2 data-lang-ja>5. 同じモデルを実際のアプリケーションで動かす：dx_app</h2>
+    <h2 data-lang-vi>5. Cùng model đó trong ứng dụng thực tế: dx_app</h2>
     <p data-lang-en>
       <code>dxrun</code> measures the NPU alone. <code>dx_app</code> wraps
       YOLO26n with real OpenCV-based decode, pre/post-processing, and
@@ -732,6 +877,11 @@ cd dx_app
       は YOLO26n を実際の OpenCV ベースのデコード、前処理・後処理、可視化と
       組み合わせます —— 実際のアプリケーションと同じ構成です。ここではこの
       1モデル分のバイナリだけをビルドし、直接実行してみましょう：
+    </p>
+    <p data-lang-vi>
+      <code>dxrun</code> chỉ đo riêng NPU. <code>dx_app</code> bao quanh YOLO26n bằng decode,
+      pre/post-processing và visualization thực tế dựa trên OpenCV — đúng hình hài của một ứng dụng thật.
+      Chỉ cần build binary cho riêng model này rồi chạy trực tiếp:
     </p>
     <div class="dx-code-wrap">
 <pre><code># Build only the yolo26n binaries (fast — no need to rebuild the whole suite)
@@ -787,15 +937,22 @@ cd dx_app
       ため、近い値になります。<strong>Overall FPS</strong> はやや低くなります
       が、これは実際の CPU 側の前処理・後処理が加わったためです。
     </p>
+    <p data-lang-vi>
+      So sánh dòng <strong>Inference FPS</strong> với giới hạn trên ở benchmark mode tại Step 3 —
+      vẫn là NPU đó, làm cùng một công việc. <strong>Overall FPS</strong> sẽ thấp hơn một chút vì
+      pre/post-processing thực tế trên CPU giờ đã nằm trong bức tranh chung.
+    </p>
     <div class="dx-callout">
       <strong class="dx-callout-title" data-lang-en>Prefer a menu?</strong>
       <strong class="dx-callout-title" data-lang-ko>메뉴 방식을 선호하시나요?</strong>
       <strong class="dx-callout-title" data-lang-zh>更喜欢菜单方式？</strong>
       <strong class="dx-callout-title" data-lang-ja>メニュー形式がお好みですか？</strong>
+      <strong class="dx-callout-title" data-lang-vi>Thích dùng menu hơn?</strong>
       <p data-lang-en><code>./run_demo.sh</code> offers a quick interactive menu across 23 pre-built demos (detection, pose, segmentation, and more) if you'd rather explore beyond this one model.</p>
       <p data-lang-ko>이 모델 하나에 국한하지 않고 다양한 데모를 둘러보고 싶다면, <code>./run_demo.sh</code>가 검출·포즈·세그멘테이션 등 23개의 사전 구성된 데모를 대화형 메뉴로 빠르게 제공합니다.</p>
       <p data-lang-zh>如果你不想局限于这一个模型，想快速浏览更多演示，<code>./run_demo.sh</code> 提供了一个交互式菜单，涵盖检测、姿态估计、分割等共 23 个预置演示。</p>
       <p data-lang-ja>この1モデルにとどまらず、他のデモも手軽に試してみたい場合は、<code>./run_demo.sh</code> が検出・姿勢推定・セグメンテーションなど 23 種類の構築済みデモを、対話形式のメニューですぐに提供します。</p>
+      <p data-lang-vi><code>./run_demo.sh</code> cung cấp một menu tương tác nhanh với 23 demo dựng sẵn (detection, pose, segmentation và nhiều hơn nữa) nếu bạn muốn khám phá vượt ra ngoài model này.</p>
     </div>
 
     <hr class="dx-sep">
@@ -804,6 +961,7 @@ cd dx_app
     <h2 data-lang-ko>6. 동일한 모델을 실제 비디오 파이프라인에서: dx_stream</h2>
     <h2 data-lang-zh>6. 同一模型，运行在真实视频流水线中：dx_stream</h2>
     <h2 data-lang-ja>6. 同じモデルを実際のビデオパイプラインで動かす：dx_stream</h2>
+    <h2 data-lang-vi>6. Cùng model đó, trong pipeline video thực tế: dx_stream</h2>
     <p data-lang-en>
       <code>dx_stream</code>'s built-in quick demo runs a fixed set of
       pipelines rather than an arbitrary model, and conveniently its default
@@ -831,11 +989,17 @@ cd dx_app
       からずっとテストしてきたのと全く同じモデルが、今度は完全な GStreamer
       パイプライン（デコード → NPU 推論 → 画面表示）として動作します。
     </p>
+    <p data-lang-vi>
+      Demo nhanh tích hợp sẵn của <code>dx_stream</code> chạy một tập pipeline cố định thay vì một model tùy ý,
+      và tiện là tùy chọn mặc định của nó chính là <strong>YOLO26n</strong> — đúng model bạn đã thử nghiệm từ Step 1 —
+      lần này chạy như một pipeline GStreamer hoàn chỉnh (decode → inference trên NPU → hiển thị trên màn hình).
+    </p>
 
     <h3 data-lang-en>What run_demo.sh actually launches</h3>
     <h3 data-lang-ko>run_demo.sh가 실제로 실행하는 파이프라인</h3>
     <h3 data-lang-zh>run_demo.sh 实际启动的流水线</h3>
     <h3 data-lang-ja>run_demo.sh が実際に起動するパイプライン</h3>
+    <h3 data-lang-vi>run_demo.sh thực sự khởi chạy cái gì</h3>
     <p data-lang-en>
       Under the hood it's one <code>gst-launch-1.0</code> chain, and the shape
       should look familiar: read/decode the video, hand it to DEEPX's
@@ -862,6 +1026,11 @@ cd dx_app
       ずっと benchmark してきたのと同じ NPU をラップする <code>dxinfer</code>
       要素も含まれます —— 最後に画面へレンダリングします。
     </p>
+    <p data-lang-vi>
+      Bên trong, nó là một chuỗi <code>gst-launch-1.0</code>, và cấu trúc hẳn trông quen thuộc:
+      đọc/decode video, chuyển cho các plugin <code>dx_stream</code> của DEEPX — bao gồm chính element
+      <code>dxinfer</code> bao quanh NPU mà bạn đã benchmark từ Step 3 — rồi render ra.
+    </p>
     <figure class="dx-figure">
 <svg viewBox="0 0 1354 216" role="img" aria-label="GStreamer plugin chain for the YOLO26n object-detection pipeline: urisourcebin and decodebin read and decode the input video, then the DEEPX dx_stream plugins dxpreprocess, dxinfer, dxpostprocess and dxosd resize the frame, run NPU inference, decode YOLO26n boxes and draw the overlay, connected by queue elements that create separate threads for pipelined throughput, and finally videoconvert and fpsdisplaysink render the result to screen with an FPS overlay." xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -881,6 +1050,7 @@ cd dx_app
     <text data-lang-ko x="0" y="4" text-anchor="middle" font-size="10.5" font-weight="800" letter-spacing="0.2" fill="var(--dx-ink-soft)">비디오 입력</text>
     <text data-lang-zh x="0" y="4" text-anchor="middle" font-size="10.5" font-weight="800" letter-spacing="0.2" fill="var(--dx-ink-soft)">视频输入</text>
     <text data-lang-ja x="0" y="4" text-anchor="middle" font-size="10.5" font-weight="800" letter-spacing="0.2" fill="var(--dx-ink-soft)">映像入力</text>
+    <text data-lang-vi x="0" y="4" text-anchor="middle" font-size="10.5" font-weight="800" letter-spacing="0.3" fill="var(--dx-ink-soft)">VIDEO INPUT</text>
   </g>
   <g transform="translate(663 22)">
     <rect x="-170" y="-11" width="340" height="22" rx="11" fill="var(--dx-blue)"/>
@@ -888,6 +1058,7 @@ cd dx_app
     <text data-lang-ko x="0" y="4" text-anchor="middle" font-size="10" font-weight="800" letter-spacing="0.2" fill="#ffffff">DEEPX NPU 파이프라인 — dx_stream 플러그인</text>
     <text data-lang-zh x="0" y="4" text-anchor="middle" font-size="10" font-weight="800" letter-spacing="0.2" fill="#ffffff">DEEPX NPU 流水线 — dx_stream 插件</text>
     <text data-lang-ja x="0" y="4" text-anchor="middle" font-size="10" font-weight="800" letter-spacing="0.2" fill="#ffffff">DEEPX NPU パイプライン — dx_stream プラグイン</text>
+    <text data-lang-vi x="0" y="4" text-anchor="middle" font-size="10" font-weight="800" letter-spacing="0.3" fill="#ffffff">DEEPX NPU PIPELINE — dx_stream PLUGINS</text>
   </g>
   <g transform="translate(1192 22)">
     <rect x="-75" y="-11" width="150" height="22" rx="11" fill="var(--dx-border)"/>
@@ -895,6 +1066,7 @@ cd dx_app
     <text data-lang-ko x="0" y="4" text-anchor="middle" font-size="10.5" font-weight="800" letter-spacing="0.2" fill="var(--dx-ink-soft)">화면 출력</text>
     <text data-lang-zh x="0" y="4" text-anchor="middle" font-size="10.5" font-weight="800" letter-spacing="0.2" fill="var(--dx-ink-soft)">显示输出</text>
     <text data-lang-ja x="0" y="4" text-anchor="middle" font-size="10.5" font-weight="800" letter-spacing="0.2" fill="var(--dx-ink-soft)">表示出力</text>
+    <text data-lang-vi x="0" y="4" text-anchor="middle" font-size="10.5" font-weight="800" letter-spacing="0.3" fill="var(--dx-ink-soft)">DISPLAY OUTPUT</text>
   </g>
   <line x1="142" y1="82" x2="164" y2="82" stroke="var(--dx-ink-soft)" stroke-width="1.4" marker-end="url(#gstArrow)"/>
   <line x1="272" y1="82" x2="314" y2="82" stroke="var(--dx-ink-soft)" stroke-width="1.4" marker-end="url(#gstArrow)"/>
@@ -945,6 +1117,7 @@ cd dx_app
     <text data-lang-ko x="26" y="4" font-size="10.5" fill="var(--dx-ink-soft)">queue = 쓰레드 경계 — 플러그인마다 별도 쓰레드에서 병렬로 실행되도록 프레임을 버퍼링</text>
     <text data-lang-zh x="26" y="4" font-size="10.5" fill="var(--dx-ink-soft)">queue = 线程边界 — 缓冲帧数据，使每个插件在各自独立的线程中并行运行</text>
     <text data-lang-ja x="26" y="4" font-size="10.5" fill="var(--dx-ink-soft)">queue = スレッド境界 — 各プラグインが独立したスレッドで並列に動作できるよう、フレームをバッファリングします</text>
+    <text data-lang-vi x="26" y="4" font-size="10.5" fill="var(--dx-ink-soft)">queue = ranh giới thread — đệm frame để mỗi plugin chạy trên thread riêng, song song với nhau</text>
   </g>
 </svg>
       <figcaption>
@@ -952,6 +1125,7 @@ cd dx_app
         <span data-lang-ko><code>dx_stream</code>의 YOLO26n 객체 검출 파이프라인: <code>urisourcebin</code>/<code>decodebin</code>이 비디오를 읽고 디코딩하고, DEEPX <code>dx_stream</code> 플러그인들이 프레임을 리사이즈하고 NPU에서 추론을 수행하고 YOLO26n의 원시 출력을 박스로 디코딩한 뒤 오버레이를 그립니다. 사이의 <code>queue</code>는 각 플러그인이 별도 쓰레드에서 동작하여 파이프라인 처리량을 높이도록 해줍니다. <code>videoconvert</code>/<code>fpsdisplaysink</code>가 FPS 오버레이와 함께 결과를 화면에 렌더링합니다.</span>
         <span data-lang-zh><code>dx_stream</code> 中的 YOLO26n 目标检测流水线：<code>urisourcebin</code>/<code>decodebin</code> 负责读取并解码视频；DEEPX 的 <code>dx_stream</code> 插件对帧进行缩放、在 NPU 上执行推理、将 YOLO26n 的原始输出解码为检测框，并绘制叠加层；它们之间的 <code>queue</code> 元件让每个插件运行在各自的线程中，以提升流水线吞吐量；<code>videoconvert</code>/<code>fpsdisplaysink</code> 负责渲染结果并叠加显示 FPS。</span>
         <span data-lang-ja><code>dx_stream</code> における YOLO26n 物体検出パイプライン：<code>urisourcebin</code>/<code>decodebin</code> がビデオを読み込みデコードし、DEEPX の <code>dx_stream</code> プラグイン群がフレームのリサイズ、NPU での推論実行、YOLO26n の生出力をボックスへのデコード、オーバーレイの描画を行います。プラグイン間の <code>queue</code> 要素により、各プラグインが独立したスレッドで動作しパイプライン処理のスループットを高めます。<code>videoconvert</code>/<code>fpsdisplaysink</code> が FPS オーバーレイ付きで結果をレンダリングします。</span>
+        <span data-lang-vi>Pipeline object detection YOLO26n trong <code>dx_stream</code>: <code>urisourcebin</code>/<code>decodebin</code> đọc và decode video; các plugin <code>dx_stream</code> của DEEPX resize frame, chạy inference trên NPU, decode output thô của YOLO26n thành các box và vẽ overlay; các element <code>queue</code> nằm giữa chúng cấp cho mỗi plugin một thread riêng để tăng throughput theo kiểu pipeline; <code>videoconvert</code>/<code>fpsdisplaysink</code> render kết quả kèm overlay FPS.</span>
       </figcaption>
     </figure>
 
@@ -981,6 +1155,11 @@ cd dx_app
       ます —— 追加のオプションは不要です。ここでも dxtop のターミナルを
       引き続き確認しておきましょう。
     </p>
+    <p data-lang-vi>
+      Một cửa sổ video mở ra kèm overlay detection, và FPS hiện tại được hiển thị trực tiếp trên video
+      thông qua <code>fpsdisplaysink</code> của GStreamer — không cần cờ nào thêm. Ở bước này cũng hãy để mắt
+      đến terminal dxtop của bạn.
+    </p>
 
     <div class="dx-nextstep" id="next">
       <div>
@@ -988,16 +1167,19 @@ cd dx_app
         <h4 data-lang-ko>더 깊이 알아보고 싶으신가요?</h4>
         <h4 data-lang-zh>想深入了解更多？</h4>
         <h4 data-lang-ja>さらに深く知りたいですか？</h4>
+        <h4 data-lang-vi>Sẵn sàng đi sâu hơn?</h4>
         <p data-lang-en>The Advanced guide covers every dxrun / dxbenchmark option in full, multi-model benchmarking, standalone sample extraction, and GStreamer-level pipeline profiling.</p>
         <p data-lang-ko>Advanced 가이드에서는 dxrun / dxbenchmark의 모든 옵션, multi-model benchmarking, 단독 샘플 추출, GStreamer 레벨 파이프라인 프로파일링까지 다룹니다.</p>
         <p data-lang-zh>Advanced 指南完整涵盖了 dxrun / dxbenchmark 的所有选项、multi-model benchmarking、独立样本提取，以及 GStreamer 层级的流水线性能剖析。</p>
         <p data-lang-ja>Advanced ガイドでは、dxrun / dxbenchmark の全オプション、multi-model benchmarking、単独でのサンプル抽出、GStreamer レベルのパイプラインプロファイリングまで、余すところなく解説しています。</p>
+        <p data-lang-vi>Hướng dẫn Advanced trình bày đầy đủ mọi tùy chọn của dxrun / dxbenchmark, benchmark multi-model, trích xuất sample độc lập, và profiling pipeline ở mức GStreamer.</p>
       </div>
       <a class="dx-btn" href="advanced.html">
         <span data-lang-en>Continue to Advanced →</span>
         <span data-lang-ko>Advanced로 이동 →</span>
         <span data-lang-zh>前往 Advanced →</span>
         <span data-lang-ja>Advanced へ進む →</span>
+        <span data-lang-vi>Tiếp tục với Advanced →</span>
       </a>
     </div>
 
@@ -1009,6 +1191,7 @@ cd dx_app
   <span data-lang-ko>DEEPX NPU(DX-M1) 빠른 평가 가이드 · DEEPX NPU 제품과 함께 사용하세요.</span>
   <span data-lang-zh>DEEPX NPU(DX-M1) 快速评估指南 · 适用于 DEEPX NPU 产品。</span>
   <span data-lang-ja>DEEPX NPU(DX-M1) クイック評価ガイド · DEEPX NPU 製品とともにご使用ください。</span>
+  <span data-lang-vi>DEEPX NPU(DX-M1) Quick Evaluation Guide · Dành cho các sản phẩm DEEPX NPU.</span>
 </footer>
 
 <script src="assets/script.js"></script>

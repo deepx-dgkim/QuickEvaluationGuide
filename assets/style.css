@@ -138,7 +138,7 @@ a:hover { text-decoration: underline; }
 /* ---------------------------------------------------------------------- */
 /* Language visibility                                                    */
 /* ---------------------------------------------------------------------- */
-[data-lang-ko], [data-lang-zh], [data-lang-ja] { display: none !important; }
+[data-lang-ko], [data-lang-zh], [data-lang-ja], [data-lang-vi] { display: none !important; }
 
 html[data-lang="ko"] [data-lang-en] { display: none !important; }
 html[data-lang="ko"] [data-lang-ko] { display: inline !important; }
@@ -181,6 +181,20 @@ html[data-lang="ja"] h2[data-lang-ja],
 html[data-lang="ja"] h3[data-lang-ja],
 html[data-lang="ja"] h4[data-lang-ja],
 html[data-lang="ja"] strong[data-lang-ja] { display: block !important; }
+html[data-lang="vi"] [data-lang-en] { display: none !important; }
+html[data-lang="vi"] [data-lang-vi] { display: inline !important; }
+html[data-lang="vi"] li[data-lang-vi] { display: list-item !important; }
+html[data-lang="vi"] tr[data-lang-vi] { display: table-row !important; }
+html[data-lang="vi"] td[data-lang-vi],
+html[data-lang="vi"] th[data-lang-vi] { display: table-cell !important; }
+html[data-lang="vi"] div[data-lang-vi],
+html[data-lang="vi"] p[data-lang-vi],
+html[data-lang="vi"] h1[data-lang-vi],
+html[data-lang="vi"] h2[data-lang-vi],
+html[data-lang="vi"] h3[data-lang-vi],
+html[data-lang="vi"] h4[data-lang-vi],
+html[data-lang="vi"] strong[data-lang-vi] { display: block !important; }
+
 
 /* ---------------------------------------------------------------------- */
 /* Layout                                                                 */

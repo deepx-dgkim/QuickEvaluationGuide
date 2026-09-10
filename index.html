@@ -87,6 +87,7 @@
       <button type="button" data-lang="ko">한국어</button>
       <button type="button" data-lang="zh">中文</button>
       <button type="button" data-lang="ja">日本語</button>
+      <button type="button" data-lang="vi">Tiếng Việt</button>
     </div>
   </div>
 </nav>
@@ -97,14 +98,17 @@
     <span class="dx-eyebrow" data-lang-ko>성능 평가</span>
     <span class="dx-eyebrow" data-lang-zh>性能评估</span>
     <span class="dx-eyebrow" data-lang-ja>パフォーマンス評価</span>
+    <span class="dx-eyebrow" data-lang-vi>Đánh giá hiệu năng</span>
     <h1 data-lang-en>DEEPX NPU(DX-M1) Quick Evaluation Guide</h1>
     <h1 data-lang-ko>DEEPX NPU(DX-M1) 빠른 평가 가이드</h1>
     <h1 data-lang-zh>DEEPX NPU(DX-M1) 快速评估指南</h1>
     <h1 data-lang-ja>DEEPX NPU(DX-M1) クイック評価ガイド</h1>
+    <h1 data-lang-vi>Hướng dẫn đánh giá nhanh DEEPX NPU(DX-M1)</h1>
     <p class="dx-hero__subtitle" data-lang-en>Performance Evaluation and Benchmarking with DEEPX NPU</p>
     <p class="dx-hero__subtitle" data-lang-ko>DEEPX NPU를 활용한 성능 평가 및 벤치마킹</p>
     <p class="dx-hero__subtitle" data-lang-zh>使用 DEEPX NPU 进行性能评估与基准测试</p>
     <p class="dx-hero__subtitle" data-lang-ja>DEEPX NPU を用いた性能評価とベンチマーキング</p>
+    <p class="dx-hero__subtitle" data-lang-vi>Đánh giá hiệu năng và benchmarking với DEEPX NPU</p>
     <p data-lang-en>
       A hands-on guide to evaluating inference performance on DEEPX NPUs —
       from downloading a model to reading your first FPS number, all the way to
@@ -125,15 +129,22 @@
       モデルのダウンロードから最初の FPS 値を確認するところに始まり、
       プロファイリングや multi-model ベンチマーク、E2E パイプラインテストまでを扱います。
     </p>
+    <p data-lang-vi>
+            Hướng dẫn thực hành để đánh giá hiệu năng inference trên DEEPX NPU —
+            từ việc tải model về và xem con số FPS đầu tiên, cho đến profiling,
+            benchmark multi-model và kiểm thử toàn bộ pipeline E2E.
+          </p>
     <div class="dx-hero__meta">
       <span data-lang-en>⏱️ <b>Basic</b>: ~15 minutes to your first result (excluding model download time)</span>
       <span data-lang-ko>⏱️ <b>Basic</b>: 첫 결과까지 약 15분 (모델 다운로드 시간 제외)</span>
       <span data-lang-zh>⏱️ <b>Basic</b>: 约 15 分钟即可获得第一个结果（不含模型下载时间）</span>
       <span data-lang-ja>⏱️ <b>Basic</b>: 最初の結果まで約15分（モデルのダウンロード時間を除く）</span>
+      <span data-lang-vi>⏱️ <b>Basic</b>: khoảng 15 phút để có kết quả đầu tiên (không tính thời gian tải model)</span>
       <span data-lang-en>🧪 <b>Advanced</b>: full toolchain deep-dive</span>
       <span data-lang-ko>🧪 <b>Advanced</b>: 전체 툴체인 심화</span>
       <span data-lang-zh>🧪 <b>Advanced</b>: 完整工具链深入讲解</span>
       <span data-lang-ja>🧪 <b>Advanced</b>: ツールチェーン全体を深く解説</span>
+      <span data-lang-vi>🧪 <b>Advanced</b>: đi sâu vào toàn bộ toolchain</span>
     </div>
   </div>
 </header>
@@ -146,6 +157,7 @@
       <strong class="dx-callout-title" data-lang-ko>범위 안내</strong>
       <strong class="dx-callout-title" data-lang-zh>范围说明</strong>
       <strong class="dx-callout-title" data-lang-ja>対象範囲</strong>
+      <strong class="dx-callout-title" data-lang-vi>Phạm vi</strong>
       <p data-lang-en>
         This guide assumes <strong>DX-AllSuite (DX-RT / dx_app / dx_stream)
         is already installed</strong> and your DEEPX NPU (e.g. DX-M1) is
@@ -168,6 +180,13 @@
         <code>dxcli -s</code> コマンドで DEEPX NPU（例：DX-M1）が正しく認識されていることを前提としています。
         SDK/ドライバのインストール手順はここでは<strong>扱いません</strong>——環境構築が完了した後の性能評価のみに焦点を当てます。
       </p>
+      <p data-lang-vi>
+                Hướng dẫn này giả định <strong>DX-AllSuite (DX-RT / dx_app / dx_stream)
+                đã được cài đặt sẵn</strong> và DEEPX NPU của bạn (ví dụ DX-M1) được
+                nhận diện bằng lệnh <code>dxcli -s</code>. Phần cài đặt SDK / driver
+                <strong>không</strong> nằm trong phạm vi này — chỉ tập trung vào việc
+                đánh giá hiệu năng sau khi môi trường đã sẵn sàng.
+              </p>
       <p data-lang-en style="font-size:13px;color:var(--dx-ink-soft);">
         This guide was written and validated against <strong>DX-RT v3.4.2</strong>.
         Command syntax and output should be broadly similar on other DX-RT
@@ -188,10 +207,16 @@
         他の DX-RT バージョンでもコマンドの構文や出力はおおむね同様ですが、
         正確なバージョン文字列、オプション、動作が異なる場合があります。
       </p>
+      <p data-lang-vi style="font-size:13px;color:var(--dx-ink-soft);">
+                Hướng dẫn này được viết và kiểm chứng trên <strong>DX-RT v3.4.2</strong>.
+                Cú pháp lệnh và output trên các phiên bản DX-RT khác nhìn chung sẽ tương tự,
+                nhưng chuỗi phiên bản, tùy chọn hoặc hành vi cụ thể có thể khác biệt.
+              </p>
       <p data-lang-en style="font-size:13.5px;font-weight:700;color:var(--dx-navy);margin-bottom:6px;">Quick self-check before you start:</p>
       <p data-lang-ko style="font-size:13.5px;font-weight:700;color:var(--dx-navy);margin-bottom:6px;">시작하기 전 빠른 자가진단:</p>
       <p data-lang-zh style="font-size:13.5px;font-weight:700;color:var(--dx-navy);margin-bottom:6px;">开始前的快速自检：</p>
       <p data-lang-ja style="font-size:13.5px;font-weight:700;color:var(--dx-navy);margin-bottom:6px;">開始前のクイックセルフチェック：</p>
+      <p data-lang-vi style="font-size:13.5px;font-weight:700;color:var(--dx-navy);margin-bottom:6px;">Kiểm tra nhanh trước khi bắt đầu:</p>
       <div class="dx-code-wrap" style="margin-bottom:10px;">
 <pre><code>dxcli -s</code></pre>
       </div>
@@ -203,6 +228,7 @@
       <p data-lang-ko style="font-size:13px;margin:10px 0 0;">위와 같이 <code>Device 0</code> 줄이 보이면 준비된 것입니다. 아무것도 안 보인다면 <a href="basic.html#prereq">Basic → Step 0</a>에서 전체 예상 출력과 문제 해결 방법을 확인하세요.</p>
       <p data-lang-zh style="font-size:13px;margin:10px 0 0;">如果看到类似上面的 <code>Device 0</code> 行，说明环境已就绪。什么都没显示？请参阅 <a href="basic.html#prereq">Basic → Step 0</a> 获取完整的预期输出和故障排查方法。</p>
       <p data-lang-ja style="font-size:13px;margin:10px 0 0;">上記のような <code>Device 0</code> の行が表示されれば準備完了です。何も表示されない場合は、<a href="basic.html#prereq">Basic → Step 0</a> で完全な期待出力とトラブルシューティングを確認してください。</p>
+      <p data-lang-vi style="font-size:13px;margin:10px 0 0;">Nếu thấy dòng <code>Device 0</code> như thế này thì bạn đã sẵn sàng. Không có gì được liệt kê? Xem <a href="basic.html#prereq">Basic → Step 0</a> để biết output đầy đủ và cách xử lý sự cố.</p>
     </div>
 
     <div class="dx-cards">
@@ -212,6 +238,7 @@
         <h3 data-lang-ko>가장 빠르게 첫 숫자 확인하기</h3>
         <h3 data-lang-zh>快速获得第一个数值</h3>
         <h3 data-lang-ja>最速で最初の数値を確認する</h3>
+        <h3 data-lang-vi>Có con số đầu tiên thật nhanh</h3>
         <p data-lang-en>
           Download a model, run one <code>dxrun</code> command to see maximum
           throughput, and launch a ready-made <code>dx_app</code> /
@@ -234,25 +261,34 @@
           <code>dx_stream</code> のデモを起動してリアルタイム FPS を確認します。
           プロファイリングやオプションの深掘りは不要——結果だけを見ます。
         </p>
+        <p data-lang-vi>
+                      Tải model về, chạy một lệnh <code>dxrun</code> để xem throughput tối đa,
+                      rồi khởi chạy demo <code>dx_app</code> / <code>dx_stream</code> có sẵn để
+                      xem FPS theo thời gian thực. Không profiling, không đi sâu vào tùy chọn — chỉ kết quả.
+                    </p>
         <ul>
           <li data-lang-en>Model Zoo download (quick path)</li>
           <li data-lang-ko>Model Zoo 다운로드 (빠른 방법)</li>
           <li data-lang-zh>Model Zoo 下载（快速方式）</li>
           <li data-lang-ja>Model Zoo ダウンロード（クイックパス）</li>
+          <li data-lang-vi>Tải model từ Model Zoo (đường đi nhanh)</li>
           <li data-lang-en><code>dxrun</code> maximum throughput check</li>
           <li data-lang-ko><code>dxrun</code> 최대 처리량 확인</li>
           <li data-lang-zh><code>dxrun</code> 最大吞吐量检查</li>
           <li data-lang-ja><code>dxrun</code> 最大スループットチェック</li>
+          <li data-lang-vi>Kiểm tra throughput tối đa bằng <code>dxrun</code></li>
           <li data-lang-en><code>dx_app</code> / <code>dx_stream</code> quick demos</li>
           <li data-lang-ko><code>dx_app</code> / <code>dx_stream</code> 빠른 데모 실행</li>
           <li data-lang-zh><code>dx_app</code> / <code>dx_stream</code> 快速演示</li>
           <li data-lang-ja><code>dx_app</code> / <code>dx_stream</code> クイックデモ</li>
+          <li data-lang-vi>Demo nhanh <code>dx_app</code> / <code>dx_stream</code></li>
         </ul>
         <a class="dx-btn" href="basic.html">
           <span data-lang-en>Start Basic guide →</span>
           <span data-lang-ko>Basic 가이드 시작 →</span>
           <span data-lang-zh>开始 Basic 指南 →</span>
           <span data-lang-ja>Basic ガイドを始める →</span>
+          <span data-lang-vi>Bắt đầu hướng dẫn Basic →</span>
         </a>
       </div>
 
@@ -262,6 +298,7 @@
         <h3 data-lang-ko>전체 툴체인 심화 학습</h3>
         <h3 data-lang-zh>深入学习完整工具链</h3>
         <h3 data-lang-ja>ツールチェーン全体を深く学ぶ</h3>
+        <h3 data-lang-vi>Toàn bộ toolchain, chuyên sâu</h3>
         <p data-lang-en>
           Every model-download path, every <code>dxrun</code> option,
           multi-model benchmarking with <code>dxbenchmark</code>, extracting standalone
@@ -284,25 +321,34 @@
           スタンドアロンサンプルの抽出、そして <code>dx_stream</code> パイプラインの
           GStreamer レベルでの完全なプロファイリングまでを扱います。
         </p>
+        <p data-lang-vi>
+                      Mọi cách tải model, mọi tùy chọn của <code>dxrun</code>, benchmark multi-model
+                      bằng <code>dxbenchmark</code>, trích xuất sample độc lập bằng <code>dx_tool.sh</code>,
+                      và profiling ở mức GStreamer cho pipeline <code>dx_stream</code>.
+                    </p>
         <ul>
           <li data-lang-en>Target-FPS mode &amp; profiler output</li>
           <li data-lang-ko>Target-FPS 모드 및 프로파일러 출력</li>
           <li data-lang-zh>Target-FPS 模式 &amp; 性能剖析器输出</li>
           <li data-lang-ja>Target-FPS モード &amp; プロファイラー出力</li>
+          <li data-lang-vi>Chế độ target-FPS &amp; output của profiler</li>
           <li data-lang-en>Full <code>dxrun</code> / <code>dxbenchmark</code> option reference</li>
           <li data-lang-ko><code>dxrun</code> / <code>dxbenchmark</code> 전체 옵션 레퍼런스</li>
           <li data-lang-zh><code>dxrun</code> / <code>dxbenchmark</code> 完整选项参考</li>
           <li data-lang-ja><code>dxrun</code> / <code>dxbenchmark</code> 全オプションリファレンス</li>
+          <li data-lang-vi>Tham chiếu đầy đủ tùy chọn <code>dxrun</code> / <code>dxbenchmark</code></li>
           <li data-lang-en>Per-model E2E sample extraction &amp; GstShark profiling</li>
           <li data-lang-ko>모델별 E2E 샘플 추출 및 GstShark 프로파일링</li>
           <li data-lang-zh>按模型提取 E2E 示例 &amp; GstShark 性能剖析</li>
           <li data-lang-ja>モデルごとの E2E サンプル抽出 &amp; GstShark プロファイリング</li>
+          <li data-lang-vi>Trích xuất sample E2E theo từng model &amp; profiling bằng GstShark</li>
         </ul>
         <a class="dx-btn" href="advanced.html">
           <span data-lang-en>Start Advanced guide →</span>
           <span data-lang-ko>Advanced 가이드 시작 →</span>
           <span data-lang-zh>开始 Advanced 指南 →</span>
           <span data-lang-ja>Advanced ガイドを始める →</span>
+          <span data-lang-vi>Bắt đầu hướng dẫn Advanced →</span>
         </a>
       </div>
     </div>
@@ -311,6 +357,7 @@
     <h2 data-lang-ko>무엇을 측정하나요?</h2>
     <h2 data-lang-zh>您将测量什么</h2>
     <h2 data-lang-ja>何を測定するか</h2>
+    <h2 data-lang-vi>Bạn sẽ đo những gì</h2>
     <div class="dx-table-wrap">
       <table>
         <thead>
@@ -318,11 +365,14 @@
             <th data-lang-en>Layer</th><th data-lang-en>Tool</th><th data-lang-en>Question it answers</th>
             <th data-lang-ko>계층</th><th data-lang-ko>도구</th><th data-lang-ko>확인할 수 있는 질문</th>
             <th data-lang-zh>层级</th><th data-lang-zh>工具</th><th data-lang-zh>可以回答的问题</th>
-            <th data-lang-ja>レイヤー</th><th data-lang-ja>ツール</th><th data-lang-ja>確認できる質問</th>
+            <th data-lang-ja>レイヤー</th>
+            <th data-lang-vi>Lớp</th><th data-lang-ja>ツール</th>
+<th data-lang-vi>Công cụ</th><th data-lang-ja>確認できる質問</th>
+<th data-lang-vi>Câu hỏi được trả lời</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
+          <tr data-lang-en>
             <td data-lang-en>Model-level</td><td data-lang-en><code>dxrun</code></td>
             <td data-lang-en>How fast can this one <code>.dxnn</code> model run on the NPU alone (throughput / latency)?</td>
           </tr>
@@ -338,7 +388,11 @@
             <td data-lang-ja>モデルレベル</td><td data-lang-ja><code>dxrun</code></td>
             <td data-lang-ja>この <code>.dxnn</code> モデル単体で NPU 上でどれだけ速く動作するか（スループット/レイテンシ）?</td>
           </tr>
-          <tr>
+          <tr data-lang-vi>
+                        <td data-lang-vi>Mức model</td><td data-lang-vi><code>dxrun</code></td>
+                        <td data-lang-vi>Một model <code>.dxnn</code> này chạy nhanh đến mức nào khi chỉ dùng NPU (throughput / latency)?</td>
+                      </tr>
+          <tr data-lang-en>
             <td data-lang-en>Model-level (multi-model)</td><td data-lang-en><code>dxbenchmark</code></td>
             <td data-lang-en>How do many models compare, all at once, with a shareable HTML report?</td>
           </tr>
@@ -354,7 +408,11 @@
             <td data-lang-ja>モデルレベル（multi-model）</td><td data-lang-ja><code>dxbenchmark</code></td>
             <td data-lang-ja>複数のモデルを一度に比較し、共有可能な HTML レポートとして残すには?</td>
           </tr>
-          <tr>
+          <tr data-lang-vi>
+                        <td data-lang-vi>Mức model (multi-model)</td><td data-lang-vi><code>dxbenchmark</code></td>
+                        <td data-lang-vi>So sánh nhiều model cùng lúc như thế nào, kèm báo cáo HTML có thể chia sẻ?</td>
+                      </tr>
+          <tr data-lang-en>
             <td data-lang-en>Application E2E</td><td data-lang-en><code>dx_app</code></td>
             <td data-lang-en>What FPS do I get with real pre/post-processing (OpenCV-based) around the model?</td>
           </tr>
@@ -370,7 +428,11 @@
             <td data-lang-ja>アプリケーション E2E</td><td data-lang-ja><code>dx_app</code></td>
             <td data-lang-ja>モデルの前後に実際の前処理/後処理（OpenCV ベース）を付けると FPS はどうなるか?</td>
           </tr>
-          <tr>
+          <tr data-lang-vi>
+                        <td data-lang-vi>Ứng dụng E2E</td><td data-lang-vi><code>dx_app</code></td>
+                        <td data-lang-vi>FPS đạt được là bao nhiêu khi có pre/post-processing thực tế (dựa trên OpenCV) quanh model?</td>
+                      </tr>
+          <tr data-lang-en>
             <td data-lang-en>Pipeline E2E</td><td data-lang-en><code>dx_stream</code></td>
             <td data-lang-en>What FPS do I get in a real GStreamer video pipeline (decode → infer → OSD)?</td>
           </tr>
@@ -386,6 +448,10 @@
             <td data-lang-ja>パイプライン E2E</td><td data-lang-ja><code>dx_stream</code></td>
             <td data-lang-ja>実際の GStreamer ビデオパイプライン（デコード → 推論 → OSD）では FPS はどうなるか?</td>
           </tr>
+          <tr data-lang-vi>
+                        <td data-lang-vi>Pipeline E2E</td><td data-lang-vi><code>dx_stream</code></td>
+                        <td data-lang-vi>FPS đạt được là bao nhiêu trong một pipeline video GStreamer thực tế (decode → infer → OSD)?</td>
+                      </tr>
         </tbody>
       </table>
     </div>
@@ -394,10 +460,12 @@
     <h2 data-lang-ko>Quick References</h2>
     <h2 data-lang-zh>Quick References</h2>
     <h2 data-lang-ja>Quick References</h2>
+    <h2 data-lang-vi>Tham chiếu nhanh</h2>
     <p data-lang-en>Everything else DEEPX-related you're likely to reach for alongside this guide — install paths, hardware, tutorials, and support.</p>
     <p data-lang-ko>이 가이드와 함께 자주 찾게 되는 DEEPX 관련 자료들을 모았습니다 — 설치 경로, 하드웨어, 튜토리얼, 지원 채널까지.</p>
     <p data-lang-zh>汇总了与本指南配套使用的其他 DEEPX 相关资源——安装路径、硬件、教程以及支持渠道。</p>
     <p data-lang-ja>本ガイドと合わせてよく参照される DEEPX 関連情報をまとめました——インストール手順、ハードウェア、チュートリアル、サポート窓口まで。</p>
+    <p data-lang-vi>Những tài nguyên DEEPX khác bạn có thể cần đến song song với hướng dẫn này — đường dẫn cài đặt, phần cứng, tutorial và hỗ trợ.</p>
 
     <div class="dx-ref-grid">
 
@@ -408,17 +476,21 @@
           <h4 data-lang-ko>빠른 설치 가이드</h4>
           <h4 data-lang-zh>快速安装指南</h4>
           <h4 data-lang-ja>クイックインストールガイド</h4>
+          <h4 data-lang-vi>Hướng dẫn cài đặt nhanh</h4>
         </div>
         <p class="dx-ref-desc" data-lang-en>Debian, PyPI, and GitHub install instructions.</p>
         <p class="dx-ref-desc" data-lang-ko>Debian·PyPI·GitHub 설치 안내.</p>
         <p class="dx-ref-desc" data-lang-zh>Debian、PyPI 及 GitHub 安装说明。</p>
         <p class="dx-ref-desc" data-lang-ja>Debian、PyPI、GitHub のインストール手順。</p>
+        <p class="dx-ref-desc" data-lang-vi>Hướng dẫn cài đặt qua Debian, PyPI và GitHub.</p>
         <div class="dx-ref-links">
           <a class="dx-ref-chip" href="https://github.com/DEEPX-AI/dx-all-suite/blob/main/docs/source/02_Setting_Up_Environment.md" target="_blank" rel="noopener">
-            <span data-lang-en>Install from GitHub</span><span data-lang-ko>GitHub로 설치</span><span data-lang-zh>从 GitHub 安装</span><span data-lang-ja>GitHub からインストール</span> ↗
+            <span data-lang-en>Install from GitHub</span><span data-lang-ko>GitHub로 설치</span><span data-lang-zh>从 GitHub 安装</span><span data-lang-ja>GitHub からインストール</span>
+<span data-lang-vi>Cài đặt từ GitHub</span> ↗
           </a>
           <a class="dx-ref-chip" href="https://deepx-dgkim.github.io/yolo26-tutorial/web/#section-2-2" target="_blank" rel="noopener">
-            <span data-lang-en>Debian package &amp; PyPI</span><span data-lang-ko>Debian 패키지 &amp; PyPI</span><span data-lang-zh>Debian 软件包 &amp; PyPI</span><span data-lang-ja>Debian パッケージ &amp; PyPI</span> ↗
+            <span data-lang-en>Debian package &amp; PyPI</span><span data-lang-ko>Debian 패키지 &amp; PyPI</span><span data-lang-zh>Debian 软件包 &amp; PyPI</span><span data-lang-ja>Debian パッケージ &amp; PyPI</span>
+<span data-lang-vi>Gói Debian &amp; PyPI</span> ↗
           </a>
         </div>
       </div>
@@ -430,11 +502,13 @@
           <h4 data-lang-ko>평가 보드</h4>
           <h4 data-lang-zh>评估板</h4>
           <h4 data-lang-ja>評価ボード</h4>
+          <h4 data-lang-vi>Evaluation Board</h4>
         </div>
         <p class="dx-ref-desc" data-lang-en>Carrier / host board options for DX-M1 (x86_64 &amp; aarch64).</p>
         <p class="dx-ref-desc" data-lang-ko>DX-M1용 캐리어/호스트 보드 옵션 (x86_64 &amp; aarch64).</p>
         <p class="dx-ref-desc" data-lang-zh>面向 DX-M1 的载板/主机板选项 (x86_64 &amp; aarch64)。</p>
         <p class="dx-ref-desc" data-lang-ja>DX-M1 向けのキャリア/ホストボードオプション (x86_64 &amp; aarch64)。</p>
+        <p class="dx-ref-desc" data-lang-vi>Các lựa chọn carrier / host board cho DX-M1 (x86_64 &amp; aarch64).</p>
         <div class="dx-ref-links">
           <a class="dx-ref-chip" href="https://deepx.ai/products/dx-aiplayer/" target="_blank" rel="noopener">x86_64 · DX-AIPlayer ↗</a>
           <a class="dx-ref-chip" href="https://deepx.ai/shop_now/#single-board-computers" target="_blank" rel="noopener">aarch64 · Single Board Computers ↗</a>
@@ -448,11 +522,13 @@
           <h4 data-lang-ko>튜토리얼</h4>
           <h4 data-lang-zh>教程</h4>
           <h4 data-lang-ja>チュートリアル</h4>
+          <h4 data-lang-vi>Tutorials</h4>
         </div>
         <p class="dx-ref-desc" data-lang-en>A collection of runnable example projects.</p>
         <p class="dx-ref-desc" data-lang-ko>실행 가능한 예제 프로젝트 모음.</p>
         <p class="dx-ref-desc" data-lang-zh>可运行示例项目合集。</p>
         <p class="dx-ref-desc" data-lang-ja>実行可能なサンプルプロジェクト集。</p>
+        <p class="dx-ref-desc" data-lang-vi>Tập hợp các project ví dụ có thể chạy được ngay.</p>
         <div class="dx-ref-links">
           <a class="dx-ref-chip" href="https://github.com/DEEPX-AI/dx-tutorials" target="_blank" rel="noopener">dx-tutorials ↗</a>
         </div>
@@ -465,17 +541,21 @@
           <h4 data-lang-ko>DX-Agent</h4>
           <h4 data-lang-zh>DX-Agent</h4>
           <h4 data-lang-ja>DX-Agent</h4>
+          <h4 data-lang-vi>DX-Agent</h4>
         </div>
         <p class="dx-ref-desc" data-lang-en>Agent-driven development workflow and showcase.</p>
         <p class="dx-ref-desc" data-lang-ko>Agent 기반 개발 워크플로우와 쇼케이스.</p>
         <p class="dx-ref-desc" data-lang-zh>Agent 驱动的开发工作流与展示案例。</p>
         <p class="dx-ref-desc" data-lang-ja>Agent 駆動開発のワークフローとショーケース。</p>
+        <p class="dx-ref-desc" data-lang-vi>Quy trình phát triển dựa trên agent và các showcase.</p>
         <div class="dx-ref-links">
           <a class="dx-ref-chip" href="https://github.com/DEEPX-AI/dx-all-suite/blob/main/docs/source/00_Agent_Driven_Development.md" target="_blank" rel="noopener">
-            <span data-lang-en>Agent-Driven Dev</span><span data-lang-ko>Agent-Driven Dev</span><span data-lang-zh>Agent-Driven Dev</span><span data-lang-ja>Agent-Driven Dev</span> ↗
+            <span data-lang-en>Agent-Driven Dev</span><span data-lang-ko>Agent-Driven Dev</span><span data-lang-zh>Agent-Driven Dev</span><span data-lang-ja>Agent-Driven Dev</span>
+<span data-lang-vi>Agent-Driven Dev</span> ↗
           </a>
           <a class="dx-ref-chip" href="https://github.com/DEEPX-AI/dx-all-suite/tree/main/dx-agent-dev-showcase" target="_blank" rel="noopener">
-            <span data-lang-en>Showcase</span><span data-lang-ko>쇼케이스</span><span data-lang-zh>展示案例</span><span data-lang-ja>ショーケース</span> ↗
+            <span data-lang-en>Showcase</span><span data-lang-ko>쇼케이스</span><span data-lang-zh>展示案例</span><span data-lang-ja>ショーケース</span>
+<span data-lang-vi>Showcase</span> ↗
           </a>
         </div>
       </div>
@@ -487,11 +567,13 @@
           <h4 data-lang-ko>AI 챗봇 지원</h4>
           <h4 data-lang-zh>AI 聊天机器人支持</h4>
           <h4 data-lang-ja>AI チャットボットサポート</h4>
+          <h4 data-lang-vi>Hỗ trợ AI Chatbot</h4>
         </div>
         <p class="dx-ref-desc" data-lang-en>Chat-based support for DEEPX products.</p>
         <p class="dx-ref-desc" data-lang-ko>DEEPX 제품 채팅 지원.</p>
         <p class="dx-ref-desc" data-lang-zh>针对 DEEPX 产品的在线聊天支持。</p>
         <p class="dx-ref-desc" data-lang-ja>DEEPX 製品向けのチャットサポート。</p>
+        <p class="dx-ref-desc" data-lang-vi>Hỗ trợ qua chat cho các sản phẩm DEEPX.</p>
         <div class="dx-ref-links">
           <a class="dx-ref-chip" href="https://deepx.rapidflare.ai/" target="_blank" rel="noopener">deepx.rapidflare.ai ↗</a>
         </div>
@@ -504,14 +586,17 @@
           <h4 data-lang-ko>추가 자료</h4>
           <h4 data-lang-zh>更多资源</h4>
           <h4 data-lang-ja>追加リソース</h4>
+          <h4 data-lang-vi>Tài nguyên bổ sung</h4>
         </div>
         <p class="dx-ref-desc" data-lang-en>Online documentation and DX AI Studio.</p>
         <p class="dx-ref-desc" data-lang-ko>온라인 문서와 DX AI Studio.</p>
         <p class="dx-ref-desc" data-lang-zh>在线文档与 DX AI Studio。</p>
         <p class="dx-ref-desc" data-lang-ja>オンラインドキュメントと DX AI Studio。</p>
+        <p class="dx-ref-desc" data-lang-vi>Tài liệu trực tuyến và DX AI Studio.</p>
         <div class="dx-ref-links">
           <a class="dx-ref-chip" href="https://developer.deepx.ai/tech-docs/" target="_blank" rel="noopener">
-            <span data-lang-en>Online Document</span><span data-lang-ko>온라인 문서</span><span data-lang-zh>在线文档</span><span data-lang-ja>オンラインドキュメント</span> ↗
+            <span data-lang-en>Online Document</span><span data-lang-ko>온라인 문서</span><span data-lang-zh>在线文档</span><span data-lang-ja>オンラインドキュメント</span>
+<span data-lang-vi>Online Document</span> ↗
           </a>
           <a class="dx-ref-chip" href="https://github.com/DEEPX-AI/dx-all-suite/tree/main/dx-ai-studio" target="_blank" rel="noopener">DX AI Studio ↗</a>
         </div>
@@ -527,6 +612,7 @@
   <span data-lang-ko>DEEPX NPU(DX-M1) 빠른 평가 가이드 · DEEPX NPU 제품과 함께 사용하세요.</span>
   <span data-lang-zh>DEEPX NPU(DX-M1) 快速评估指南 · 适用于 DEEPX NPU 产品。</span>
   <span data-lang-ja>DEEPX NPU(DX-M1) クイック評価ガイド · DEEPX NPU 製品でご利用ください。</span>
+  <span data-lang-vi>DEEPX NPU(DX-M1) Quick Evaluation Guide · Dành cho các sản phẩm DEEPX NPU.</span>
 </footer>
 
 <script src="assets/script.js"></script>
