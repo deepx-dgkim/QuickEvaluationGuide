@@ -25,6 +25,29 @@
     });
   }
 
+  var SETUP_KEY = "dx-guide-setup";
+
+  function applyMethod(method) {
+    document.documentElement.setAttribute("data-setup", method);
+    document.querySelectorAll(".dx-method-tabs button").forEach(function (b) {
+      b.classList.toggle("is-active", b.getAttribute("data-method") === method);
+    });
+    try { localStorage.setItem(SETUP_KEY, method); } catch (e) {}
+  }
+
+  function initMethodTabs() {
+    if (!document.querySelector(".dx-method-tabs")) return;
+    var saved = "allsuite";
+    try { saved = localStorage.getItem(SETUP_KEY) || "allsuite"; } catch (e) {}
+    applyMethod(saved);
+
+    document.querySelectorAll(".dx-method-tabs button").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        applyMethod(btn.getAttribute("data-method"));
+      });
+    });
+  }
+
   function initCopyButtons() {
     document.querySelectorAll(".dx-code-wrap").forEach(function (wrap) {
       var btn = document.createElement("button");
@@ -79,6 +102,7 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     initLangToggle();
+    initMethodTabs();
     initCopyButtons();
     initTocScrollSpy();
     initNavActive();

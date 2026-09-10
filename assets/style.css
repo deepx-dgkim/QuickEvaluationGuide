@@ -505,6 +505,42 @@ td code { white-space: nowrap; }
 }
 .dx-callout p:last-child { margin-bottom: 0; }
 
+/* Setup method tabs (setup.html) */
+.dx-method-tabs {
+  display: flex;
+  gap: 0;
+  margin: 0 0 22px;
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+  background: var(--dx-surface);
+  overflow: hidden;
+}
+.dx-method-tabs button {
+  flex: 1;
+  appearance: none;
+  border: 0;
+  border-right: 1px solid var(--dx-border);
+  background: transparent;
+  padding: 13px 18px;
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--dx-ink-soft);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.dx-method-tabs button:last-child { border-right: 0; }
+.dx-method-tabs button:hover { background: var(--dx-bg); color: var(--dx-blue); }
+.dx-method-tabs button.is-active {
+  background: var(--dx-blue);
+  color: #fff;
+}
+/* Method panes — the wrapper carries no data-lang, so hiding it
+   also hides every per-language child regardless of the language rules. */
+[data-method-allsuite], [data-method-manual] { display: none; }
+html[data-setup="allsuite"] [data-method-allsuite] { display: block; }
+html[data-setup="manual"] [data-method-manual] { display: block; }
+
 /* Collapsible / optional content */
 .dx-main details.dx-details {
   margin: 30px 0 18px;

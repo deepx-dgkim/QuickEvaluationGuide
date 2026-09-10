@@ -185,6 +185,122 @@ NPU 2: voltage 750 mV, clock 1000 MHz, temperature 36'C
       hãy xem các dòng device/version, không phải các con số nguyên văn.
     </p>
 
+    <details class="dx-details">
+      <summary>
+        <span data-lang-en>Troubleshooting: <code>dxcli -s</code> didn't list your device?</span>
+        <span data-lang-ko>문제 해결: <code>dxcli -s</code>에 디바이스가 보이지 않나요?</span>
+        <span data-lang-zh>故障排查：<code>dxcli -s</code> 没有列出您的设备？</span>
+        <span data-lang-ja>トラブルシューティング：<code>dxcli -s</code> にデバイスが表示されませんか？</span>
+        <span data-lang-vi>Xử lý sự cố: <code>dxcli -s</code> không liệt kê thiết bị của bạn?</span>
+      </summary>
+      <div class="dx-details-body">
+        <p data-lang-en>Work through these checks in order — each one tests a layer below the previous one, so the first check that fails is where the problem actually is. All of them are read-only.</p>
+        <p data-lang-ko>아래 항목을 순서대로 확인하세요. 각 항목은 바로 앞 항목보다 더 낮은 계층을 점검하므로, 처음으로 실패하는 항목이 문제가 실제로 발생한 지점입니다. 모두 읽기 전용 명령입니다.</p>
+        <p data-lang-zh>请按顺序逐项检查。每一项检查的层级都比上一项更底层，因此第一个失败的检查就是问题真正所在。以下命令均为只读操作。</p>
+        <p data-lang-ja>以下の項目を順に確認してください。各項目は一つ前より下位のレイヤーを検査するため、最初に失敗した項目が問題の実際の発生箇所です。いずれも読み取り専用のコマンドです。</p>
+        <p data-lang-vi>Hãy kiểm tra lần lượt theo thứ tự. Mỗi mục kiểm tra một lớp thấp hơn mục trước, nên mục đầu tiên thất bại chính là nơi vấn đề thực sự nằm. Tất cả đều là lệnh chỉ đọc.</p>
+        <h4 data-lang-en>1. Is the card visible to the host at all?</h4>
+        <h4 data-lang-ko>1. 호스트가 카드를 인식하고 있나요?</h4>
+        <h4 data-lang-zh>1. 主机能否看到板卡？</h4>
+        <h4 data-lang-ja>1. ホストがカードを認識していますか？</h4>
+        <h4 data-lang-vi>1. Host có nhìn thấy card không?</h4>
+        <div class="dx-code-wrap">
+<pre><code>lspci | grep acc</code></pre>
+        </div>
+        <p data-lang-en>Expected: a line reading <code>Processing accelerators: DEEPX ...</code>. If nothing is printed, the host does not see the card and no software fix will help — reseat the M.2 / PCIe module, check that the carrier board is powered, and confirm the slot is enabled in BIOS/firmware. Everything below assumes this line appears.</p>
+        <p data-lang-ko>예상 출력: <code>Processing accelerators: DEEPX ...</code> 형태의 한 줄. 아무것도 출력되지 않으면 호스트가 카드 자체를 보지 못하는 상태이므로 소프트웨어로는 해결되지 않습니다. M.2 / PCIe 모듈을 다시 장착하고, 캐리어 보드에 전원이 들어오는지, BIOS/펌웨어에서 해당 슬롯이 활성화되어 있는지 확인하세요. 아래 항목은 모두 이 줄이 보이는 것을 전제로 합니다.</p>
+        <p data-lang-zh>预期输出：一行 <code>Processing accelerators: DEEPX ...</code>。如果没有任何输出，说明主机根本看不到板卡，靠软件无法解决——请重新插拔 M.2 / PCIe 模块，检查载板供电，并确认 BIOS/固件中已启用该插槽。下面的所有检查都以这一行能正常显示为前提。</p>
+        <p data-lang-ja>期待される出力：<code>Processing accelerators: DEEPX ...</code> という行。何も表示されない場合、ホストがカード自体を認識できていない状態であり、ソフトウェアでは解決できません。M.2 / PCIe モジュールを挿し直し、キャリアボードに電源が供給されているか、BIOS/ファームウェアで該当スロットが有効になっているかを確認してください。以降の項目はこの行が表示されることを前提としています。</p>
+        <p data-lang-vi>Kết quả mong đợi: một dòng dạng <code>Processing accelerators: DEEPX ...</code>. Nếu không có gì được in ra, host hoàn toàn không thấy card và không cách nào sửa được bằng phần mềm — hãy tháo lắp lại module M.2 / PCIe, kiểm tra nguồn của carrier board, và xác nhận slot đã được bật trong BIOS/firmware. Mọi mục bên dưới đều giả định dòng này đã xuất hiện.</p>
+        <h4 data-lang-en>2. Is the kernel driver loaded?</h4>
+        <h4 data-lang-ko>2. 커널 드라이버가 로드되어 있나요?</h4>
+        <h4 data-lang-zh>2. 内核驱动是否已加载？</h4>
+        <h4 data-lang-ja>2. カーネルドライバはロードされていますか？</h4>
+        <h4 data-lang-vi>2. Kernel driver đã được nạp chưa?</h4>
+        <div class="dx-code-wrap">
+<pre><code>lsmod | grep dxrt</code></pre>
+        </div>
+        <p data-lang-en>Expected: <code>dxrt_driver</code> and <code>dx_dma</code>. If they are missing, the driver is either not installed or failed to build and load. By far the most common cause: <strong>the host kernel was updated and the DKMS module was never rebuilt against it</strong> — everything worked yesterday and stopped after a reboot. Reinstalling the <code>dxrt-driver-dkms</code> package rebuilds it for the running kernel. <code>dmesg | grep -i dxrt</code> usually names the reason directly.</p>
+        <p data-lang-ko>예상 출력: <code>dxrt_driver</code>와 <code>dx_dma</code>. 둘 다 보이지 않는다면 드라이버가 설치되지 않았거나, 설치는 되었지만 빌드/로드에 실패한 상태입니다. 가장 흔한 원인은 <strong>호스트 커널이 업데이트되었는데 DKMS 모듈이 새 커널에 맞춰 다시 빌드되지 않은 경우</strong>입니다. 어제까지 잘 되던 것이 재부팅 후 갑자기 안 되는 전형적인 패턴입니다. <code>dxrt-driver-dkms</code> 패키지를 다시 설치하면 현재 커널에 맞게 재빌드됩니다. <code>dmesg | grep -i dxrt</code>에 실패 이유가 그대로 찍히는 경우가 많습니다.</p>
+        <p data-lang-zh>预期输出：<code>dxrt_driver</code> 和 <code>dx_dma</code>。如果都看不到，说明驱动未安装，或虽已安装但构建/加载失败。最常见的原因是<strong>主机内核已更新，而 DKMS 模块从未针对新内核重新构建</strong>——昨天还正常，重启后就不行了。重新安装 <code>dxrt-driver-dkms</code> 软件包即可针对当前内核重新构建。<code>dmesg | grep -i dxrt</code> 通常会直接给出失败原因。</p>
+        <p data-lang-ja>期待される出力：<code>dxrt_driver</code> と <code>dx_dma</code>。どちらも表示されない場合、ドライバが未インストールか、インストール済みでもビルド/ロードに失敗しています。最も多い原因は<strong>ホストのカーネルが更新されたのに、DKMS モジュールが新しいカーネル向けに再ビルドされていない</strong>ケースです。昨日まで動いていたものが再起動後に動かなくなる典型的なパターンです。<code>dxrt-driver-dkms</code> パッケージを再インストールすれば、稼働中のカーネル向けに再ビルドされます。<code>dmesg | grep -i dxrt</code> に失敗理由がそのまま出ていることがよくあります。</p>
+        <p data-lang-vi>Kết quả mong đợi: <code>dxrt_driver</code> và <code>dx_dma</code>. Nếu không thấy chúng, driver hoặc là chưa được cài, hoặc đã cài nhưng build/nạp thất bại. Nguyên nhân phổ biến nhất: <strong>kernel của host đã được cập nhật nhưng module DKMS chưa hề được build lại cho kernel đó</strong> — hôm qua vẫn chạy tốt rồi hỏng sau khi reboot. Cài lại gói <code>dxrt-driver-dkms</code> sẽ build lại cho kernel đang chạy. <code>dmesg | grep -i dxrt</code> thường nêu thẳng lý do.</p>
+        <h4 data-lang-en>3. Do the device nodes exist?</h4>
+        <h4 data-lang-ko>3. 디바이스 노드가 생성되어 있나요?</h4>
+        <h4 data-lang-zh>3. 设备节点是否已创建？</h4>
+        <h4 data-lang-ja>3. デバイスノードは作成されていますか？</h4>
+        <h4 data-lang-vi>3. Các device node đã tồn tại chưa?</h4>
+        <div class="dx-code-wrap">
+<pre><code>ls /dev/dxrt*</code></pre>
+        </div>
+        <p data-lang-en>Expected: <code>/dev/dxrt0</code>, one node per device. If step 1 saw the card and step 2 showed the modules but there is no node here, the driver loaded but failed to probe the device. <code>dmesg | tail -50</code> immediately after a reboot is where the reason shows up.</p>
+        <p data-lang-ko>예상 출력: <code>/dev/dxrt0</code>. 디바이스 하나당 노드 하나가 생성됩니다. 1번에서 카드가 보이고 2번에서 모듈도 올라와 있는데 여기서 노드가 없다면, 드라이버는 로드되었지만 디바이스 probe에 실패한 상태입니다. 재부팅 직후 <code>dmesg | tail -50</code>에서 원인을 확인할 수 있습니다.</p>
+        <p data-lang-zh>预期输出：<code>/dev/dxrt0</code>，每个设备对应一个节点。如果第 1 步能看到板卡、第 2 步模块也已加载，但这里没有节点，说明驱动已加载但设备 probe 失败。重启后立即执行 <code>dmesg | tail -50</code> 即可看到原因。</p>
+        <p data-lang-ja>期待される出力：<code>/dev/dxrt0</code>。デバイス 1 台につきノードが 1 つ作成されます。手順 1 でカードが見え、手順 2 でモジュールもロードされているのにここでノードがない場合、ドライバはロードされたもののデバイスの probe に失敗しています。再起動直後の <code>dmesg | tail -50</code> に原因が現れます。</p>
+        <p data-lang-vi>Kết quả mong đợi: <code>/dev/dxrt0</code>, mỗi thiết bị một node. Nếu bước 1 đã thấy card và bước 2 đã thấy các module nhưng ở đây không có node nào, thì driver đã nạp nhưng probe thiết bị thất bại. <code>dmesg | tail -50</code> ngay sau khi reboot là nơi lý do hiện ra.</p>
+        <h4 data-lang-en>4. Is the runtime service running?</h4>
+        <h4 data-lang-ko>4. 런타임 서비스가 동작 중인가요?</h4>
+        <h4 data-lang-zh>4. 运行时服务是否在运行？</h4>
+        <h4 data-lang-ja>4. ランタイムサービスは動作していますか？</h4>
+        <h4 data-lang-vi>4. Service runtime có đang chạy không?</h4>
+        <div class="dx-code-wrap">
+<pre><code>systemctl status dxrt.service</code></pre>
+        </div>
+        <p data-lang-en>Expected: <code>active (running)</code>. If it is inactive or failed, restart it with <code>sudo systemctl restart dxrt.service</code> and run <code>dxcli -s</code> again. <code>journalctl -u dxrt.service -b</code> has the reason when it refuses to start.</p>
+        <p data-lang-ko>예상 출력: <code>active (running)</code>. inactive나 failed 상태라면 <code>sudo systemctl restart dxrt.service</code>로 재시작한 뒤 <code>dxcli -s</code>를 다시 실행하세요. 서비스가 아예 뜨지 않는다면 <code>journalctl -u dxrt.service -b</code>에 원인이 남아 있습니다.</p>
+        <p data-lang-zh>预期输出：<code>active (running)</code>。如果处于 inactive 或 failed 状态，请用 <code>sudo systemctl restart dxrt.service</code> 重启后再次执行 <code>dxcli -s</code>。若服务始终无法启动，原因会记录在 <code>journalctl -u dxrt.service -b</code> 中。</p>
+        <p data-lang-ja>期待される出力：<code>active (running)</code>。inactive や failed の場合は <code>sudo systemctl restart dxrt.service</code> で再起動し、あらためて <code>dxcli -s</code> を実行してください。サービスが起動しない場合は <code>journalctl -u dxrt.service -b</code> に原因が残っています。</p>
+        <p data-lang-vi>Kết quả mong đợi: <code>active (running)</code>. Nếu ở trạng thái inactive hoặc failed, hãy khởi động lại bằng <code>sudo systemctl restart dxrt.service</code> rồi chạy lại <code>dxcli -s</code>. Khi service không chịu khởi động, <code>journalctl -u dxrt.service -b</code> sẽ cho biết lý do.</p>
+        <h4 data-lang-en>5. Getting <code>dxcli: command not found</code>?</h4>
+        <h4 data-lang-ko>5. <code>dxcli: command not found</code>가 나온다면?</h4>
+        <h4 data-lang-zh>5. 出现 <code>dxcli: command not found</code>？</h4>
+        <h4 data-lang-ja>5. <code>dxcli: command not found</code> と表示される場合</h4>
+        <h4 data-lang-vi>5. Gặp <code>dxcli: command not found</code>?</h4>
+        <p data-lang-en>That is a different failure: the device may well be fine, but the runtime is not installed or is not on your <code>PATH</code>. <code>dxcli</code> ships with the DX-RT runtime package (<code>libdxrt-bin</code>). Installation is outside this guide's scope — see the <a href="setup.html">setup guide</a> linked below.</p>
+        <p data-lang-ko>이는 다른 종류의 문제입니다. 디바이스는 정상일 수 있지만 런타임이 설치되지 않았거나 <code>PATH</code>에 없는 상태입니다. <code>dxcli</code>는 DX-RT 런타임 패키지(<code>libdxrt-bin</code>)에 포함되어 있습니다. 설치 과정은 이 가이드의 범위를 벗어나므로 아래 <a href="setup.html">설치 가이드</a>를 참고하세요.</p>
+        <p data-lang-zh>这属于另一类问题：设备本身可能完全正常，但运行时未安装，或不在 <code>PATH</code> 中。<code>dxcli</code> 随 DX-RT 运行时软件包（<code>libdxrt-bin</code>）一起提供。安装过程不在本指南范围内，请参阅<a href="setup.html">安装指南</a>。</p>
+        <p data-lang-ja>これは別種の問題です。デバイス自体は正常でも、ランタイムが未インストールか <code>PATH</code> に含まれていない状態です。<code>dxcli</code> は DX-RT ランタイムパッケージ（<code>libdxrt-bin</code>）に含まれています。インストール手順は本ガイドの範囲外のため、<a href="setup.html">セットアップガイド</a>を参照してください。</p>
+        <p data-lang-vi>Đây là một loại lỗi khác: thiết bị có thể hoàn toàn bình thường, nhưng runtime chưa được cài hoặc không nằm trong <code>PATH</code>. <code>dxcli</code> đi kèm gói runtime DX-RT (<code>libdxrt-bin</code>). Việc cài đặt nằm ngoài phạm vi hướng dẫn này — xem <a href="setup.html">hướng dẫn cài đặt</a>.</p>
+        <h4 data-lang-en>6. The device is listed, but something later fails</h4>
+        <h4 data-lang-ko>6. 디바이스는 보이는데 이후 단계에서 실패한다면</h4>
+        <h4 data-lang-zh>6. 设备能列出，但后续步骤失败</h4>
+        <h4 data-lang-ja>6. デバイスは表示されるが、後の手順で失敗する場合</h4>
+        <h4 data-lang-vi>6. Thiết bị đã hiện ra, nhưng bước sau lại thất bại</h4>
+        <p data-lang-en>If <code>dxcli -s</code> prints the device yet models fail to load or behave oddly, compare the three version lines in its output against each other: <code>RT Driver version</code>, <code>PCIe Driver version</code>, and <code>FW version</code>. Outdated M.2 firmware is a known cause of API compatibility problems — DX-RT v3.4.x expects NPU FW v2.7.4 or newer. Firmware is upgraded with the service stopped:</p>
+        <p data-lang-ko><code>dxcli -s</code>에는 디바이스가 표시되는데 모델 로드가 실패하거나 동작이 이상하다면, 출력의 버전 세 줄이 서로 호환되는 조합인지 확인하세요: <code>RT Driver version</code>, <code>PCIe Driver version</code>, <code>FW version</code>. 오래된 M.2 펌웨어는 API 호환성 문제의 알려진 원인입니다. DX-RT v3.4.x는 NPU FW v2.7.4 이상을 요구합니다. 펌웨어 업그레이드는 서비스를 정지한 상태에서 진행합니다:</p>
+        <p data-lang-zh>如果 <code>dxcli -s</code> 能列出设备，但模型加载失败或行为异常，请对照检查输出中的三行版本信息是否为相互兼容的组合：<code>RT Driver version</code>、<code>PCIe Driver version</code> 和 <code>FW version</code>。过旧的 M.2 固件是导致 API 兼容性问题的已知原因——DX-RT v3.4.x 需要 NPU FW v2.7.4 或更高版本。固件升级需在服务停止的状态下进行：</p>
+        <p data-lang-ja><code>dxcli -s</code> にデバイスは表示されるのに、モデルのロードに失敗したり挙動がおかしい場合は、出力にある 3 つのバージョン行が互いに整合しているかを確認してください：<code>RT Driver version</code>、<code>PCIe Driver version</code>、<code>FW version</code>。古い M.2 ファームウェアは API 互換性の問題を引き起こす既知の原因です。DX-RT v3.4.x は NPU FW v2.7.4 以降を必要とします。ファームウェアの更新はサービスを停止した状態で行います：</p>
+        <p data-lang-vi>Nếu <code>dxcli -s</code> in ra thiết bị nhưng model không nạp được hoặc hoạt động bất thường, hãy đối chiếu ba dòng phiên bản trong output với nhau: <code>RT Driver version</code>, <code>PCIe Driver version</code> và <code>FW version</code>. Firmware M.2 cũ là nguyên nhân đã biết gây ra các vấn đề tương thích API — DX-RT v3.4.x cần NPU FW v2.7.4 trở lên. Việc nâng cấp firmware được thực hiện khi service đã dừng:</p>
+        <div class="dx-code-wrap">
+<pre><code>systemctl stop dxrt.service
+dxcli -u fw.bin
+systemctl start dxrt.service</code></pre>
+        </div>
+        <p data-lang-en>The latest firmware images are published at <a href="https://github.com/DEEPX-AI/dx_fw" target="_blank" rel="noopener">github.com/DEEPX-AI/dx_fw</a>. Use the image that matches your module — DX-M1 and DX-M1M use different files.</p>
+        <p data-lang-ko>최신 펌웨어 이미지는 <a href="https://github.com/DEEPX-AI/dx_fw" target="_blank" rel="noopener">github.com/DEEPX-AI/dx_fw</a>에서 다운로드할 수 있습니다. 모듈에 맞는 이미지를 사용하세요 — DX-M1과 DX-M1M은 서로 다른 파일을 사용합니다.</p>
+        <p data-lang-zh>最新固件镜像可从 <a href="https://github.com/DEEPX-AI/dx_fw" target="_blank" rel="noopener">github.com/DEEPX-AI/dx_fw</a> 下载。请使用与您模块匹配的镜像——DX-M1 与 DX-M1M 使用不同的文件。</p>
+        <p data-lang-ja>最新のファームウェアイメージは <a href="https://github.com/DEEPX-AI/dx_fw" target="_blank" rel="noopener">github.com/DEEPX-AI/dx_fw</a> からダウンロードできます。お使いのモジュールに対応したイメージを使用してください — DX-M1 と DX-M1M では別のファイルを使用します。</p>
+        <p data-lang-vi>Các image firmware mới nhất được đăng tại <a href="https://github.com/DEEPX-AI/dx_fw" target="_blank" rel="noopener">github.com/DEEPX-AI/dx_fw</a>. Hãy dùng đúng image khớp với module của bạn — DX-M1 và DX-M1M dùng file khác nhau.</p>
+        <p data-lang-en>Also worth noting: if your board reports a different NPU core count than the 3-core example above, the throughput figures in Steps 3–4 will scale accordingly — that is expected, not a fault.</p>
+        <p data-lang-ko>참고로, 사용 중인 보드의 NPU 코어 수가 위 3코어 예시와 다르면 Step 3~4의 처리량 수치도 그에 비례해 달라집니다. 이는 정상이며 문제가 아닙니다.</p>
+        <p data-lang-zh>另外需要注意：如果您的板卡报告的 NPU 核心数与上面的 3 核示例不同，Step 3~4 的吞吐量数值也会相应变化——这是正常现象，并非故障。</p>
+        <p data-lang-ja>なお、お使いのボードの NPU コア数が上記の 3 コアの例と異なる場合、Step 3〜4 のスループット値もそれに応じて変わります。これは正常であり、不具合ではありません。</p>
+        <p data-lang-vi>Cũng cần lưu ý: nếu board của bạn báo số NPU core khác với ví dụ 3 core ở trên, các con số throughput ở Step 3–4 sẽ thay đổi tương ứng — đó là điều bình thường, không phải lỗi.</p>
+        <div class="dx-callout">
+          <strong class="dx-callout-title" data-lang-en>Still stuck?</strong>
+          <strong class="dx-callout-title" data-lang-ko>그래도 해결되지 않는다면</strong>
+          <strong class="dx-callout-title" data-lang-zh>仍然无法解决？</strong>
+          <strong class="dx-callout-title" data-lang-ja>それでも解決しない場合</strong>
+          <strong class="dx-callout-title" data-lang-vi>Vẫn chưa xử lý được?</strong>
+          <p data-lang-en>Attach all four of these when you contact support — it saves a round trip: the full output of <code>dxcli -s</code> (or the error it prints), <code>lspci | grep acc</code>, <code>lsmod | grep dxrt</code>, and <code>dmesg | grep -i dxrt</code>. For installation and driver questions, see the <a href="setup.html">setup guide</a>; for anything else, the <a href="https://deepx.rapidflare.ai/" target="_blank" rel="noopener">DEEPX support chatbot</a> is the fastest route.</p>
+          <p data-lang-ko>문의할 때 다음 네 가지를 함께 첨부하면 왕복 한 번을 줄일 수 있습니다: <code>dxcli -s</code>의 전체 출력(또는 출력되는 에러), <code>lspci | grep acc</code>, <code>lsmod | grep dxrt</code>, <code>dmesg | grep -i dxrt</code>. 설치·드라이버 관련 문의는 <a href="setup.html">설치 가이드</a>를, 그 외 문의는 <a href="https://deepx.rapidflare.ai/" target="_blank" rel="noopener">DEEPX 지원 챗봇</a>을 이용하는 것이 가장 빠릅니다.</p>
+          <p data-lang-zh>联系支持时请一并附上以下四项，可以少一轮沟通：<code>dxcli -s</code> 的完整输出（或它打印的错误）、<code>lspci | grep acc</code>、<code>lsmod | grep dxrt</code> 和 <code>dmesg | grep -i dxrt</code>。安装与驱动相关问题请参阅 <a href="setup.html">安装指南</a>；其他问题通过 <a href="https://deepx.rapidflare.ai/" target="_blank" rel="noopener">DEEPX 支持聊天机器人</a>最为快捷。</p>
+          <p data-lang-ja>問い合わせの際は次の 4 点を添えると、やり取りを 1 往復減らせます：<code>dxcli -s</code> の全出力（またはエラー内容）、<code>lspci | grep acc</code>、<code>lsmod | grep dxrt</code>、<code>dmesg | grep -i dxrt</code>。インストールやドライバに関する内容は <a href="setup.html">セットアップガイド</a>を、それ以外は <a href="https://deepx.rapidflare.ai/" target="_blank" rel="noopener">DEEPX サポートチャットボット</a>が最短です。</p>
+          <p data-lang-vi>Hãy đính kèm cả bốn thứ sau khi liên hệ hỗ trợ — nó giúp bớt một lượt trao đổi: toàn bộ output của <code>dxcli -s</code> (hoặc lỗi mà nó in ra), <code>lspci | grep acc</code>, <code>lsmod | grep dxrt</code> và <code>dmesg | grep -i dxrt</code>. Với các câu hỏi về cài đặt và driver, xem <a href="setup.html">hướng dẫn cài đặt</a>; với những vấn đề khác, <a href="https://deepx.rapidflare.ai/" target="_blank" rel="noopener">chatbot hỗ trợ của DEEPX</a> là con đường nhanh nhất.</p>
+        </div>
+      </div>
+    </details>
+
     <hr class="dx-sep">
 
     <h2 id="get-model" data-lang-en>1. Download the case-study model: YOLO26n</h2>

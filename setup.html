@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en" data-setup="allsuite">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setup — DEEPX NPU(DX-M1) Quick Evaluation Guide</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<nav class="dx-nav">
+  <div class="dx-nav__inner">
+    <a class="dx-logo" href="index.html"><img class="dx-logo__mark" src="assets/Logo.svg" alt="DEEPX"><small>Quick Evaluation Guide</small></a>
+    <div class="dx-nav__links">
+      <a href="index.html">Overview</a>
+      <a href="basic.html">Basic</a>
+      <a href="advanced.html">Advanced</a>
+    </div>
+    <div class="dx-lang-toggle">
+      <button type="button" data-lang="en">English</button>
+      <button type="button" data-lang="ko">한국어</button>
+      <button type="button" data-lang="zh">中文</button>
+      <button type="button" data-lang="ja">日本語</button>
+      <button type="button" data-lang="vi">Tiếng Việt</button>
+    </div>
+  </div>
+</nav>
+
+<header class="dx-hero">
+  <div class="dx-hero__inner">
+    <span class="dx-eyebrow" data-lang-en>SDK Setup</span>
+    <span class="dx-eyebrow" data-lang-ko>SDK 설치</span>
+    <span class="dx-eyebrow" data-lang-zh>SDK 安装</span>
+    <span class="dx-eyebrow" data-lang-ja>SDK セットアップ</span>
+    <span class="dx-eyebrow" data-lang-vi>Cài đặt SDK</span>
+    <h1 data-lang-en>DEEPX SDK Setup Guide</h1>
+    <h1 data-lang-ko>DEEPX SDK 설치 가이드</h1>
+    <h1 data-lang-zh>DEEPX SDK 安装指南</h1>
+    <h1 data-lang-ja>DEEPX SDK セットアップガイド</h1>
+    <h1 data-lang-vi>Hướng dẫn cài đặt DEEPX SDK</h1>
+    <p class="dx-hero__subtitle" data-lang-en>Two ways to install each DEEPX SDK component</p>
+    <p class="dx-hero__subtitle" data-lang-ko>DEEPX SDK 컴포넌트를 설치하는 두 가지 방법</p>
+    <p class="dx-hero__subtitle" data-lang-zh>安装各个 DEEPX SDK 组件的两种方式</p>
+    <p class="dx-hero__subtitle" data-lang-ja>DEEPX SDK の各コンポーネントをインストールする 2 つの方法</p>
+    <p class="dx-hero__subtitle" data-lang-vi>Hai cách cài đặt từng thành phần của DEEPX SDK</p>
+    <p data-lang-en>Pick a method with the tabs below and every command on this page switches to match. Use DX-AllSuite when you want one repository and one installer; use individual install when you only need a single component, or prefer pip and apt packages.</p>
+    <p data-lang-ko>아래 탭에서 방식을 선택하면 이 페이지의 모든 명령이 해당 방식으로 바뀝니다. 저장소 하나로 한 번에 설치하려면 DX-AllSuite를, 특정 컴포넌트만 필요하거나 pip·apt 패키지를 선호한다면 개별 설치를 사용하세요.</p>
+    <p data-lang-zh>在下方标签中选择安装方式，本页所有命令会随之切换。若希望用一个仓库、一个安装脚本搞定，请选 DX-AllSuite；若只需要某一个组件，或更习惯使用 pip 与 apt 软件包，请选单独安装。</p>
+    <p data-lang-ja>下のタブで方式を選ぶと、このページのすべてのコマンドがその方式に切り替わります。1 つのリポジトリとインストーラーでまとめたい場合は DX-AllSuite を、特定のコンポーネントだけが必要な場合や pip・apt パッケージを好む場合は個別インストールを使用してください。</p>
+    <p data-lang-vi>Chọn phương thức bằng các tab bên dưới, mọi lệnh trên trang này sẽ tự chuyển theo. Dùng DX-AllSuite khi bạn muốn một repository và một trình cài đặt duy nhất; dùng cài đặt riêng lẻ khi chỉ cần một thành phần, hoặc khi bạn thích các gói pip và apt hơn.</p>
+  </div>
+</header>
+
+<div class="dx-shell">
+  <aside class="dx-toc">
+    <h4 data-lang-en>On this page</h4>
+    <h4 data-lang-ko>목차</h4>
+    <h4 data-lang-zh>目录</h4>
+    <h4 data-lang-ja>目次</h4>
+    <h4 data-lang-vi>Nội dung trang này</h4>
+    <ol>
+      <li><a href="#dx-com" data-lang-en>1. DX-COM</a><a href="#dx-com" data-lang-ko>1. DX-COM</a><a href="#dx-com" data-lang-zh>1. DX-COM</a><a href="#dx-com" data-lang-ja>1. DX-COM</a><a href="#dx-com" data-lang-vi>1. DX-COM</a></li>
+      <li><a href="#npu-driver" data-lang-en>2. DX-NPU driver</a><a href="#npu-driver" data-lang-ko>2. DX-NPU driver</a><a href="#npu-driver" data-lang-zh>2. DX-NPU driver</a><a href="#npu-driver" data-lang-ja>2. DX-NPU driver</a><a href="#npu-driver" data-lang-vi>2. DX-NPU driver</a></li>
+      <li><a href="#dx-rt" data-lang-en>3. DX-RT</a><a href="#dx-rt" data-lang-ko>3. DX-RT</a><a href="#dx-rt" data-lang-zh>3. DX-RT</a><a href="#dx-rt" data-lang-ja>3. DX-RT</a><a href="#dx-rt" data-lang-vi>3. DX-RT</a></li>
+      <li><a href="#npu-fw" data-lang-en>4. NPU F/W</a><a href="#npu-fw" data-lang-ko>4. NPU F/W</a><a href="#npu-fw" data-lang-zh>4. NPU F/W</a><a href="#npu-fw" data-lang-ja>4. NPU F/W</a><a href="#npu-fw" data-lang-vi>4. NPU F/W</a></li>
+      <li><a href="#dx-app" data-lang-en>5. DX-APP</a><a href="#dx-app" data-lang-ko>5. DX-APP</a><a href="#dx-app" data-lang-zh>5. DX-APP</a><a href="#dx-app" data-lang-ja>5. DX-APP</a><a href="#dx-app" data-lang-vi>5. DX-APP</a></li>
+      <li><a href="#dx-stream" data-lang-en>6. DX-STREAM</a><a href="#dx-stream" data-lang-ko>6. DX-STREAM</a><a href="#dx-stream" data-lang-zh>6. DX-STREAM</a><a href="#dx-stream" data-lang-ja>6. DX-STREAM</a><a href="#dx-stream" data-lang-vi>6. DX-STREAM</a></li>
+      <li><a href="#verify" data-lang-en>Verify the install</a><a href="#verify" data-lang-ko>설치 확인</a><a href="#verify" data-lang-zh>验证安装</a><a href="#verify" data-lang-ja>インストールの確認</a><a href="#verify" data-lang-vi>Kiểm tra cài đặt</a></li>
+    </ol>
+  </aside>
+
+  <main class="dx-main">
+
+    <div class="dx-method-tabs" role="tablist">
+      <button type="button" data-method="allsuite">
+        <span data-lang-en>DX-AllSuite</span>
+        <span data-lang-ko>DX-AllSuite</span>
+        <span data-lang-zh>DX-AllSuite</span>
+        <span data-lang-ja>DX-AllSuite</span>
+        <span data-lang-vi>DX-AllSuite</span>
+      </button>
+      <button type="button" data-method="manual">
+        <span data-lang-en>Individual install</span>
+        <span data-lang-ko>개별 설치</span>
+        <span data-lang-zh>单独安装</span>
+        <span data-lang-ja>個別インストール</span>
+        <span data-lang-vi>Cài đặt riêng lẻ</span>
+      </button>
+    </div>
+
+    <div class="dx-method" data-method-allsuite>
+      <p data-lang-en>Every component below is installed from one repository. Clone it once, then run the installer for the part you need.</p>
+      <p data-lang-ko>아래 모든 컴포넌트를 저장소 하나에서 설치합니다. 한 번만 클론한 뒤, 필요한 부분의 설치 스크립트를 실행하세요.</p>
+      <p data-lang-zh>下面的所有组件都从同一个仓库安装。只需克隆一次，然后运行所需组件的安装脚本。</p>
+      <p data-lang-ja>以下のすべてのコンポーネントを 1 つのリポジトリからインストールします。一度クローンしたうえで、必要な部分のインストールスクリプトを実行してください。</p>
+      <p data-lang-vi>Mọi thành phần bên dưới đều được cài từ một repository duy nhất. Chỉ cần clone một lần, rồi chạy script cài đặt cho phần bạn cần.</p>
+      <div class="dx-code-wrap">
+<pre><code>git clone --recurse-submodules https://github.com/DEEPX-AI/dx-all-suite.git</code></pre>
+      </div>
+    </div>
+
+    <div class="dx-method" data-method-manual>
+      <p data-lang-en>Each component comes from its own source — pip, apt, or its own repository. Install only the ones you need.</p>
+      <p data-lang-ko>각 컴포넌트를 pip, apt, 또는 각자의 저장소에서 따로 설치합니다. 필요한 것만 골라 설치하세요.</p>
+      <p data-lang-zh>每个组件分别来自各自的来源——pip、apt 或各自的仓库。只安装您需要的部分即可。</p>
+      <p data-lang-ja>各コンポーネントは pip、apt、またはそれぞれのリポジトリから個別にインストールします。必要なものだけを選んでインストールしてください。</p>
+      <p data-lang-vi>Mỗi thành phần đến từ nguồn riêng của nó — pip, apt, hoặc repository riêng. Chỉ cài những thứ bạn cần.</p>
+    </div>
+
+    <h2 id="pc" data-lang-en>PC for DX-Compiler</h2>
+    <h2 data-lang-ko>DX-Compiler용 PC</h2>
+    <h2 data-lang-zh>用于 DX-Compiler 的 PC</h2>
+    <h2 data-lang-ja>DX-Compiler 用 PC</h2>
+    <h2 data-lang-vi>PC cho DX-Compiler</h2>
+
+    <p data-lang-en>Model compilation runs here. This is a separate machine from the NPU-equipped system below — you only need it if you compile your own models.</p>
+    <p data-lang-ko>모델 컴파일이 실행되는 환경입니다. 아래의 NPU 장착 시스템과는 별개의 머신이며, 직접 모델을 컴파일하는 경우에만 필요합니다.</p>
+    <p data-lang-zh>模型编译在这里运行。它与下面装有 NPU 的系统是不同的机器——只有当您需要自行编译模型时才用得到。</p>
+    <p data-lang-ja>モデルのコンパイルを実行する環境です。下記の NPU 搭載システムとは別のマシンであり、自分でモデルをコンパイルする場合にのみ必要です。</p>
+    <p data-lang-vi>Việc biên dịch model chạy ở đây. Đây là máy tách biệt với hệ thống có gắn NPU bên dưới — bạn chỉ cần nó nếu tự biên dịch model.</p>
+
+    <h3 id="dx-com" data-lang-en>1. DX-COM</h3>
+    <h3 data-lang-ko>1. DX-COM</h3>
+    <h3 data-lang-zh>1. DX-COM</h3>
+    <h3 data-lang-ja>1. DX-COM</h3>
+    <h3 data-lang-vi>1. DX-COM</h3>
+
+    <p data-lang-en>The DEEPX model compiler — converts a trained model into the <code>.dxnn</code> format the NPU runs.</p>
+    <p data-lang-ko>DEEPX 모델 컴파일러입니다. 학습된 모델을 NPU가 실행하는 <code>.dxnn</code> 형식으로 변환합니다.</p>
+    <p data-lang-zh>DEEPX 模型编译器——将训练好的模型转换为 NPU 可运行的 <code>.dxnn</code> 格式。</p>
+    <p data-lang-ja>DEEPX のモデルコンパイラです。学習済みモデルを NPU が実行する <code>.dxnn</code> 形式に変換します。</p>
+    <p data-lang-vi>Trình biên dịch model của DEEPX — chuyển model đã huấn luyện sang định dạng <code>.dxnn</code> mà NPU chạy được.</p>
+
+    <div class="dx-method" data-method-allsuite>
+      <div class="dx-code-wrap">
+<pre><code>cd dx-all-suite/dx-compiler
+./install.sh</code></pre>
+      </div>
+    </div>
+
+    <div class="dx-method" data-method-manual>
+      <div class="dx-code-wrap">
+<pre><code>pip install dx-com</code></pre>
+      </div>
+    </div>
+
+    <h2 id="target" data-lang-en>Target (NPU-equipped system)</h2>
+    <h2 data-lang-ko>Target (NPU가 장착된 시스템)</h2>
+    <h2 data-lang-zh>Target（装有 NPU 的系统）</h2>
+    <h2 data-lang-ja>Target（NPU を搭載したシステム）</h2>
+    <h2 data-lang-vi>Target (hệ thống có gắn NPU)</h2>
+
+    <p data-lang-en>Install these in the order shown — each step depends on the one before it. DX-RT comes before the firmware step because <code>dxcli</code>, the tool that flashes the firmware, ships with DX-RT.</p>
+    <p data-lang-ko>아래 순서대로 설치하세요. 각 단계는 앞 단계에 의존합니다. 펌웨어를 기록하는 도구인 <code>dxcli</code>가 DX-RT에 포함되어 있으므로, DX-RT를 펌웨어 단계보다 먼저 설치합니다.</p>
+    <p data-lang-zh>请按下面的顺序安装——每一步都依赖于前一步。由于用于烧写固件的工具 <code>dxcli</code> 随 DX-RT 一起提供，因此 DX-RT 要排在固件步骤之前。</p>
+    <p data-lang-ja>以下の順序でインストールしてください。各ステップは前のステップに依存します。ファームウェアを書き込むツールである <code>dxcli</code> は DX-RT に含まれているため、DX-RT をファームウェアの手順より先にインストールします。</p>
+    <p data-lang-vi>Hãy cài theo đúng thứ tự bên dưới — mỗi bước phụ thuộc vào bước trước. DX-RT đứng trước bước firmware vì <code>dxcli</code>, công cụ nạp firmware, đi kèm với DX-RT.</p>
+
+    <div class="dx-method" data-method-allsuite>
+      <p data-lang-en>One command installs steps 2–6 at once:</p>
+      <p data-lang-ko>명령 한 번으로 2~6번을 한꺼번에 설치합니다:</p>
+      <p data-lang-zh>一条命令即可一次性安装第 2~6 步：</p>
+      <p data-lang-ja>コマンド 1 回で 2〜6 をまとめてインストールします：</p>
+      <p data-lang-vi>Một lệnh duy nhất cài luôn các bước 2–6:</p>
+      <div class="dx-code-wrap">
+<pre><code>cd dx-all-suite/dx-runtime
+./install.sh --all</code></pre>
+      </div>
+      <p data-lang-en>To install just one of them, use <code>--target</code> as shown in each step below.</p>
+      <p data-lang-ko>그중 하나만 설치하려면 아래 각 단계의 <code>--target</code> 옵션을 사용하세요.</p>
+      <p data-lang-zh>若只想安装其中某一项，请使用下面各步骤中的 <code>--target</code> 选项。</p>
+      <p data-lang-ja>そのうち 1 つだけをインストールする場合は、下記の各手順にある <code>--target</code> オプションを使用してください。</p>
+      <p data-lang-vi>Để chỉ cài một trong số đó, dùng tùy chọn <code>--target</code> như trong từng bước bên dưới.</p>
+    </div>
+
+    <div class="dx-method" data-method-manual>
+      <div class="dx-callout warn">
+        <strong class="dx-callout-title" data-lang-en>APT setup — run once</strong>
+        <strong class="dx-callout-title" data-lang-ko>APT 사전 설정 — 최초 1회만</strong>
+        <strong class="dx-callout-title" data-lang-zh>APT 前置设置 — 仅需执行一次</strong>
+        <strong class="dx-callout-title" data-lang-ja>APT 事前設定 — 初回のみ</strong>
+        <strong class="dx-callout-title" data-lang-vi>Thiết lập APT — chỉ chạy một lần</strong>
+        <p data-lang-en>Steps 2 and 3 install from the DEEPX APT repository. Register it once before you run any <code>apt install</code> below.</p>
+        <p data-lang-ko>2번과 3번은 DEEPX APT 저장소에서 설치합니다. 아래의 <code>apt install</code>을 실행하기 전에 저장소를 한 번만 등록하세요.</p>
+        <p data-lang-zh>第 2 步和第 3 步从 DEEPX APT 仓库安装。在执行下面任何 <code>apt install</code> 之前，请先注册一次该仓库。</p>
+        <p data-lang-ja>手順 2 と 3 は DEEPX の APT リポジトリからインストールします。下記の <code>apt install</code> を実行する前に、一度だけリポジトリを登録してください。</p>
+        <p data-lang-vi>Bước 2 và 3 cài từ APT repository của DEEPX. Hãy đăng ký nó một lần trước khi chạy bất kỳ lệnh <code>apt install</code> nào bên dưới.</p>
+      </div>
+      <div class="dx-code-wrap">
+<pre><code>wget -O - https://apt.releases.deepx.ai/gpg | sudo gpg --dearmor -o /usr/share/keyrings/deepx-archive-keyring.gpg
+echo &quot;deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/deepx-archive-keyring.gpg] https://apt.releases.deepx.ai $(grep -oP &#39;(?&lt;=UBUNTU_CODENAME=).*&#39; /etc/os-release || lsb_release -cs) main&quot; | sudo tee /etc/apt/sources.list.d/deepx.list
+sudo apt update</code></pre>
+      </div>
+    </div>
+
+    <h3 id="npu-driver" data-lang-en>2. DX-NPU driver</h3>
+    <h3 data-lang-ko>2. DX-NPU driver</h3>
+    <h3 data-lang-zh>2. DX-NPU driver</h3>
+    <h3 data-lang-ja>2. DX-NPU driver</h3>
+    <h3 data-lang-vi>2. DX-NPU driver</h3>
+
+    <p data-lang-en>The kernel driver for the NPU — provides the <code>dxrt_driver</code> and <code>dx_dma</code> modules and the <code>/dev/dxrt0</code> device node.</p>
+    <p data-lang-ko>NPU용 커널 드라이버입니다. <code>dxrt_driver</code>, <code>dx_dma</code> 모듈과 <code>/dev/dxrt0</code> 디바이스 노드를 제공합니다.</p>
+    <p data-lang-zh>NPU 的内核驱动——提供 <code>dxrt_driver</code> 和 <code>dx_dma</code> 模块以及 <code>/dev/dxrt0</code> 设备节点。</p>
+    <p data-lang-ja>NPU 用のカーネルドライバです。<code>dxrt_driver</code>、<code>dx_dma</code> モジュールと <code>/dev/dxrt0</code> デバイスノードを提供します。</p>
+    <p data-lang-vi>Kernel driver cho NPU — cung cấp các module <code>dxrt_driver</code>, <code>dx_dma</code> và device node <code>/dev/dxrt0</code>.</p>
+
+    <div class="dx-method" data-method-allsuite>
+      <div class="dx-code-wrap">
+<pre><code>cd dx-all-suite/dx-runtime
+./install.sh --target=dx_rt_npu_linux_driver</code></pre>
+      </div>
+    </div>
+
+    <div class="dx-method" data-method-manual>
+      <div class="dx-code-wrap">
+<pre><code>sudo apt install dxrt-driver-dkms</code></pre>
+      </div>
+    </div>
+
+    <h3 id="dx-rt" data-lang-en>3. DX-RT</h3>
+    <h3 data-lang-ko>3. DX-RT</h3>
+    <h3 data-lang-zh>3. DX-RT</h3>
+    <h3 data-lang-ja>3. DX-RT</h3>
+    <h3 data-lang-vi>3. DX-RT</h3>
+
+    <p data-lang-en>The DEEPX runtime and its CLI tools — <code>dxcli</code>, <code>dxrun</code>, <code>dxtop</code>, and <code>dxbenchmark</code>.</p>
+    <p data-lang-ko>DEEPX 런타임과 CLI 도구입니다. <code>dxcli</code>, <code>dxrun</code>, <code>dxtop</code>, <code>dxbenchmark</code>가 포함됩니다.</p>
+    <p data-lang-zh>DEEPX 运行时及其命令行工具——<code>dxcli</code>、<code>dxrun</code>、<code>dxtop</code> 和 <code>dxbenchmark</code>。</p>
+    <p data-lang-ja>DEEPX ランタイムと CLI ツールです。<code>dxcli</code>、<code>dxrun</code>、<code>dxtop</code>、<code>dxbenchmark</code> が含まれます。</p>
+    <p data-lang-vi>Runtime của DEEPX cùng các công cụ CLI — <code>dxcli</code>, <code>dxrun</code>, <code>dxtop</code> và <code>dxbenchmark</code>.</p>
+
+    <div class="dx-method" data-method-allsuite>
+      <div class="dx-code-wrap">
+<pre><code>cd dx-all-suite/dx-runtime
+./install.sh --target=dx_rt</code></pre>
+      </div>
+    </div>
+
+    <div class="dx-method" data-method-manual>
+      <div class="dx-code-wrap">
+<pre><code>sudo apt install libdxrt-bin</code></pre>
+      </div>
+    </div>
+
+    <h3 id="npu-fw" data-lang-en>4. NPU F/W</h3>
+    <h3 data-lang-ko>4. NPU F/W</h3>
+    <h3 data-lang-zh>4. NPU F/W</h3>
+    <h3 data-lang-ja>4. NPU F/W</h3>
+    <h3 data-lang-vi>4. NPU F/W</h3>
+
+    <p data-lang-en>The firmware running on the NPU module itself. Outdated firmware is a known cause of API compatibility problems — DX-RT v3.4.x expects NPU FW v2.7.4 or newer.</p>
+    <p data-lang-ko>NPU 모듈 자체에서 동작하는 펌웨어입니다. 오래된 펌웨어는 API 호환성 문제의 알려진 원인이며, DX-RT v3.4.x는 NPU FW v2.7.4 이상을 요구합니다.</p>
+    <p data-lang-zh>运行在 NPU 模块本身上的固件。过旧的固件是导致 API 兼容性问题的已知原因——DX-RT v3.4.x 需要 NPU FW v2.7.4 或更高版本。</p>
+    <p data-lang-ja>NPU モジュール自体で動作するファームウェアです。古いファームウェアは API 互換性の問題を引き起こす既知の原因であり、DX-RT v3.4.x は NPU FW v2.7.4 以降を必要とします。</p>
+    <p data-lang-vi>Firmware chạy trên chính module NPU. Firmware cũ là nguyên nhân đã biết gây ra vấn đề tương thích API — DX-RT v3.4.x cần NPU FW v2.7.4 trở lên.</p>
+
+    <div class="dx-method" data-method-allsuite>
+      <div class="dx-code-wrap">
+<pre><code>cd dx-all-suite/dx-runtime
+./install.sh --target=dx_fw</code></pre>
+      </div>
+    </div>
+
+    <div class="dx-method" data-method-manual>
+      <div class="dx-code-wrap">
+<pre><code>git clone https://github.com/DEEPX-AI/dx_fw
+
+# path layout: dx_fw/&lt;chip&gt;/&lt;fw version&gt;/&lt;form factor&gt;/fw.bin
+dxcli -u dx_fw/m1/2.7.4/mdot2/fw.bin</code></pre>
+      </div>
+      <p data-lang-en style="font-size:13px;color:var(--dx-ink-soft);">Replace <code>m1</code> with <code>m1m</code> for a DX-M1M module, and pick the version directory that matches your DX-RT. Run this with <code>dxrt.service</code> stopped — see <a href="basic.html#prereq">Basic → Step 0 troubleshooting</a> for the full stop/upgrade/start sequence.</p>
+      <p data-lang-ko style="font-size:13px;color:var(--dx-ink-soft);">DX-M1M 모듈은 <code>m1</code> 대신 <code>m1m</code> 경로를 사용하며, 버전 디렉터리는 사용 중인 DX-RT에 맞는 것을 선택하세요. <code>dxrt.service</code>를 정지한 상태에서 실행하세요. 정지·업그레이드·재시작 전체 절차는 <a href="basic.html#prereq">Basic → Step 0 문제 해결</a>을 참고하세요.</p>
+      <p data-lang-zh style="font-size:13px;color:var(--dx-ink-soft);">DX-M1M 模块请将 <code>m1</code> 换成 <code>m1m</code>，并选择与您的 DX-RT 匹配的版本目录。请在 <code>dxrt.service</code> 已停止的状态下执行——完整的停止/升级/启动流程请参阅 <a href="basic.html#prereq">Basic → Step 0 故障排查</a>。</p>
+      <p data-lang-ja style="font-size:13px;color:var(--dx-ink-soft);">DX-M1M モジュールでは <code>m1</code> の代わりに <code>m1m</code> のパスを使用し、バージョンのディレクトリはお使いの DX-RT に対応するものを選んでください。<code>dxrt.service</code> を停止した状態で実行してください。停止・アップグレード・再起動の全手順は <a href="basic.html#prereq">Basic → Step 0 トラブルシューティング</a>を参照してください。</p>
+      <p data-lang-vi style="font-size:13px;color:var(--dx-ink-soft);">Với module DX-M1M, hãy thay <code>m1</code> bằng <code>m1m</code>, và chọn thư mục phiên bản khớp với DX-RT của bạn. Hãy chạy khi <code>dxrt.service</code> đã dừng — xem <a href="basic.html#prereq">Basic → Step 0 xử lý sự cố</a> để biết toàn bộ trình tự dừng/nâng cấp/khởi động lại.</p>
+    </div>
+
+    <h3 id="dx-app" data-lang-en>5. DX-APP</h3>
+    <h3 data-lang-ko>5. DX-APP</h3>
+    <h3 data-lang-zh>5. DX-APP</h3>
+    <h3 data-lang-ja>5. DX-APP</h3>
+    <h3 data-lang-vi>5. DX-APP</h3>
+
+    <p data-lang-en>Application-level examples — OpenCV-based I/O and pre/post-processing around NPU inference.</p>
+    <p data-lang-ko>애플리케이션 레벨 예제입니다. NPU 추론 주위에 OpenCV 기반 I/O와 pre/post-processing이 포함됩니다.</p>
+    <p data-lang-zh>应用层示例——在 NPU 推理外围包含基于 OpenCV 的 I/O 和前/后处理。</p>
+    <p data-lang-ja>アプリケーションレベルのサンプルです。NPU 推論の周囲に OpenCV ベースの I/O と pre/post-processing を含みます。</p>
+    <p data-lang-vi>Các ví dụ ở mức ứng dụng — I/O và pre/post-processing dựa trên OpenCV bao quanh phần inference trên NPU.</p>
+
+    <div class="dx-method" data-method-allsuite>
+      <div class="dx-code-wrap">
+<pre><code>cd dx-all-suite/dx-runtime
+./install.sh --target=dx_app</code></pre>
+      </div>
+    </div>
+
+    <div class="dx-method" data-method-manual>
+      <div class="dx-code-wrap">
+<pre><code>git clone https://github.com/DEEPX-AI/dx_app
+cd dx_app
+./install.sh --all
+./build.sh --minimal</code></pre>
+      </div>
+    </div>
+
+    <h3 id="dx-stream" data-lang-en>6. DX-STREAM</h3>
+    <h3 data-lang-ko>6. DX-STREAM</h3>
+    <h3 data-lang-zh>6. DX-STREAM</h3>
+    <h3 data-lang-ja>6. DX-STREAM</h3>
+    <h3 data-lang-vi>6. DX-STREAM</h3>
+
+    <p data-lang-en>GStreamer plugins for full video pipelines — <code>dxpreprocess</code>, <code>dxinfer</code>, <code>dxpostprocess</code>, <code>dxosd</code> and more.</p>
+    <p data-lang-ko>전체 비디오 파이프라인을 위한 GStreamer 플러그인입니다. <code>dxpreprocess</code>, <code>dxinfer</code>, <code>dxpostprocess</code>, <code>dxosd</code> 등이 포함됩니다.</p>
+    <p data-lang-zh>用于完整视频流水线的 GStreamer 插件——包括 <code>dxpreprocess</code>、<code>dxinfer</code>、<code>dxpostprocess</code>、<code>dxosd</code> 等。</p>
+    <p data-lang-ja>映像パイプライン全体のための GStreamer プラグインです。<code>dxpreprocess</code>、<code>dxinfer</code>、<code>dxpostprocess</code>、<code>dxosd</code> などが含まれます。</p>
+    <p data-lang-vi>Các plugin GStreamer cho pipeline video hoàn chỉnh — <code>dxpreprocess</code>, <code>dxinfer</code>, <code>dxpostprocess</code>, <code>dxosd</code> và nhiều hơn nữa.</p>
+
+    <div class="dx-method" data-method-allsuite>
+      <div class="dx-code-wrap">
+<pre><code>cd dx-all-suite/dx-runtime
+./install.sh --target=dx_stream</code></pre>
+      </div>
+    </div>
+
+    <div class="dx-method" data-method-manual>
+      <div class="dx-code-wrap">
+<pre><code>git clone https://github.com/DEEPX-AI/dx_stream
+cd dx_stream
+./install.sh
+./build.sh</code></pre>
+      </div>
+    </div>
+
+    <hr class="dx-sep">
+
+    <h2 id="verify" data-lang-en>Verify the install</h2>
+    <h2 data-lang-ko>설치 확인</h2>
+    <h2 data-lang-zh>验证安装</h2>
+    <h2 data-lang-ja>インストールの確認</h2>
+    <h2 data-lang-vi>Kiểm tra cài đặt</h2>
+
+    <p data-lang-en>Run <code>dxcli -s</code> and check that your device is listed. <a href="basic.html#prereq">Basic → Step 0</a> shows the full expected output, and its troubleshooting section walks through what to check when nothing appears.</p>
+    <p data-lang-ko><code>dxcli -s</code>를 실행해 디바이스가 표시되는지 확인하세요. <a href="basic.html#prereq">Basic → Step 0</a>에 전체 예상 출력이 있으며, 아무것도 보이지 않을 때 확인할 항목은 문제 해결 섹션에 정리되어 있습니다.</p>
+    <p data-lang-zh>执行 <code>dxcli -s</code> 并确认设备已被列出。<a href="basic.html#prereq">Basic → Step 0</a> 给出了完整的预期输出，其故障排查部分说明了什么都没显示时应逐项检查的内容。</p>
+    <p data-lang-ja><code>dxcli -s</code> を実行し、デバイスが表示されることを確認してください。<a href="basic.html#prereq">Basic → Step 0</a> に期待される出力の全体があり、何も表示されない場合の確認手順はトラブルシューティングの節にまとめられています。</p>
+    <p data-lang-vi>Chạy <code>dxcli -s</code> và kiểm tra thiết bị của bạn có được liệt kê không. <a href="basic.html#prereq">Basic → Step 0</a> cho biết output đầy đủ mong đợi, và phần xử lý sự cố ở đó hướng dẫn cần kiểm tra những gì khi không có gì hiện ra.</p>
+
+    <div class="dx-code-wrap">
+<pre><code>dxcli -s</code></pre>
+    </div>
+
+  </main>
+</div>
+
+<footer class="dx-footer">
+  <span data-lang-en>DEEPX NPU(DX-M1) Quick Evaluation Guide · For use with DEEPX NPU products.</span>
+  <span data-lang-ko>DEEPX NPU(DX-M1) 빠른 평가 가이드 · DEEPX NPU 제품과 함께 사용하세요.</span>
+  <span data-lang-zh>DEEPX NPU(DX-M1) 快速评估指南 · 适用于 DEEPX NPU 产品。</span>
+  <span data-lang-ja>DEEPX NPU(DX-M1) クイック評価ガイド · DEEPX NPU 製品とともにご使用ください。</span>
+  <span data-lang-vi>DEEPX NPU(DX-M1) Quick Evaluation Guide · Dành cho các sản phẩm DEEPX NPU.</span>
+</footer>
+
+<script src="assets/script.js"></script>
+</body>
+</html>

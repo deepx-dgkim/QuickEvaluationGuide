@@ -2067,459 +2067,470 @@ Processing... Only FPS will be displayed.
         </tbody>
       </table>
     </div>
-    <p data-lang-en>
-      <strong>Why, in one sentence:</strong> the same thread that reads video
-      frames and submits them to the NPU is also the thread that has to call
-      <code>cv::imshow</code>/<code>cv::waitKey</code> for the preview window
-      — so while it's busy drawing a window, it can't read the next frame or
-      submit the next request either.
-    </p>
-    <p data-lang-ko>
-      <strong>원인을 한 문장으로 말하면:</strong> 영상을 읽어서 NPU에 추론을
-      제출하는 스레드와, 미리보기 창을 그리는 <code>cv::imshow</code>/<code>cv::waitKey</code>를
-      호출하는 스레드가 <strong>같은 스레드</strong>라서, 창을 그리는 동안에는
-      다음 프레임을 읽거나 다음 요청을 제출할 수도 없습니다.
-    </p>
-    <p data-lang-zh>
-      <strong>一句话原因:</strong>负责读取视频帧并提交给 NPU 的线程,同时也是必须调用
-      <code>cv::imshow</code>/<code>cv::waitKey</code> 来绘制预览窗口的那个线程——所以
-      当它忙于绘制窗口时,既无法读取下一帧,也无法提交下一个请求。
-    </p>
-    <p data-lang-ja>
-      <strong>一言でいえば:</strong>動画フレームを読み込みNPUへ提出するスレッドが、
-      プレビューウィンドウのために<code>cv::imshow</code>/<code>cv::waitKey</code>を
-      呼び出すスレッドと<strong>同一</strong>だからです——そのため、ウィンドウの描画に
-      忙しい間は、次のフレームを読み込むことも、次のリクエストを提出することもできません。
-    </p>
-    <p data-lang-vi>
-      <strong>Lý do, tóm gọn trong một câu:</strong> chính thread đọc frame video và submit chúng lên NPU
-      cũng là thread phải gọi <code>cv::imshow</code>/<code>cv::waitKey</code> cho cửa sổ preview —
-      nên trong lúc nó bận vẽ cửa sổ, nó không thể đọc frame kế tiếp hay submit request kế tiếp.
-    </p>
-    <p data-lang-en>
-      Looking at the actual source
-      (<code>common/runner/async_detection_runner.hpp</code>) confirms this
-      precisely — two separate mistakes stack on top of each other:
-    </p>
-    <p data-lang-ko>
-      실제 소스(<code>common/runner/async_detection_runner.hpp</code>)를 보면
-      정확히 이 상황이고, 서로 다른 두 가지 문제가 겹쳐 있습니다:
-    </p>
-    <p data-lang-zh>
-      查看实际源码(<code>common/runner/async_detection_runner.hpp</code>)可以精确地
-      证实这一点——这里叠加了两个相互独立的错误:
-    </p>
-    <p data-lang-ja>
-      実際のソースコード(<code>common/runner/async_detection_runner.hpp</code>)を見ると、
-      これが正確に確認できます——2つの別々のミスが重なり合っています:
-    </p>
-    <p data-lang-vi>
-      Nhìn vào mã nguồn thực tế (<code>common/runner/async_detection_runner.hpp</code>) xác nhận chính xác điều này —
-      hai lỗi riêng biệt chồng lên nhau:
-    </p>
-    <ol>
-      <li data-lang-en><strong>The main loop calls the display poll itself.</strong>
-      Every single frame ends with <code>if (!args.no_display &amp;&amp; !pollDisplay()) break;</code>
-      — right inside the same <code>for</code> loop that does <code>video &gt;&gt; frame</code>
-      and <code>ie.RunAsync(...)</code>. There is no separate capture thread;
-      reading, submitting, <em>and</em> polling the GUI all happen one after
-      another, on one thread.</li>
-      <li data-lang-ko><strong>메인 루프가 디스플레이 폴링까지 직접 호출합니다.</strong>
-      모든 프레임 처리가 <code>if (!args.no_display &amp;&amp; !pollDisplay()) break;</code>로
-      끝나는데, 이게 <code>video &gt;&gt; frame</code>과 <code>ie.RunAsync(...)</code>를
-      수행하는 것과 <strong>같은</strong> <code>for</code> 루프 안입니다. 별도의
-      캡처 스레드가 없어서, 읽기·제출·GUI 폴링이 전부 한 스레드에서 순서대로
-      일어납니다.</li>
-      <li data-lang-zh><strong>主循环自己调用了显示轮询。</strong>每一帧的处理都以
-      <code>if (!args.no_display &amp;&amp; !pollDisplay()) break;</code> 结尾——就在执行
-      <code>video &gt;&gt; frame</code> 和 <code>ie.RunAsync(...)</code> 的同一个
-      <code>for</code> 循环内部。这里没有独立的采集线程;读取、提交<em>以及</em>轮询 GUI
-      全部依次发生在同一个线程上。</li>
-      <li data-lang-ja><strong>メインループ自体がディスプレイのポーリングを呼び出しています。</strong>
-      すべてのフレーム処理は<code>if (!args.no_display &amp;&amp; !pollDisplay()) break;</code>で
-      終わりますが、これは<code>video &gt;&gt; frame</code>と<code>ie.RunAsync(...)</code>を
-      実行するのと<strong>同じ</strong><code>for</code>ループの内部です。専用のキャプチャ
-      スレッドは存在せず、読み込み、提出、<em>そして</em>GUIのポーリングがすべて1つの
-      スレッド上で順番に行われます。</li>
-      <li data-lang-vi><strong>Vòng lặp chính tự gọi display poll.</strong> Mỗi frame đều kết thúc bằng <code>if (!args.no_display &amp;&amp; !pollDisplay()) break;</code> — ngay bên trong cùng vòng <code>for</code> vốn thực hiện <code>video &gt;&gt; frame</code> và <code>ie.RunAsync(...)</code>. Không hề có capture thread riêng; việc đọc, submit, <em>và</em> poll GUI đều diễn ra lần lượt trên cùng một thread.</li>
-      <li data-lang-en><strong>The GUI is polled twice per frame.</strong>
-      <code>pollDisplay()</code> calls <code>dxapp::showOutput(frame)</code>
-      and then calls <code>cv::waitKey(1)</code> again itself right after. The
-      shared utility's own doc comment for <code>showOutput()</code> spells out
-      why that's costly: <em>"cv::waitKey() ignores its ms argument and always
-      fully services the GUI event queue, so a duplicate call directly doubles
-      per-frame display latency."</em> — <code>async_detection_runner.hpp</code>
-      never passes the <code>pump_events=false</code> flag that <code>showOutput()</code>
-      exists specifically to let callers avoid this.</li>
-      <li data-lang-ko><strong>GUI를 프레임마다 두 번 폴링합니다.</strong>
-      <code>pollDisplay()</code>는 <code>dxapp::showOutput(frame)</code>을 호출한
-      직후 <code>cv::waitKey(1)</code>을 또 한 번 직접 호출합니다. 공용
-      유틸리티인 <code>showOutput()</code>의 문서 주석이 이게 왜 비싼지 정확히
-      설명합니다: <em>"cv::waitKey()는 인자로 넘긴 ms 값과 무관하게 항상 GUI
-      이벤트 큐 전체를 처리하므로, 중복 호출은 프레임당 디스플레이 지연시간을
-      그대로 두 배로 만든다."</em> — <code>async_detection_runner.hpp</code>는
-      바로 이런 중복 호출을 피하라고 만들어둔 <code>pump_events=false</code>
-      플래그를 한 번도 넘기지 않습니다.</li>
-      <li data-lang-zh><strong>GUI 每帧被轮询两次。</strong><code>pollDisplay()</code>
-      调用了 <code>dxapp::showOutput(frame)</code>,紧接着又自己再调用一次
-      <code>cv::waitKey(1)</code>。共享工具函数 <code>showOutput()</code> 自身的文档
-      注释清楚说明了为什么这样做代价高昂:<em>"cv::waitKey() 会忽略传入的 ms 参数,
-      始终完整处理一次 GUI 事件队列,因此重复调用会直接使每帧的显示延迟翻倍。"</em>
-      ——<code>async_detection_runner.hpp</code> 从未传入 <code>showOutput()</code>
-      专门为了让调用方避免这个问题而提供的 <code>pump_events=false</code> 标志。</li>
-      <li data-lang-ja><strong>GUIがフレームごとに2回ポーリングされています。</strong>
-      <code>pollDisplay()</code>は<code>dxapp::showOutput(frame)</code>を呼び出した
-      直後に、自身でもう一度<code>cv::waitKey(1)</code>を呼び出しています。共有
-      ユーティリティである<code>showOutput()</code>自体のドキュメントコメントには、
-      これがなぜコストが高いのかが明記されています:<em>「cv::waitKey()はms引数を
-      無視し、常にGUIイベントキューを完全に処理するため、重複呼び出しはフレームごとの
-      表示レイテンシをそのまま2倍にする。」</em>——<code>async_detection_runner.hpp</code>は、
-      まさにこの問題を呼び出し側が回避できるように用意されている
-      <code>pump_events=false</code>フラグを一度も渡していません。</li>
-      <li data-lang-vi><strong>GUI bị poll hai lần mỗi frame.</strong> <code>pollDisplay()</code> gọi <code>dxapp::showOutput(frame)</code> rồi ngay sau đó lại tự gọi <code>cv::waitKey(1)</code> lần nữa. Chính comment tài liệu của tiện ích dùng chung <code>showOutput()</code> đã nói rõ vì sao điều đó tốn kém: <em>"cv::waitKey() bỏ qua tham số ms và luôn phục vụ trọn vẹn hàng đợi sự kiện GUI, nên một lần gọi trùng lặp sẽ trực tiếp nhân đôi độ trễ hiển thị mỗi frame."</em> — <code>async_detection_runner.hpp</code> không hề truyền cờ <code>pump_events=false</code>, vốn là thứ mà <code>showOutput()</code> cung cấp đúng để người gọi tránh được vấn đề này.</li>
-    </ol>
-    <p data-lang-en>
-      By Little's&nbsp;Law from <strong>4.1</strong>
-      (<code>Throughput&nbsp;=&nbsp;Inflight&nbsp;/&nbsp;Latency</code>), this
-      alone explains the FPS drop: <code>6.0&nbsp;/&nbsp;0.0186&nbsp;s ≈
-      322.6&nbsp;FPS</code> without display versus
-      <code>1.6&nbsp;/&nbsp;0.01352&nbsp;s ≈ 118.3&nbsp;FPS</code> with it —
-      both match the measured Inference throughput almost exactly. Notice
-      that <strong>Inference latency itself actually goes down</strong>
-      (18.60&nbsp;ms → 13.52&nbsp;ms) — the NPU isn't working harder or
-      slower, it's simply <strong>starved</strong>: the capture/submit thread
-      is stuck servicing the GUI instead of feeding it work.
-    </p>
-    <p data-lang-ko>
-      <strong>4.1</strong>에서 다룬 Little의 법칙(<code>Throughput = Inflight / Latency</code>)만으로도
-      이 FPS 하락을 설명할 수 있습니다: display 없이는 <code>6.0 / 0.0186s ≈ 322.6 FPS</code>,
-      있을 때는 <code>1.6 / 0.01352s ≈ 118.3 FPS</code> — 둘 다 실측 Inference
-      처리량과 거의 정확히 일치합니다. 흥미로운 점은 <strong>Inference 지연시간
-      자체는 오히려 줄어든다</strong>는 것입니다(18.60ms → 13.52ms) — NPU가 더
-      느리게 일하는 게 아니라, 단순히 <strong>일감을 못 받고 있는 것</strong>입니다:
-      캡처/제출을 담당하는 스레드가 GUI 처리에 붙잡혀서 NPU에 일을 넣어주지
-      못하고 있는 것입니다.
-    </p>
-    <p data-lang-zh>
-      根据<strong>4.1</strong>中提到的 Little 定律(<code>Throughput&nbsp;=&nbsp;Inflight&nbsp;/&nbsp;Latency</code>),
-      仅凭这一点就能解释 FPS 的下降:不开启显示时为 <code>6.0&nbsp;/&nbsp;0.0186&nbsp;s ≈
-      322.6&nbsp;FPS</code>,开启后为 <code>1.6&nbsp;/&nbsp;0.01352&nbsp;s ≈ 118.3&nbsp;FPS</code>
-      ——两者都与实测的 Inference 吞吐量几乎完全吻合。请注意,<strong>Inference 延迟本身
-      实际上是下降的</strong>(18.60&nbsp;ms → 13.52&nbsp;ms)——这并不是因为 NPU 工作得
-      更努力或更慢,而是它单纯地被<strong>饿着</strong>了:负责采集/提交的线程被困在处理
-      GUI 上,没能持续给它喂入工作。
-    </p>
-    <p data-lang-ja>
-      <strong>4.1</strong>で紹介したリトルの法則(<code>Throughput&nbsp;=&nbsp;Inflight&nbsp;/&nbsp;Latency</code>)
-      だけで、このFPS低下は説明できます:表示なしでは<code>6.0&nbsp;/&nbsp;0.0186&nbsp;s ≈
-      322.6&nbsp;FPS</code>、表示ありでは<code>1.6&nbsp;/&nbsp;0.01352&nbsp;s ≈ 118.3&nbsp;FPS</code>
-      ——どちらも実測のInferenceスループットとほぼ完全に一致します。注目すべきは、
-      <strong>Inferenceのレイテンシ自体はむしろ下がっている</strong>点です(18.60&nbsp;ms →
-      13.52&nbsp;ms)——NPUがより頑張って、あるいはより遅く動作しているわけではなく、単に
-      <strong>飢餓状態</strong>になっているのです。キャプチャ/提出を担当するスレッドがGUIの
-      処理に張り付いてしまい、NPUに仕事を供給できていません。
-    </p>
-    <p data-lang-vi>
-      Theo định luật Little ở mục <strong>4.1</strong> (<code>Throughput&nbsp;=&nbsp;Inflight&nbsp;/&nbsp;Latency</code>),
-      riêng điều này đã giải thích được mức sụt FPS: <code>6.0&nbsp;/&nbsp;0.0186&nbsp;s ≈ 322.6&nbsp;FPS</code>
-      khi không hiển thị, so với <code>1.6&nbsp;/&nbsp;0.01352&nbsp;s ≈ 118.3&nbsp;FPS</code> khi có hiển thị —
-      cả hai đều khớp gần như chính xác với throughput Inference đo được. Hãy để ý rằng
-      <strong>bản thân latency của Inference lại giảm xuống</strong> (18.60&nbsp;ms → 13.52&nbsp;ms) —
-      NPU không hề làm việc nặng hơn hay chậm hơn, nó chỉ đơn giản là <strong>bị bỏ đói</strong>:
-      thread capture/submit đang mắc kẹt phục vụ GUI thay vì cấp việc cho nó.
-    </p>
-    <div class="dx-callout warn">
-      <strong class="dx-callout-title" data-lang-en>This breaks the simple 4.1 heuristic</strong>
-      <strong class="dx-callout-title" data-lang-ko>4.1의 단순 판별법이 통하지 않는 경우</strong>
-      <strong class="dx-callout-title" data-lang-zh>这打破了 4.1 中的简单判断法</strong>
-      <strong class="dx-callout-title" data-lang-ja>4.1のシンプルな判断法が通用しないケース</strong>
-      <strong class="dx-callout-title" data-lang-vi>Điều này phá vỡ quy tắc đơn giản ở 4.1</strong>
+    <details class="dx-details">
+      <summary>
+        <span data-lang-en>Why the preview window drops FPS</span>
+        <span data-lang-ko>미리보기 창이 FPS를 떨어뜨리는 이유</span>
+        <span data-lang-zh>预览窗口为何会导致 FPS 下降</span>
+        <span data-lang-ja>プレビューウィンドウが FPS を低下させる理由</span>
+        <span data-lang-vi>Vì sao cửa sổ preview làm giảm FPS</span>
+      </summary>
+      <div class="dx-details-body">
       <p data-lang-en>
-        <strong>4.1</strong> said: compare Overall FPS against the Inference
-        row's throughput — close together means NPU-bound. Here they
-        <em>are</em> close (119.3 vs 121.4) — but the NPU is not actually the
-        bottleneck. The Inference row's throughput isn't an independent
-        ceiling; it's downstream of how fast the host can submit work, so a
-        submission-side bottleneck (display, here) drags <em>both</em>
-        numbers down together and still looks self-consistent. The tell is
-        comparing against the model's known ceiling: <code>dxrun</code>
-        measured this exact model at ~300&nbsp;FPS in <strong>2.1</strong>;
-        120&nbsp;FPS in an application built around it is a red flag no
-        matter how consistent the app's own numbers look internally. Watching
-        <strong>Infer Inflight Avg</strong> drop is the more direct signal.
+        The same thread that reads video
+        frames and submits them to the NPU is also the thread that has to call
+        <code>cv::imshow</code>/<code>cv::waitKey</code> for the preview window
+        — so while it's busy drawing a window, it can't read the next frame or
+        submit the next request either.
       </p>
       <p data-lang-ko>
-        <strong>4.1</strong>에서는 Overall FPS와 Inference 행의 처리량을 비교해서
-        가까우면 NPU-bound라고 했습니다. 여기서도 두 값(119.3 vs 121.4)은 가깝지만,
-        실제로는 NPU가 병목이 아닙니다. Inference 행의 처리량은 독립적인 한계치가
-        아니라 호스트가 얼마나 빠르게 작업을 제출하느냐에 종속된 값이라서, 제출 쪽
-        병목(여기서는 display)이 두 수치를 <em>함께</em> 끌어내리면서도 겉으로는
-        여전히 일관돼 보입니다. 진짜 신호는 이 모델의 알려진 한계치와 비교하는
-        것입니다 — <strong>2.1</strong>에서 <code>dxrun</code>으로 측정한 이 모델의
-        한계는 ~300FPS였는데, 이를 감싼 애플리케이션에서 120FPS가 나온다면 앱 내부
-        수치가 아무리 일관돼 보여도 위험 신호입니다. <strong>Infer Inflight Avg</strong>가
-        떨어지는지 보는 편이 더 직접적인 신호입니다.
+        영상을 읽어서 NPU에 추론을
+        제출하는 스레드와, 미리보기 창을 그리는 <code>cv::imshow</code>/<code>cv::waitKey</code>를
+        호출하는 스레드가 <strong>같은 스레드</strong>라서, 창을 그리는 동안에는
+        다음 프레임을 읽거나 다음 요청을 제출할 수도 없습니다.
       </p>
       <p data-lang-zh>
-        <strong>4.1</strong>中说过:把 Overall FPS 和 Inference 行的吞吐量做比较——两者
-        接近就说明是 NPU-bound。这里两个数值(119.3 对 121.4)<em>确实</em>接近——但实际上
-        NPU 并不是瓶颈。Inference 行的吞吐量并不是一个独立的上限,它取决于主机能以多快
-        的速度提交工作,因此提交侧的瓶颈(这里就是显示)会把<em>两个</em>数值一起拖低,而且
-        看起来仍然自洽。真正的破绽在于和该模型已知的上限做比较:<code>dxrun</code> 在
-        <strong>2.1</strong>中测得这个模型的上限约为 300&nbsp;FPS;而在围绕它构建的应用中
-        只跑出 120&nbsp;FPS,无论应用内部的数字看起来多么一致,这都是一个危险信号。观察
-        <strong>Infer Inflight Avg</strong> 是否下降,是更直接的信号。
+        负责读取视频帧并提交给 NPU 的线程,同时也是必须调用
+        <code>cv::imshow</code>/<code>cv::waitKey</code> 来绘制预览窗口的那个线程——所以
+        当它忙于绘制窗口时,既无法读取下一帧,也无法提交下一个请求。
       </p>
       <p data-lang-ja>
-        <strong>4.1</strong>では、Overall FPSとInference行のスループットを比較し、
-        近ければNPUバウンドだと述べました。ここでも両者(119.3対121.4)は<em>確かに</em>
-        近い値ですが、実際にはNPUがボトルネックではありません。Inference行のスループット
-        は独立した上限ではなく、ホストがどれだけ速く作業を提出できるかに従属しています。
-        そのため提出側のボトルネック(ここでは表示)が<em>両方の</em>数値を一緒に引き下げて
-        しまい、それでも見かけ上は自己整合的に見えます。本当の手がかりは、そのモデルの
-        既知の上限と比較することです:<code>dxrun</code>は<strong>2.1</strong>でこのモデル
-        を約300&nbsp;FPSと測定しています。それを組み込んだアプリケーションで120&nbsp;FPS
-        しか出ないのであれば、アプリ内部の数値がどれだけ一貫して見えても危険信号です。
-        <strong>Infer Inflight Avg</strong>が低下していないかを見るほうが、より直接的な
-        シグナルになります。
+        動画フレームを読み込みNPUへ提出するスレッドが、
+        プレビューウィンドウのために<code>cv::imshow</code>/<code>cv::waitKey</code>を
+        呼び出すスレッドと<strong>同一</strong>だからです——そのため、ウィンドウの描画に
+        忙しい間は、次のフレームを読み込むことも、次のリクエストを提出することもできません。
       </p>
       <p data-lang-vi>
-        Mục <strong>4.1</strong> nói: so Overall FPS với throughput ở dòng Inference — sát nhau nghĩa là bị giới hạn bởi NPU.
-        Ở đây chúng <em>đúng là</em> sát nhau (119.3 so với 121.4) — nhưng NPU thực ra không phải nút thắt.
-        Throughput ở dòng Inference không phải một trần độc lập; nó phụ thuộc vào tốc độ host submit công việc,
-        nên một nút thắt ở phía submit (ở đây là hiển thị) sẽ kéo <em>cả hai</em> con số xuống cùng nhau mà
-        vẫn trông nhất quán. Dấu hiệu nhận biết là so với trần đã biết của model: <code>dxrun</code> đo chính model này
-        ở mức ~300&nbsp;FPS tại mục <strong>2.1</strong>; con số 120&nbsp;FPS trong một ứng dụng xây quanh nó là
-        dấu hiệu đáng ngờ, bất kể các con số nội bộ của ứng dụng trông nhất quán đến đâu.
-        Theo dõi <strong>Infer Inflight Avg</strong> tụt xuống là tín hiệu trực tiếp hơn.
+        Chính thread đọc frame video và submit chúng lên NPU
+        cũng là thread phải gọi <code>cv::imshow</code>/<code>cv::waitKey</code> cho cửa sổ preview —
+        nên trong lúc nó bận vẽ cửa sổ, nó không thể đọc frame kế tiếp hay submit request kế tiếp.
       </p>
-    </div>
-    <div class="dx-callout tip">
-      <strong class="dx-callout-title" data-lang-en>The fix already exists — in dx_app itself</strong>
-      <strong class="dx-callout-title" data-lang-ko>고치는 방법은 이미 dx_app 안에 있습니다</strong>
-      <strong class="dx-callout-title" data-lang-zh>解决方法已经存在——就在 dx_app 内部</strong>
-      <strong class="dx-callout-title" data-lang-ja>修正はすでに存在します——dx_app自体の中に</strong>
-      <strong class="dx-callout-title" data-lang-vi>Cách khắc phục đã có sẵn — ngay trong dx_app</strong>
       <p data-lang-en>
-        <code>dx_app</code>'s own <code>pose</code> example
-        (<code>common/runner/async_pose_runner.hpp</code>) doesn't have this
-        problem — its own source comment even names it: <em>"that coupling was
-        root cause #2 (video read+submit blocked on the GUI event pump every
-        single frame)."</em> Its fix, in plain terms:
+        Looking at the actual source
+        (<code>common/runner/async_detection_runner.hpp</code>) confirms this
+        precisely — two separate mistakes stack on top of each other:
       </p>
       <p data-lang-ko>
-        <code>dx_app</code>의 <code>pose</code> 예제(<code>common/runner/async_pose_runner.hpp</code>)는
-        이 문제가 없습니다 — 소스 주석에 원인까지 직접 적혀 있습니다: <em>"that
-        coupling was root cause #2 (video read+submit blocked on the GUI
-        event pump every single frame)."</em> 고친 방식을 쉽게 풀면:
+        실제 소스(<code>common/runner/async_detection_runner.hpp</code>)를 보면
+        정확히 이 상황이고, 서로 다른 두 가지 문제가 겹쳐 있습니다:
       </p>
       <p data-lang-zh>
-        <code>dx_app</code> 自身的 <code>pose</code> 示例
-        (<code>common/runner/async_pose_runner.hpp</code>)就没有这个问题——它的源码
-        注释里甚至直接点明了这一点:<em>"that coupling was root cause #2 (video
-        read+submit blocked on the GUI event pump every single frame)."</em>
-        它的修复方式,用简单的话来说:
+        查看实际源码(<code>common/runner/async_detection_runner.hpp</code>)可以精确地
+        证实这一点——这里叠加了两个相互独立的错误:
       </p>
       <p data-lang-ja>
-        <code>dx_app</code>自身の<code>pose</code>サンプル
-        (<code>common/runner/async_pose_runner.hpp</code>)にはこの問題がありません
-        ——そのソースコメントには原因まで名指しで書かれています:<em>"that coupling
-        was root cause #2 (video read+submit blocked on the GUI event pump
-        every single frame)."</em>その修正内容を平易に言うと:
+        実際のソースコード(<code>common/runner/async_detection_runner.hpp</code>)を見ると、
+        これが正確に確認できます——2つの別々のミスが重なり合っています:
       </p>
       <p data-lang-vi>
-        Ví dụ <code>pose</code> của chính <code>dx_app</code> (<code>common/runner/async_pose_runner.hpp</code>)
-        không gặp vấn đề này — comment trong mã nguồn của nó thậm chí còn gọi tên vấn đề:
-        <em>"sự ràng buộc đó chính là root cause #2 (việc đọc video + submit bị chặn bởi vòng bơm sự kiện GUI ở mọi frame)."</em>
-        Cách nó khắc phục, nói đơn giản:
+        Nhìn vào mã nguồn thực tế (<code>common/runner/async_detection_runner.hpp</code>) xác nhận chính xác điều này —
+        hai lỗi riêng biệt chồng lên nhau:
       </p>
-      <ul>
-        <li data-lang-en>Give frame-reading/submitting its <strong>own thread</strong>, so the main thread does nothing but pump the display window.</li>
-        <li data-lang-ko>영상 읽기/제출을 <strong>별도 스레드</strong>로 분리해서, 메인 스레드는 오직 화면창 갱신만 담당하게 합니다.</li>
-        <li data-lang-zh>为帧读取/提交分配一个<strong>专属线程</strong>,让主线程只负责处理显示窗口。</li>
-        <li data-lang-ja>フレームの読み込み/提出に<strong>専用スレッド</strong>を与え、メインスレッドは表示ウィンドウの処理だけを行うようにします。</li>
-        <li data-lang-vi>Cấp cho việc đọc/submit frame một <strong>thread riêng</strong>, để thread chính chỉ làm mỗi việc bơm sự kiện cho cửa sổ hiển thị.</li>
-        <li data-lang-en>Make the hand-off to that display thread a tiny <strong>2-slot, drop-oldest</strong> queue — if the window falls behind, it just skips stale frames instead of blocking anything upstream.</li>
-        <li data-lang-ko>화면 스레드로 넘기는 큐를 <strong>2칸짜리, 오래된 프레임을 버리는(drop-oldest)</strong> 큐로 만듭니다 — 창이 뒤처지면 그냥 오래된 프레임을 건너뛸 뿐, 앞단을 막지 않습니다.</li>
-        <li data-lang-zh>把交给显示线程的队列做成一个很小的<strong>2 槽、丢弃最旧帧</strong>的队列——如果窗口跟不上,就直接跳过过期帧,而不会阻塞上游的任何环节。</li>
-        <li data-lang-ja>その表示スレッドへの受け渡しを、小さな<strong>2スロット・最古破棄(drop-oldest)</strong>のキューにします——ウィンドウの処理が遅れても、古いフレームを単にスキップするだけで、上流の処理をブロックしません。</li>
-        <li data-lang-vi>Biến việc bàn giao sang thread hiển thị thành một hàng đợi nhỏ <strong>2 slot, bỏ frame cũ nhất</strong> — nếu cửa sổ hiển thị bị tụt lại, nó chỉ bỏ qua các frame cũ chứ không chặn bất cứ gì ở phía trước.</li>
-        <li data-lang-en>Pump the GUI event queue <strong>once</strong> per frame, not twice.</li>
-        <li data-lang-ko>GUI 이벤트 큐는 프레임당 <strong>한 번만</strong> 처리합니다(두 번이 아니라).</li>
-        <li data-lang-zh>每帧只处理<strong>一次</strong> GUI 事件队列,而不是两次。</li>
-        <li data-lang-ja>GUIイベントキューの処理をフレームごとに2回ではなく<strong>1回</strong>だけにします。</li>
-        <li data-lang-vi>Bơm hàng đợi sự kiện GUI <strong>một lần</strong> mỗi frame, không phải hai lần.</li>
-      </ul>
+      <ol>
+        <li data-lang-en><strong>The main loop calls the display poll itself.</strong>
+        Every single frame ends with <code>if (!args.no_display &amp;&amp; !pollDisplay()) break;</code>
+        — right inside the same <code>for</code> loop that does <code>video &gt;&gt; frame</code>
+        and <code>ie.RunAsync(...)</code>. There is no separate capture thread;
+        reading, submitting, <em>and</em> polling the GUI all happen one after
+        another, on one thread.</li>
+        <li data-lang-ko><strong>메인 루프가 디스플레이 폴링까지 직접 호출합니다.</strong>
+        모든 프레임 처리가 <code>if (!args.no_display &amp;&amp; !pollDisplay()) break;</code>로
+        끝나는데, 이게 <code>video &gt;&gt; frame</code>과 <code>ie.RunAsync(...)</code>를
+        수행하는 것과 <strong>같은</strong> <code>for</code> 루프 안입니다. 별도의
+        캡처 스레드가 없어서, 읽기·제출·GUI 폴링이 전부 한 스레드에서 순서대로
+        일어납니다.</li>
+        <li data-lang-zh><strong>主循环自己调用了显示轮询。</strong>每一帧的处理都以
+        <code>if (!args.no_display &amp;&amp; !pollDisplay()) break;</code> 结尾——就在执行
+        <code>video &gt;&gt; frame</code> 和 <code>ie.RunAsync(...)</code> 的同一个
+        <code>for</code> 循环内部。这里没有独立的采集线程;读取、提交<em>以及</em>轮询 GUI
+        全部依次发生在同一个线程上。</li>
+        <li data-lang-ja><strong>メインループ自体がディスプレイのポーリングを呼び出しています。</strong>
+        すべてのフレーム処理は<code>if (!args.no_display &amp;&amp; !pollDisplay()) break;</code>で
+        終わりますが、これは<code>video &gt;&gt; frame</code>と<code>ie.RunAsync(...)</code>を
+        実行するのと<strong>同じ</strong><code>for</code>ループの内部です。専用のキャプチャ
+        スレッドは存在せず、読み込み、提出、<em>そして</em>GUIのポーリングがすべて1つの
+        スレッド上で順番に行われます。</li>
+        <li data-lang-vi><strong>Vòng lặp chính tự gọi display poll.</strong> Mỗi frame đều kết thúc bằng <code>if (!args.no_display &amp;&amp; !pollDisplay()) break;</code> — ngay bên trong cùng vòng <code>for</code> vốn thực hiện <code>video &gt;&gt; frame</code> và <code>ie.RunAsync(...)</code>. Không hề có capture thread riêng; việc đọc, submit, <em>và</em> poll GUI đều diễn ra lần lượt trên cùng một thread.</li>
+        <li data-lang-en><strong>The GUI is polled twice per frame.</strong>
+        <code>pollDisplay()</code> calls <code>dxapp::showOutput(frame)</code>
+        and then calls <code>cv::waitKey(1)</code> again itself right after. The
+        shared utility's own doc comment for <code>showOutput()</code> spells out
+        why that's costly: <em>"cv::waitKey() ignores its ms argument and always
+        fully services the GUI event queue, so a duplicate call directly doubles
+        per-frame display latency."</em> — <code>async_detection_runner.hpp</code>
+        never passes the <code>pump_events=false</code> flag that <code>showOutput()</code>
+        exists specifically to let callers avoid this.</li>
+        <li data-lang-ko><strong>GUI를 프레임마다 두 번 폴링합니다.</strong>
+        <code>pollDisplay()</code>는 <code>dxapp::showOutput(frame)</code>을 호출한
+        직후 <code>cv::waitKey(1)</code>을 또 한 번 직접 호출합니다. 공용
+        유틸리티인 <code>showOutput()</code>의 문서 주석이 이게 왜 비싼지 정확히
+        설명합니다: <em>"cv::waitKey()는 인자로 넘긴 ms 값과 무관하게 항상 GUI
+        이벤트 큐 전체를 처리하므로, 중복 호출은 프레임당 디스플레이 지연시간을
+        그대로 두 배로 만든다."</em> — <code>async_detection_runner.hpp</code>는
+        바로 이런 중복 호출을 피하라고 만들어둔 <code>pump_events=false</code>
+        플래그를 한 번도 넘기지 않습니다.</li>
+        <li data-lang-zh><strong>GUI 每帧被轮询两次。</strong><code>pollDisplay()</code>
+        调用了 <code>dxapp::showOutput(frame)</code>,紧接着又自己再调用一次
+        <code>cv::waitKey(1)</code>。共享工具函数 <code>showOutput()</code> 自身的文档
+        注释清楚说明了为什么这样做代价高昂:<em>"cv::waitKey() 会忽略传入的 ms 参数,
+        始终完整处理一次 GUI 事件队列,因此重复调用会直接使每帧的显示延迟翻倍。"</em>
+        ——<code>async_detection_runner.hpp</code> 从未传入 <code>showOutput()</code>
+        专门为了让调用方避免这个问题而提供的 <code>pump_events=false</code> 标志。</li>
+        <li data-lang-ja><strong>GUIがフレームごとに2回ポーリングされています。</strong>
+        <code>pollDisplay()</code>は<code>dxapp::showOutput(frame)</code>を呼び出した
+        直後に、自身でもう一度<code>cv::waitKey(1)</code>を呼び出しています。共有
+        ユーティリティである<code>showOutput()</code>自体のドキュメントコメントには、
+        これがなぜコストが高いのかが明記されています:<em>「cv::waitKey()はms引数を
+        無視し、常にGUIイベントキューを完全に処理するため、重複呼び出しはフレームごとの
+        表示レイテンシをそのまま2倍にする。」</em>——<code>async_detection_runner.hpp</code>は、
+        まさにこの問題を呼び出し側が回避できるように用意されている
+        <code>pump_events=false</code>フラグを一度も渡していません。</li>
+        <li data-lang-vi><strong>GUI bị poll hai lần mỗi frame.</strong> <code>pollDisplay()</code> gọi <code>dxapp::showOutput(frame)</code> rồi ngay sau đó lại tự gọi <code>cv::waitKey(1)</code> lần nữa. Chính comment tài liệu của tiện ích dùng chung <code>showOutput()</code> đã nói rõ vì sao điều đó tốn kém: <em>"cv::waitKey() bỏ qua tham số ms và luôn phục vụ trọn vẹn hàng đợi sự kiện GUI, nên một lần gọi trùng lặp sẽ trực tiếp nhân đôi độ trễ hiển thị mỗi frame."</em> — <code>async_detection_runner.hpp</code> không hề truyền cờ <code>pump_events=false</code>, vốn là thứ mà <code>showOutput()</code> cung cấp đúng để người gọi tránh được vấn đề này.</li>
+      </ol>
       <p data-lang-en>
-        Applying that exact pattern to <code>yolo26n_async</code>'s
-        <code>AsyncDetectionRunner</code> and re-measuring, same model, same
-        video, live preview on:
+        By Little's&nbsp;Law from <strong>4.1</strong>
+        (<code>Throughput&nbsp;=&nbsp;Inflight&nbsp;/&nbsp;Latency</code>), this
+        alone explains the FPS drop: <code>6.0&nbsp;/&nbsp;0.0186&nbsp;s ≈
+        322.6&nbsp;FPS</code> without display versus
+        <code>1.6&nbsp;/&nbsp;0.01352&nbsp;s ≈ 118.3&nbsp;FPS</code> with it —
+        both match the measured Inference throughput almost exactly. Notice
+        that <strong>Inference latency itself actually goes down</strong>
+        (18.60&nbsp;ms → 13.52&nbsp;ms) — the NPU isn't working harder or
+        slower, it's simply <strong>starved</strong>: the capture/submit thread
+        is stuck servicing the GUI instead of feeding it work.
       </p>
       <p data-lang-ko>
-        같은 패턴을 <code>yolo26n_async</code>의 <code>AsyncDetectionRunner</code>에
-        그대로 적용하고, 동일한 모델·동일한 비디오·화면 출력 켠 상태로 다시
-        측정한 결과:
+        <strong>4.1</strong>에서 다룬 Little의 법칙(<code>Throughput = Inflight / Latency</code>)만으로도
+        이 FPS 하락을 설명할 수 있습니다: display 없이는 <code>6.0 / 0.0186s ≈ 322.6 FPS</code>,
+        있을 때는 <code>1.6 / 0.01352s ≈ 118.3 FPS</code> — 둘 다 실측 Inference
+        처리량과 거의 정확히 일치합니다. 흥미로운 점은 <strong>Inference 지연시간
+        자체는 오히려 줄어든다</strong>는 것입니다(18.60ms → 13.52ms) — NPU가 더
+        느리게 일하는 게 아니라, 단순히 <strong>일감을 못 받고 있는 것</strong>입니다:
+        캡처/제출을 담당하는 스레드가 GUI 처리에 붙잡혀서 NPU에 일을 넣어주지
+        못하고 있는 것입니다.
       </p>
       <p data-lang-zh>
-        把这一模式原样应用到 <code>yolo26n_async</code> 的 <code>AsyncDetectionRunner</code>
-        上并重新测量,使用相同的模型、相同的视频,开启实时预览:
+        根据<strong>4.1</strong>中提到的 Little 定律(<code>Throughput&nbsp;=&nbsp;Inflight&nbsp;/&nbsp;Latency</code>),
+        仅凭这一点就能解释 FPS 的下降:不开启显示时为 <code>6.0&nbsp;/&nbsp;0.0186&nbsp;s ≈
+        322.6&nbsp;FPS</code>,开启后为 <code>1.6&nbsp;/&nbsp;0.01352&nbsp;s ≈ 118.3&nbsp;FPS</code>
+        ——两者都与实测的 Inference 吞吐量几乎完全吻合。请注意,<strong>Inference 延迟本身
+        实际上是下降的</strong>(18.60&nbsp;ms → 13.52&nbsp;ms)——这并不是因为 NPU 工作得
+        更努力或更慢,而是它单纯地被<strong>饿着</strong>了:负责采集/提交的线程被困在处理
+        GUI 上,没能持续给它喂入工作。
       </p>
       <p data-lang-ja>
-        この同じパターンを<code>yolo26n_async</code>の<code>AsyncDetectionRunner</code>に
-        適用して再測定した結果です。同じモデル、同じ動画、ライブプレビューON:
+        <strong>4.1</strong>で紹介したリトルの法則(<code>Throughput&nbsp;=&nbsp;Inflight&nbsp;/&nbsp;Latency</code>)
+        だけで、このFPS低下は説明できます:表示なしでは<code>6.0&nbsp;/&nbsp;0.0186&nbsp;s ≈
+        322.6&nbsp;FPS</code>、表示ありでは<code>1.6&nbsp;/&nbsp;0.01352&nbsp;s ≈ 118.3&nbsp;FPS</code>
+        ——どちらも実測のInferenceスループットとほぼ完全に一致します。注目すべきは、
+        <strong>Inferenceのレイテンシ自体はむしろ下がっている</strong>点です(18.60&nbsp;ms →
+        13.52&nbsp;ms)——NPUがより頑張って、あるいはより遅く動作しているわけではなく、単に
+        <strong>飢餓状態</strong>になっているのです。キャプチャ/提出を担当するスレッドがGUIの
+        処理に張り付いてしまい、NPUに仕事を供給できていません。
       </p>
       <p data-lang-vi>
-        Áp dụng đúng pattern đó cho <code>AsyncDetectionRunner</code> của <code>yolo26n_async</code> rồi đo lại,
-        cùng model, cùng video, bật live preview:
+        Theo định luật Little ở mục <strong>4.1</strong> (<code>Throughput&nbsp;=&nbsp;Inflight&nbsp;/&nbsp;Latency</code>),
+        riêng điều này đã giải thích được mức sụt FPS: <code>6.0&nbsp;/&nbsp;0.0186&nbsp;s ≈ 322.6&nbsp;FPS</code>
+        khi không hiển thị, so với <code>1.6&nbsp;/&nbsp;0.01352&nbsp;s ≈ 118.3&nbsp;FPS</code> khi có hiển thị —
+        cả hai đều khớp gần như chính xác với throughput Inference đo được. Hãy để ý rằng
+        <strong>bản thân latency của Inference lại giảm xuống</strong> (18.60&nbsp;ms → 13.52&nbsp;ms) —
+        NPU không hề làm việc nặng hơn hay chậm hơn, nó chỉ đơn giản là <strong>bị bỏ đói</strong>:
+        thread capture/submit đang mắc kẹt phục vụ GUI thay vì cấp việc cho nó.
       </p>
-      <div class="dx-table-wrap">
-        <table>
-          <thead><tr><th data-lang-en>Metric</th><th data-lang-en>Before (buggy)</th><th data-lang-en>After (patched)</th>
-            <th data-lang-ko>지표</th><th data-lang-ko>패치 전</th><th data-lang-ko>패치 후</th>
-            <th data-lang-zh>指标</th><th data-lang-zh>修复前(有问题)</th><th data-lang-zh>修复后(已打补丁)</th>
-            <th data-lang-ja>指標</th>
-            <th data-lang-vi>Chỉ số</th><th data-lang-ja>修正前(バグあり)</th>
-<th data-lang-vi>Trước (còn lỗi)</th><th data-lang-ja>修正後(パッチ適用)</th>
-<th data-lang-vi>Sau (đã vá)</th></tr></thead>
-          <tbody>
-            <tr data-lang-en><td data-lang-en>Overall FPS</td><td data-lang-en>119.3</td><td data-lang-en><strong>215.2</strong> (~1.8x)</td></tr>
-            <tr data-lang-ko><td data-lang-ko>Overall FPS</td><td data-lang-ko>119.3</td><td data-lang-ko><strong>215.2</strong> (~1.8배)</td></tr>
-            <tr data-lang-zh><td data-lang-zh>Overall FPS</td><td data-lang-zh>119.3</td><td data-lang-zh><strong>215.2</strong>(约1.8倍)</td></tr>
-            <tr data-lang-ja><td data-lang-ja>Overall FPS</td><td data-lang-ja>119.3</td><td data-lang-ja><strong>215.2</strong>(約1.8倍)</td></tr>
-            <tr data-lang-vi><td data-lang-vi>Overall FPS</td><td data-lang-vi>119.3</td><td data-lang-vi><strong>215.2</strong> (~1.8x)</td></tr>
-            <tr data-lang-en><td data-lang-en>Inference throughput</td><td data-lang-en>121.4 FPS</td><td data-lang-en>222.1 FPS</td></tr>
-            <tr data-lang-ko><td data-lang-ko>Inference 처리량</td><td data-lang-ko>121.4 FPS</td><td data-lang-ko>222.1 FPS</td></tr>
-            <tr data-lang-zh><td data-lang-zh>Inference 吞吐量</td><td data-lang-zh>121.4 FPS</td><td data-lang-zh>222.1 FPS</td></tr>
-            <tr data-lang-ja><td data-lang-ja>Inferenceスループット</td><td data-lang-ja>121.4 FPS</td><td data-lang-ja>222.1 FPS</td></tr>
-            <tr data-lang-vi><td data-lang-vi>Throughput inference</td><td data-lang-vi>121.4 FPS</td><td data-lang-vi>222.1 FPS</td></tr>
-            <tr data-lang-en><td data-lang-en>Infer Inflight Avg / Max</td><td data-lang-en>1.6 / 6</td><td data-lang-en>4.5 / 7</td></tr>
-            <tr data-lang-ko><td data-lang-ko>Infer Inflight Avg / Max</td><td data-lang-ko>1.6 / 6</td><td data-lang-ko>4.5 / 7</td></tr>
-            <tr data-lang-zh><td data-lang-zh>Infer Inflight Avg / Max</td><td data-lang-zh>1.6 / 6</td><td data-lang-zh>4.5 / 7</td></tr>
-            <tr data-lang-ja><td data-lang-ja>Infer Inflight Avg / Max</td><td data-lang-ja>1.6 / 6</td><td data-lang-ja>4.5 / 7</td></tr>
-            <tr data-lang-vi><td data-lang-vi>Infer Inflight Avg / Max</td><td data-lang-vi>1.6 / 6</td><td data-lang-vi>4.5 / 7</td></tr>
-          </tbody>
-        </table>
+      <div class="dx-callout warn">
+        <strong class="dx-callout-title" data-lang-en>This breaks the simple 4.1 heuristic</strong>
+        <strong class="dx-callout-title" data-lang-ko>4.1의 단순 판별법이 통하지 않는 경우</strong>
+        <strong class="dx-callout-title" data-lang-zh>这打破了 4.1 中的简单判断法</strong>
+        <strong class="dx-callout-title" data-lang-ja>4.1のシンプルな判断法が通用しないケース</strong>
+        <strong class="dx-callout-title" data-lang-vi>Điều này phá vỡ quy tắc đơn giản ở 4.1</strong>
+        <p data-lang-en>
+          <strong>4.1</strong> said: compare Overall FPS against the Inference
+          row's throughput — close together means NPU-bound. Here they
+          <em>are</em> close (119.3 vs 121.4) — but the NPU is not actually the
+          bottleneck. The Inference row's throughput isn't an independent
+          ceiling; it's downstream of how fast the host can submit work, so a
+          submission-side bottleneck (display, here) drags <em>both</em>
+          numbers down together and still looks self-consistent. The tell is
+          comparing against the model's known ceiling: <code>dxrun</code>
+          measured this exact model at ~300&nbsp;FPS in <strong>2.1</strong>;
+          120&nbsp;FPS in an application built around it is a red flag no
+          matter how consistent the app's own numbers look internally. Watching
+          <strong>Infer Inflight Avg</strong> drop is the more direct signal.
+        </p>
+        <p data-lang-ko>
+          <strong>4.1</strong>에서는 Overall FPS와 Inference 행의 처리량을 비교해서
+          가까우면 NPU-bound라고 했습니다. 여기서도 두 값(119.3 vs 121.4)은 가깝지만,
+          실제로는 NPU가 병목이 아닙니다. Inference 행의 처리량은 독립적인 한계치가
+          아니라 호스트가 얼마나 빠르게 작업을 제출하느냐에 종속된 값이라서, 제출 쪽
+          병목(여기서는 display)이 두 수치를 <em>함께</em> 끌어내리면서도 겉으로는
+          여전히 일관돼 보입니다. 진짜 신호는 이 모델의 알려진 한계치와 비교하는
+          것입니다 — <strong>2.1</strong>에서 <code>dxrun</code>으로 측정한 이 모델의
+          한계는 ~300FPS였는데, 이를 감싼 애플리케이션에서 120FPS가 나온다면 앱 내부
+          수치가 아무리 일관돼 보여도 위험 신호입니다. <strong>Infer Inflight Avg</strong>가
+          떨어지는지 보는 편이 더 직접적인 신호입니다.
+        </p>
+        <p data-lang-zh>
+          <strong>4.1</strong>中说过:把 Overall FPS 和 Inference 行的吞吐量做比较——两者
+          接近就说明是 NPU-bound。这里两个数值(119.3 对 121.4)<em>确实</em>接近——但实际上
+          NPU 并不是瓶颈。Inference 行的吞吐量并不是一个独立的上限,它取决于主机能以多快
+          的速度提交工作,因此提交侧的瓶颈(这里就是显示)会把<em>两个</em>数值一起拖低,而且
+          看起来仍然自洽。真正的破绽在于和该模型已知的上限做比较:<code>dxrun</code> 在
+          <strong>2.1</strong>中测得这个模型的上限约为 300&nbsp;FPS;而在围绕它构建的应用中
+          只跑出 120&nbsp;FPS,无论应用内部的数字看起来多么一致,这都是一个危险信号。观察
+          <strong>Infer Inflight Avg</strong> 是否下降,是更直接的信号。
+        </p>
+        <p data-lang-ja>
+          <strong>4.1</strong>では、Overall FPSとInference行のスループットを比較し、
+          近ければNPUバウンドだと述べました。ここでも両者(119.3対121.4)は<em>確かに</em>
+          近い値ですが、実際にはNPUがボトルネックではありません。Inference行のスループット
+          は独立した上限ではなく、ホストがどれだけ速く作業を提出できるかに従属しています。
+          そのため提出側のボトルネック(ここでは表示)が<em>両方の</em>数値を一緒に引き下げて
+          しまい、それでも見かけ上は自己整合的に見えます。本当の手がかりは、そのモデルの
+          既知の上限と比較することです:<code>dxrun</code>は<strong>2.1</strong>でこのモデル
+          を約300&nbsp;FPSと測定しています。それを組み込んだアプリケーションで120&nbsp;FPS
+          しか出ないのであれば、アプリ内部の数値がどれだけ一貫して見えても危険信号です。
+          <strong>Infer Inflight Avg</strong>が低下していないかを見るほうが、より直接的な
+          シグナルになります。
+        </p>
+        <p data-lang-vi>
+          Mục <strong>4.1</strong> nói: so Overall FPS với throughput ở dòng Inference — sát nhau nghĩa là bị giới hạn bởi NPU.
+          Ở đây chúng <em>đúng là</em> sát nhau (119.3 so với 121.4) — nhưng NPU thực ra không phải nút thắt.
+          Throughput ở dòng Inference không phải một trần độc lập; nó phụ thuộc vào tốc độ host submit công việc,
+          nên một nút thắt ở phía submit (ở đây là hiển thị) sẽ kéo <em>cả hai</em> con số xuống cùng nhau mà
+          vẫn trông nhất quán. Dấu hiệu nhận biết là so với trần đã biết của model: <code>dxrun</code> đo chính model này
+          ở mức ~300&nbsp;FPS tại mục <strong>2.1</strong>; con số 120&nbsp;FPS trong một ứng dụng xây quanh nó là
+          dấu hiệu đáng ngờ, bất kể các con số nội bộ của ứng dụng trông nhất quán đến đâu.
+          Theo dõi <strong>Infer Inflight Avg</strong> tụt xuống là tín hiệu trực tiếp hơn.
+        </p>
       </div>
-      <p data-lang-en>
-        Not fully back to the <code>--no-display</code> ceiling (~310&nbsp;FPS)
-        — drawing and displaying a window is real work that still has to
-        happen somewhere — but the artificial, thread-coupling penalty is
-        gone. The <code>--no-display</code> path is unaffected by this change
-        (measured ~298–311&nbsp;FPS before and after).
-      </p>
-      <p data-lang-ko>
-        <code>--no-display</code>의 한계치(~310FPS)까지 완전히 회복되지는
-        않습니다 — 창을 그리고 표시하는 작업 자체는 어딘가에서 실제로 일어나야
-        하니까요 — 하지만 스레드가 불필요하게 묶여서 생기던 인위적인 손실은
-        사라집니다. <code>--no-display</code> 경로는 이 변경의 영향을 받지
-        않습니다(패치 전후 모두 ~298–311FPS로 측정됨).
-      </p>
-      <p data-lang-zh>
-        虽然还没有完全恢复到 <code>--no-display</code> 的上限(~310&nbsp;FPS)——绘制和
-        显示窗口终究是需要在某处实际发生的真实工作——但那种由线程耦合造成的人为损失已经
-        消失了。<code>--no-display</code> 路径不受此改动影响(修复前后测得均约为
-        ~298–311&nbsp;FPS)。
-      </p>
-      <p data-lang-ja>
-        <code>--no-display</code>の上限(~310&nbsp;FPS)まで完全に戻るわけではありません
-        ——ウィンドウの描画と表示はどこかで実際に発生しなければならない本物の処理だからです
-        ——しかし、スレッドが不必要に結合していたことによる人為的なペナルティはなくなりました。
-        <code>--no-display</code>の経路はこの変更の影響を受けません(修正前後どちらも約
-        ~298–311&nbsp;FPSで測定されています)。
-      </p>
-      <p data-lang-vi>
-        Vẫn chưa quay lại hoàn toàn mức trần của <code>--no-display</code> (~310&nbsp;FPS) — vẽ và hiển thị
-        một cửa sổ là công việc thật, vẫn phải diễn ra ở đâu đó — nhưng phần thiệt hại nhân tạo do
-        ràng buộc thread thì đã biến mất. Nhánh <code>--no-display</code> không bị ảnh hưởng bởi thay đổi này
-        (đo được ~298–311&nbsp;FPS cả trước lẫn sau).
-      </p>
-      <p data-lang-en>
-        This exact change — verified by rebuilding <code>yolo26n_async</code>
-        and re-running both the <code>--no-display</code> and live-preview
-        cases above — is available as a ready-to-apply patch:
-      </p>
-      <p data-lang-ko>
-        위 변경사항은 <code>yolo26n_async</code>를 실제로 재빌드하고
-        <code>--no-display</code>/화면 출력 두 경우 모두 다시 실행해서 검증한
-        것이며, 바로 적용 가능한 patch 파일로 제공합니다:
-      </p>
-      <p data-lang-zh>
-        这项改动——已通过重新构建 <code>yolo26n_async</code> 并重新运行上述
-        <code>--no-display</code> 与实时预览两种情况进行了验证——已作为可直接应用的
-        补丁提供:
-      </p>
-      <p data-lang-ja>
-        この変更は、<code>yolo26n_async</code>を再ビルドし、上記の<code>--no-display</code>
-        とライブプレビューの両方のケースを再実行して検証済みです。すぐに適用できる
-        パッチとして提供されています:
-      </p>
-      <p data-lang-vi>
-        Đúng thay đổi này — đã được kiểm chứng bằng cách build lại <code>yolo26n_async</code> và chạy lại
-        cả hai trường hợp <code>--no-display</code> và live preview ở trên — có sẵn dưới dạng một patch
-        có thể áp dụng ngay:
-      </p>
-      <p style="margin-top:10px;">
-        <a href="assets/0001-decouple-display-from-capture-submit.patch" download
-           style="display:inline-block;padding:8px 16px;border-radius:6px;background:var(--dx-accent, #2563eb);color:#fff;text-decoration:none;font-weight:600;">
-          <span data-lang-en>⬇ Download patch (async_detection_runner.hpp)</span>
-          <span data-lang-ko>⬇ Patch 다운로드 (async_detection_runner.hpp)</span>
-          <span data-lang-zh>⬇ 下载补丁 (async_detection_runner.hpp)</span>
-          <span data-lang-ja>⬇ パッチをダウンロード (async_detection_runner.hpp)</span>
-          <span data-lang-vi>⬇ Tải patch (async_detection_runner.hpp)</span>
-        </a>
-      </p>
-      <div class="dx-code-wrap" style="margin-top:10px;">
-<pre><code># From the extracted package root
-cd yolo26-standalone/cpp/object_detection/yolo26n
-patch -p1 &lt; 0001-decouple-display-from-capture-submit.patch
-# or: git apply 0001-decouple-display-from-capture-submit.patch
-cd build &amp;&amp; make -j$(nproc)</code></pre>
+      <div class="dx-callout tip">
+        <strong class="dx-callout-title" data-lang-en>The fix already exists — in dx_app itself</strong>
+        <strong class="dx-callout-title" data-lang-ko>고치는 방법은 이미 dx_app 안에 있습니다</strong>
+        <strong class="dx-callout-title" data-lang-zh>解决方法已经存在——就在 dx_app 内部</strong>
+        <strong class="dx-callout-title" data-lang-ja>修正はすでに存在します——dx_app自体の中に</strong>
+        <strong class="dx-callout-title" data-lang-vi>Cách khắc phục đã có sẵn — ngay trong dx_app</strong>
+        <p data-lang-en>
+          <code>dx_app</code>'s own <code>pose</code> example
+          (<code>common/runner/async_pose_runner.hpp</code>) doesn't have this
+          problem — its own source comment even names it: <em>"that coupling was
+          root cause #2 (video read+submit blocked on the GUI event pump every
+          single frame)."</em> Its fix, in plain terms:
+        </p>
+        <p data-lang-ko>
+          <code>dx_app</code>의 <code>pose</code> 예제(<code>common/runner/async_pose_runner.hpp</code>)는
+          이 문제가 없습니다 — 소스 주석에 원인까지 직접 적혀 있습니다: <em>"that
+          coupling was root cause #2 (video read+submit blocked on the GUI
+          event pump every single frame)."</em> 고친 방식을 쉽게 풀면:
+        </p>
+        <p data-lang-zh>
+          <code>dx_app</code> 自身的 <code>pose</code> 示例
+          (<code>common/runner/async_pose_runner.hpp</code>)就没有这个问题——它的源码
+          注释里甚至直接点明了这一点:<em>"that coupling was root cause #2 (video
+          read+submit blocked on the GUI event pump every single frame)."</em>
+          它的修复方式,用简单的话来说:
+        </p>
+        <p data-lang-ja>
+          <code>dx_app</code>自身の<code>pose</code>サンプル
+          (<code>common/runner/async_pose_runner.hpp</code>)にはこの問題がありません
+          ——そのソースコメントには原因まで名指しで書かれています:<em>"that coupling
+          was root cause #2 (video read+submit blocked on the GUI event pump
+          every single frame)."</em>その修正内容を平易に言うと:
+        </p>
+        <p data-lang-vi>
+          Ví dụ <code>pose</code> của chính <code>dx_app</code> (<code>common/runner/async_pose_runner.hpp</code>)
+          không gặp vấn đề này — comment trong mã nguồn của nó thậm chí còn gọi tên vấn đề:
+          <em>"sự ràng buộc đó chính là root cause #2 (việc đọc video + submit bị chặn bởi vòng bơm sự kiện GUI ở mọi frame)."</em>
+          Cách nó khắc phục, nói đơn giản:
+        </p>
+        <ul>
+          <li data-lang-en>Give frame-reading/submitting its <strong>own thread</strong>, so the main thread does nothing but pump the display window.</li>
+          <li data-lang-ko>영상 읽기/제출을 <strong>별도 스레드</strong>로 분리해서, 메인 스레드는 오직 화면창 갱신만 담당하게 합니다.</li>
+          <li data-lang-zh>为帧读取/提交分配一个<strong>专属线程</strong>,让主线程只负责处理显示窗口。</li>
+          <li data-lang-ja>フレームの読み込み/提出に<strong>専用スレッド</strong>を与え、メインスレッドは表示ウィンドウの処理だけを行うようにします。</li>
+          <li data-lang-vi>Cấp cho việc đọc/submit frame một <strong>thread riêng</strong>, để thread chính chỉ làm mỗi việc bơm sự kiện cho cửa sổ hiển thị.</li>
+          <li data-lang-en>Make the hand-off to that display thread a tiny <strong>2-slot, drop-oldest</strong> queue — if the window falls behind, it just skips stale frames instead of blocking anything upstream.</li>
+          <li data-lang-ko>화면 스레드로 넘기는 큐를 <strong>2칸짜리, 오래된 프레임을 버리는(drop-oldest)</strong> 큐로 만듭니다 — 창이 뒤처지면 그냥 오래된 프레임을 건너뛸 뿐, 앞단을 막지 않습니다.</li>
+          <li data-lang-zh>把交给显示线程的队列做成一个很小的<strong>2 槽、丢弃最旧帧</strong>的队列——如果窗口跟不上,就直接跳过过期帧,而不会阻塞上游的任何环节。</li>
+          <li data-lang-ja>その表示スレッドへの受け渡しを、小さな<strong>2スロット・最古破棄(drop-oldest)</strong>のキューにします——ウィンドウの処理が遅れても、古いフレームを単にスキップするだけで、上流の処理をブロックしません。</li>
+          <li data-lang-vi>Biến việc bàn giao sang thread hiển thị thành một hàng đợi nhỏ <strong>2 slot, bỏ frame cũ nhất</strong> — nếu cửa sổ hiển thị bị tụt lại, nó chỉ bỏ qua các frame cũ chứ không chặn bất cứ gì ở phía trước.</li>
+          <li data-lang-en>Pump the GUI event queue <strong>once</strong> per frame, not twice.</li>
+          <li data-lang-ko>GUI 이벤트 큐는 프레임당 <strong>한 번만</strong> 처리합니다(두 번이 아니라).</li>
+          <li data-lang-zh>每帧只处理<strong>一次</strong> GUI 事件队列,而不是两次。</li>
+          <li data-lang-ja>GUIイベントキューの処理をフレームごとに2回ではなく<strong>1回</strong>だけにします。</li>
+          <li data-lang-vi>Bơm hàng đợi sự kiện GUI <strong>một lần</strong> mỗi frame, không phải hai lần.</li>
+        </ul>
+        <p data-lang-en>
+          Applying that exact pattern to <code>yolo26n_async</code>'s
+          <code>AsyncDetectionRunner</code> and re-measuring, same model, same
+          video, live preview on:
+        </p>
+        <p data-lang-ko>
+          같은 패턴을 <code>yolo26n_async</code>의 <code>AsyncDetectionRunner</code>에
+          그대로 적용하고, 동일한 모델·동일한 비디오·화면 출력 켠 상태로 다시
+          측정한 결과:
+        </p>
+        <p data-lang-zh>
+          把这一模式原样应用到 <code>yolo26n_async</code> 的 <code>AsyncDetectionRunner</code>
+          上并重新测量,使用相同的模型、相同的视频,开启实时预览:
+        </p>
+        <p data-lang-ja>
+          この同じパターンを<code>yolo26n_async</code>の<code>AsyncDetectionRunner</code>に
+          適用して再測定した結果です。同じモデル、同じ動画、ライブプレビューON:
+        </p>
+        <p data-lang-vi>
+          Áp dụng đúng pattern đó cho <code>AsyncDetectionRunner</code> của <code>yolo26n_async</code> rồi đo lại,
+          cùng model, cùng video, bật live preview:
+        </p>
+        <div class="dx-table-wrap">
+          <table>
+            <thead><tr><th data-lang-en>Metric</th><th data-lang-en>Before (buggy)</th><th data-lang-en>After (patched)</th>
+              <th data-lang-ko>지표</th><th data-lang-ko>패치 전</th><th data-lang-ko>패치 후</th>
+              <th data-lang-zh>指标</th><th data-lang-zh>修复前(有问题)</th><th data-lang-zh>修复后(已打补丁)</th>
+              <th data-lang-ja>指標</th>
+              <th data-lang-vi>Chỉ số</th><th data-lang-ja>修正前(バグあり)</th>
+  <th data-lang-vi>Trước (còn lỗi)</th><th data-lang-ja>修正後(パッチ適用)</th>
+  <th data-lang-vi>Sau (đã vá)</th></tr></thead>
+            <tbody>
+              <tr data-lang-en><td data-lang-en>Overall FPS</td><td data-lang-en>119.3</td><td data-lang-en><strong>215.2</strong> (~1.8x)</td></tr>
+              <tr data-lang-ko><td data-lang-ko>Overall FPS</td><td data-lang-ko>119.3</td><td data-lang-ko><strong>215.2</strong> (~1.8배)</td></tr>
+              <tr data-lang-zh><td data-lang-zh>Overall FPS</td><td data-lang-zh>119.3</td><td data-lang-zh><strong>215.2</strong>(约1.8倍)</td></tr>
+              <tr data-lang-ja><td data-lang-ja>Overall FPS</td><td data-lang-ja>119.3</td><td data-lang-ja><strong>215.2</strong>(約1.8倍)</td></tr>
+              <tr data-lang-vi><td data-lang-vi>Overall FPS</td><td data-lang-vi>119.3</td><td data-lang-vi><strong>215.2</strong> (~1.8x)</td></tr>
+              <tr data-lang-en><td data-lang-en>Inference throughput</td><td data-lang-en>121.4 FPS</td><td data-lang-en>222.1 FPS</td></tr>
+              <tr data-lang-ko><td data-lang-ko>Inference 처리량</td><td data-lang-ko>121.4 FPS</td><td data-lang-ko>222.1 FPS</td></tr>
+              <tr data-lang-zh><td data-lang-zh>Inference 吞吐量</td><td data-lang-zh>121.4 FPS</td><td data-lang-zh>222.1 FPS</td></tr>
+              <tr data-lang-ja><td data-lang-ja>Inferenceスループット</td><td data-lang-ja>121.4 FPS</td><td data-lang-ja>222.1 FPS</td></tr>
+              <tr data-lang-vi><td data-lang-vi>Throughput inference</td><td data-lang-vi>121.4 FPS</td><td data-lang-vi>222.1 FPS</td></tr>
+              <tr data-lang-en><td data-lang-en>Infer Inflight Avg / Max</td><td data-lang-en>1.6 / 6</td><td data-lang-en>4.5 / 7</td></tr>
+              <tr data-lang-ko><td data-lang-ko>Infer Inflight Avg / Max</td><td data-lang-ko>1.6 / 6</td><td data-lang-ko>4.5 / 7</td></tr>
+              <tr data-lang-zh><td data-lang-zh>Infer Inflight Avg / Max</td><td data-lang-zh>1.6 / 6</td><td data-lang-zh>4.5 / 7</td></tr>
+              <tr data-lang-ja><td data-lang-ja>Infer Inflight Avg / Max</td><td data-lang-ja>1.6 / 6</td><td data-lang-ja>4.5 / 7</td></tr>
+              <tr data-lang-vi><td data-lang-vi>Infer Inflight Avg / Max</td><td data-lang-vi>1.6 / 6</td><td data-lang-vi>4.5 / 7</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p data-lang-en>
+          Not fully back to the <code>--no-display</code> ceiling (~310&nbsp;FPS)
+          — drawing and displaying a window is real work that still has to
+          happen somewhere — but the artificial, thread-coupling penalty is
+          gone. The <code>--no-display</code> path is unaffected by this change
+          (measured ~298–311&nbsp;FPS before and after).
+        </p>
+        <p data-lang-ko>
+          <code>--no-display</code>의 한계치(~310FPS)까지 완전히 회복되지는
+          않습니다 — 창을 그리고 표시하는 작업 자체는 어딘가에서 실제로 일어나야
+          하니까요 — 하지만 스레드가 불필요하게 묶여서 생기던 인위적인 손실은
+          사라집니다. <code>--no-display</code> 경로는 이 변경의 영향을 받지
+          않습니다(패치 전후 모두 ~298–311FPS로 측정됨).
+        </p>
+        <p data-lang-zh>
+          虽然还没有完全恢复到 <code>--no-display</code> 的上限(~310&nbsp;FPS)——绘制和
+          显示窗口终究是需要在某处实际发生的真实工作——但那种由线程耦合造成的人为损失已经
+          消失了。<code>--no-display</code> 路径不受此改动影响(修复前后测得均约为
+          ~298–311&nbsp;FPS)。
+        </p>
+        <p data-lang-ja>
+          <code>--no-display</code>の上限(~310&nbsp;FPS)まで完全に戻るわけではありません
+          ——ウィンドウの描画と表示はどこかで実際に発生しなければならない本物の処理だからです
+          ——しかし、スレッドが不必要に結合していたことによる人為的なペナルティはなくなりました。
+          <code>--no-display</code>の経路はこの変更の影響を受けません(修正前後どちらも約
+          ~298–311&nbsp;FPSで測定されています)。
+        </p>
+        <p data-lang-vi>
+          Vẫn chưa quay lại hoàn toàn mức trần của <code>--no-display</code> (~310&nbsp;FPS) — vẽ và hiển thị
+          một cửa sổ là công việc thật, vẫn phải diễn ra ở đâu đó — nhưng phần thiệt hại nhân tạo do
+          ràng buộc thread thì đã biến mất. Nhánh <code>--no-display</code> không bị ảnh hưởng bởi thay đổi này
+          (đo được ~298–311&nbsp;FPS cả trước lẫn sau).
+        </p>
+        <p data-lang-en>
+          This exact change — verified by rebuilding <code>yolo26n_async</code>
+          and re-running both the <code>--no-display</code> and live-preview
+          cases above — is available as a ready-to-apply patch:
+        </p>
+        <p data-lang-ko>
+          위 변경사항은 <code>yolo26n_async</code>를 실제로 재빌드하고
+          <code>--no-display</code>/화면 출력 두 경우 모두 다시 실행해서 검증한
+          것이며, 바로 적용 가능한 patch 파일로 제공합니다:
+        </p>
+        <p data-lang-zh>
+          这项改动——已通过重新构建 <code>yolo26n_async</code> 并重新运行上述
+          <code>--no-display</code> 与实时预览两种情况进行了验证——已作为可直接应用的
+          补丁提供:
+        </p>
+        <p data-lang-ja>
+          この変更は、<code>yolo26n_async</code>を再ビルドし、上記の<code>--no-display</code>
+          とライブプレビューの両方のケースを再実行して検証済みです。すぐに適用できる
+          パッチとして提供されています:
+        </p>
+        <p data-lang-vi>
+          Đúng thay đổi này — đã được kiểm chứng bằng cách build lại <code>yolo26n_async</code> và chạy lại
+          cả hai trường hợp <code>--no-display</code> và live preview ở trên — có sẵn dưới dạng một patch
+          có thể áp dụng ngay:
+        </p>
+        <p style="margin-top:10px;">
+          <a href="assets/0001-decouple-display-from-capture-submit.patch" download
+             style="display:inline-block;padding:8px 16px;border-radius:6px;background:var(--dx-accent, #2563eb);color:#fff;text-decoration:none;font-weight:600;">
+            <span data-lang-en>⬇ Download patch (async_detection_runner.hpp)</span>
+            <span data-lang-ko>⬇ Patch 다운로드 (async_detection_runner.hpp)</span>
+            <span data-lang-zh>⬇ 下载补丁 (async_detection_runner.hpp)</span>
+            <span data-lang-ja>⬇ パッチをダウンロード (async_detection_runner.hpp)</span>
+            <span data-lang-vi>⬇ Tải patch (async_detection_runner.hpp)</span>
+          </a>
+        </p>
+        <div class="dx-code-wrap" style="margin-top:10px;">
+  <pre><code># From the extracted package root
+  cd yolo26-standalone/cpp/object_detection/yolo26n
+  patch -p1 &lt; 0001-decouple-display-from-capture-submit.patch
+  # or: git apply 0001-decouple-display-from-capture-submit.patch
+  cd build &amp;&amp; make -j$(nproc)</code></pre>
+        </div>
+        <p data-lang-en>
+          The patch only touches <code>common/runner/async_detection_runner.hpp</code>
+          — every other detection-family example that shares this runner
+          benefits the same way. For anything beyond a single-model C++ sample —
+          or if patching generated code isn't your style — <code>dx_stream</code>
+          (<strong>Section 5</strong>) already solves this architecturally: its
+          GStreamer <code>queue</code> elements give <code>dxosd</code>/<code>fpsdisplaysink</code>
+          their own thread, so display never serializes with inference in the
+          first place.
+        </p>
+        <p data-lang-ko>
+          이 patch는 <code>common/runner/async_detection_runner.hpp</code> 하나만
+          건드리므로, 이 runner를 공유하는 다른 detection 계열 예제들도 동일하게
+          혜택을 받습니다. 단일 모델 C++ 샘플 이상의 범위이거나, 생성된 코드를
+          직접 패치하는 게 부담스럽다면 <code>dx_stream</code>(<strong>5장</strong>)이
+          이미 이 문제를 아키텍처적으로 해결해뒀습니다 — GStreamer의 <code>queue</code>
+          요소가 <code>dxosd</code>/<code>fpsdisplaysink</code>에 별도 스레드를
+          부여하므로 display가 애초에 추론과 직렬화되지 않습니다.
+        </p>
+        <p data-lang-zh>
+          该补丁只涉及 <code>common/runner/async_detection_runner.hpp</code> 这一个
+          文件——所有共享这个 runner 的其他 detection 系列示例都能同样受益。如果您需要的
+          不只是单模型的 C++ 示例,或者不喜欢直接修补生成的代码,<code>dx_stream</code>
+          (<strong>第 5 章</strong>)已经从架构层面解决了这个问题:它的 GStreamer
+          <code>queue</code> 元素会为 <code>dxosd</code>/<code>fpsdisplaysink</code>
+          提供各自独立的线程,因此显示从一开始就不会与推理串行化。
+        </p>
+        <p data-lang-ja>
+          このパッチは<code>common/runner/async_detection_runner.hpp</code>のみに手を
+          加えるものです——このrunnerを共有する他のすべてのdetection系サンプルも同じように
+          恩恵を受けます。単一モデルのC++サンプルの範囲を超える場合、あるいは生成された
+          コードにパッチを当てるのが好みでない場合は、<code>dx_stream</code>
+          (<strong>第5章</strong>)がすでにこの問題をアーキテクチャレベルで解決しています
+          ——GStreamerの<code>queue</code>要素が<code>dxosd</code>/<code>fpsdisplaysink</code>
+          に専用スレッドを与えるため、表示がそもそも推論と直列化することがありません。
+        </p>
+        <p data-lang-vi>
+          Patch chỉ động đến <code>common/runner/async_detection_runner.hpp</code> — mọi ví dụ khác thuộc nhóm
+          detection dùng chung runner này đều được hưởng lợi tương tự. Với những trường hợp vượt ra ngoài một
+          sample C++ đơn model — hoặc nếu bạn không thích vá mã sinh sẵn — <code>dx_stream</code>
+          (<strong>Mục 5</strong>) đã giải quyết việc này ở mức kiến trúc: các element <code>queue</code> của GStreamer
+          cấp cho <code>dxosd</code>/<code>fpsdisplaysink</code> thread riêng, nên việc hiển thị ngay từ đầu
+          đã không bị tuần tự hóa cùng inference.
+        </p>
       </div>
-      <p data-lang-en>
-        The patch only touches <code>common/runner/async_detection_runner.hpp</code>
-        — every other detection-family example that shares this runner
-        benefits the same way. For anything beyond a single-model C++ sample —
-        or if patching generated code isn't your style — <code>dx_stream</code>
-        (<strong>Section 5</strong>) already solves this architecturally: its
-        GStreamer <code>queue</code> elements give <code>dxosd</code>/<code>fpsdisplaysink</code>
-        their own thread, so display never serializes with inference in the
-        first place.
-      </p>
-      <p data-lang-ko>
-        이 patch는 <code>common/runner/async_detection_runner.hpp</code> 하나만
-        건드리므로, 이 runner를 공유하는 다른 detection 계열 예제들도 동일하게
-        혜택을 받습니다. 단일 모델 C++ 샘플 이상의 범위이거나, 생성된 코드를
-        직접 패치하는 게 부담스럽다면 <code>dx_stream</code>(<strong>5장</strong>)이
-        이미 이 문제를 아키텍처적으로 해결해뒀습니다 — GStreamer의 <code>queue</code>
-        요소가 <code>dxosd</code>/<code>fpsdisplaysink</code>에 별도 스레드를
-        부여하므로 display가 애초에 추론과 직렬화되지 않습니다.
-      </p>
-      <p data-lang-zh>
-        该补丁只涉及 <code>common/runner/async_detection_runner.hpp</code> 这一个
-        文件——所有共享这个 runner 的其他 detection 系列示例都能同样受益。如果您需要的
-        不只是单模型的 C++ 示例,或者不喜欢直接修补生成的代码,<code>dx_stream</code>
-        (<strong>第 5 章</strong>)已经从架构层面解决了这个问题:它的 GStreamer
-        <code>queue</code> 元素会为 <code>dxosd</code>/<code>fpsdisplaysink</code>
-        提供各自独立的线程,因此显示从一开始就不会与推理串行化。
-      </p>
-      <p data-lang-ja>
-        このパッチは<code>common/runner/async_detection_runner.hpp</code>のみに手を
-        加えるものです——このrunnerを共有する他のすべてのdetection系サンプルも同じように
-        恩恵を受けます。単一モデルのC++サンプルの範囲を超える場合、あるいは生成された
-        コードにパッチを当てるのが好みでない場合は、<code>dx_stream</code>
-        (<strong>第5章</strong>)がすでにこの問題をアーキテクチャレベルで解決しています
-        ——GStreamerの<code>queue</code>要素が<code>dxosd</code>/<code>fpsdisplaysink</code>
-        に専用スレッドを与えるため、表示がそもそも推論と直列化することがありません。
-      </p>
-      <p data-lang-vi>
-        Patch chỉ động đến <code>common/runner/async_detection_runner.hpp</code> — mọi ví dụ khác thuộc nhóm
-        detection dùng chung runner này đều được hưởng lợi tương tự. Với những trường hợp vượt ra ngoài một
-        sample C++ đơn model — hoặc nếu bạn không thích vá mã sinh sẵn — <code>dx_stream</code>
-        (<strong>Mục 5</strong>) đã giải quyết việc này ở mức kiến trúc: các element <code>queue</code> của GStreamer
-        cấp cho <code>dxosd</code>/<code>fpsdisplaysink</code> thread riêng, nên việc hiển thị ngay từ đầu
-        đã không bị tuần tự hóa cùng inference.
-      </p>
-    </div>
+      </div>
+    </details>
 
     <hr class="dx-sep">
 
