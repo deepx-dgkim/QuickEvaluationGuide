@@ -2049,16 +2049,6 @@ Processing... Only FPS will be displayed.
 <th data-lang-vi>--no-display</th><th data-lang-ja>ライブプレビュー</th>
 <th data-lang-vi>live preview</th></tr></thead>
         <tbody>
-          <tr data-lang-en><td data-lang-en>Inference Avg Latency</td><td data-lang-en>18.60 ms</td><td data-lang-en>13.52 ms</td></tr>
-          <tr data-lang-ko><td data-lang-ko>Inference Avg Latency</td><td data-lang-ko>18.60 ms</td><td data-lang-ko>13.52 ms</td></tr>
-          <tr data-lang-zh><td data-lang-zh>Inference Avg Latency</td><td data-lang-zh>18.60 ms</td><td data-lang-zh>13.52 ms</td></tr>
-          <tr data-lang-ja><td data-lang-ja>Inference Avg Latency</td><td data-lang-ja>18.60 ms</td><td data-lang-ja>13.52 ms</td></tr>
-          <tr data-lang-vi><td data-lang-vi>Inference Avg Latency</td><td data-lang-vi>18.60 ms</td><td data-lang-vi>13.52 ms</td></tr>
-          <tr data-lang-en><td data-lang-en>Infer Inflight Avg / Max</td><td data-lang-en>6.0 / 7</td><td data-lang-en>1.6 / 6</td></tr>
-          <tr data-lang-ko><td data-lang-ko>Infer Inflight Avg / Max</td><td data-lang-ko>6.0 / 7</td><td data-lang-ko>1.6 / 6</td></tr>
-          <tr data-lang-zh><td data-lang-zh>Infer Inflight Avg / Max</td><td data-lang-zh>6.0 / 7</td><td data-lang-zh>1.6 / 6</td></tr>
-          <tr data-lang-ja><td data-lang-ja>Infer Inflight Avg / Max</td><td data-lang-ja>6.0 / 7</td><td data-lang-ja>1.6 / 6</td></tr>
-          <tr data-lang-vi><td data-lang-vi>Infer Inflight Avg / Max</td><td data-lang-vi>6.0 / 7</td><td data-lang-vi>1.6 / 6</td></tr>
           <tr data-lang-en><td data-lang-en>Overall FPS</td><td data-lang-en>310.0</td><td data-lang-en>119.3</td></tr>
           <tr data-lang-ko><td data-lang-ko>Overall FPS</td><td data-lang-ko>310.0</td><td data-lang-ko>119.3</td></tr>
           <tr data-lang-zh><td data-lang-zh>Overall FPS</td><td data-lang-zh>310.0</td><td data-lang-zh>119.3</td></tr>
@@ -2342,8 +2332,29 @@ Processing... Only FPS will be displayed.
           <em>"sự ràng buộc đó chính là root cause #2 (việc đọc video + submit bị chặn bởi vòng bơm sự kiện GUI ở mọi frame)."</em>
           Cách nó khắc phục, nói đơn giản:
         </p>
+        <div class="dx-code-wrap" style="background-color:#f5f5f5;margin:16px 0;padding:14px;">
+          <pre style="margin:0;font-size:12px;line-height:1.5;color:#d1c7c7;"><code data-lang-en">BEFORE (Bottleneck):
+┌──────────────────────────────────┐
+│  Single Thread                   │
+│  Capture → Submit → GUI Poll     │ (sequential)
+│  └─ All serialized, FPS drops    │ ~120 FPS
+└──────────────────────────────────┘
+
+         ↓ (Apply Patch)
+
+AFTER (Decoupled):
+┌────────────────┐   ┌──────────────┐
+│ Capture/Submit │   │ GUI Display  │
+│    Thread      │   │   Thread     │
+└────────────────┘   └──────────────┘
+        │                   ▲
+        └── [2-slot] ───────┘
+             Queue
+      (non-blocking)
+      ~215 FPS (1.8x faster)</code></pre>
+        </div>
         <ul>
-          <li data-lang-en>Give frame-reading/submitting its <strong>own thread</strong>, so the main thread does nothing but pump the display window.</li>
+          <li data-lang-en">Give frame-reading/submitting its <strong>own thread</strong>, so the main thread does nothing but pump the display window.</li>
           <li data-lang-ko>영상 읽기/제출을 <strong>별도 스레드</strong>로 분리해서, 메인 스레드는 오직 화면창 갱신만 담당하게 합니다.</li>
           <li data-lang-zh>为帧读取/提交分配一个<strong>专属线程</strong>,让主线程只负责处理显示窗口。</li>
           <li data-lang-ja>フレームの読み込み/提出に<strong>専用スレッド</strong>を与え、メインスレッドは表示ウィンドウの処理だけを行うようにします。</li>
@@ -2396,16 +2407,6 @@ Processing... Only FPS will be displayed.
               <tr data-lang-zh><td data-lang-zh>Overall FPS</td><td data-lang-zh>119.3</td><td data-lang-zh><strong>215.2</strong>(约1.8倍)</td></tr>
               <tr data-lang-ja><td data-lang-ja>Overall FPS</td><td data-lang-ja>119.3</td><td data-lang-ja><strong>215.2</strong>(約1.8倍)</td></tr>
               <tr data-lang-vi><td data-lang-vi>Overall FPS</td><td data-lang-vi>119.3</td><td data-lang-vi><strong>215.2</strong> (~1.8x)</td></tr>
-              <tr data-lang-en><td data-lang-en>Inference throughput</td><td data-lang-en>121.4 FPS</td><td data-lang-en>222.1 FPS</td></tr>
-              <tr data-lang-ko><td data-lang-ko>Inference 처리량</td><td data-lang-ko>121.4 FPS</td><td data-lang-ko>222.1 FPS</td></tr>
-              <tr data-lang-zh><td data-lang-zh>Inference 吞吐量</td><td data-lang-zh>121.4 FPS</td><td data-lang-zh>222.1 FPS</td></tr>
-              <tr data-lang-ja><td data-lang-ja>Inferenceスループット</td><td data-lang-ja>121.4 FPS</td><td data-lang-ja>222.1 FPS</td></tr>
-              <tr data-lang-vi><td data-lang-vi>Throughput inference</td><td data-lang-vi>121.4 FPS</td><td data-lang-vi>222.1 FPS</td></tr>
-              <tr data-lang-en><td data-lang-en>Infer Inflight Avg / Max</td><td data-lang-en>1.6 / 6</td><td data-lang-en>4.5 / 7</td></tr>
-              <tr data-lang-ko><td data-lang-ko>Infer Inflight Avg / Max</td><td data-lang-ko>1.6 / 6</td><td data-lang-ko>4.5 / 7</td></tr>
-              <tr data-lang-zh><td data-lang-zh>Infer Inflight Avg / Max</td><td data-lang-zh>1.6 / 6</td><td data-lang-zh>4.5 / 7</td></tr>
-              <tr data-lang-ja><td data-lang-ja>Infer Inflight Avg / Max</td><td data-lang-ja>1.6 / 6</td><td data-lang-ja>4.5 / 7</td></tr>
-              <tr data-lang-vi><td data-lang-vi>Infer Inflight Avg / Max</td><td data-lang-vi>1.6 / 6</td><td data-lang-vi>4.5 / 7</td></tr>
             </tbody>
           </table>
         </div>
@@ -2468,7 +2469,7 @@ Processing... Only FPS will be displayed.
           có thể áp dụng ngay:
         </p>
         <p style="margin-top:10px;">
-          <a href="assets/0001-decouple-display-from-capture-submit.patch" download
+          <a href="assets/0001-yolo26-improve.patch" download
              style="display:inline-block;padding:8px 16px;border-radius:6px;background:var(--dx-accent, #2563eb);color:#fff;text-decoration:none;font-weight:600;">
             <span data-lang-en>⬇ Download patch (async_detection_runner.hpp)</span>
             <span data-lang-ko>⬇ Patch 다운로드 (async_detection_runner.hpp)</span>
@@ -2480,8 +2481,8 @@ Processing... Only FPS will be displayed.
         <div class="dx-code-wrap" style="margin-top:10px;">
   <pre><code># From the extracted package root
   cd yolo26-standalone/cpp/object_detection/yolo26n
-  patch -p1 &lt; 0001-decouple-display-from-capture-submit.patch
-  # or: git apply 0001-decouple-display-from-capture-submit.patch
+  patch -p1 &lt; 0001-yolo26-improve.patch
+  # or: git apply 0001-yolo26-improve.patch
   cd build &amp;&amp; make -j$(nproc)</code></pre>
         </div>
         <p data-lang-en>

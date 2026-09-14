@@ -1,0 +1,444 @@
+From c25b1effefb353fae2ae2c3a1e888d2cef3374a8 Mon Sep 17 00:00:00 2001
+From: donggyun kim <dgkim@deepx.ai>
+Date: Mon, 14 Sep 2026 15:24:36 +0900
+Subject: [PATCH] yolo26-improve
+
+---
+ common/runner/async_detection_runner.hpp | 329 +++++++++++++----------
+ common/utility/common_util.hpp           |   7 +-
+ 2 files changed, 186 insertions(+), 150 deletions(-)
+
+diff --git a/common/runner/async_detection_runner.hpp b/common/runner/async_detection_runner.hpp
+index 8fc3f5f..7bbf225 100644
+--- a/common/runner/async_detection_runner.hpp
++++ b/common/runner/async_detection_runner.hpp
+@@ -104,15 +104,24 @@ private:
+     std::mutex mutex_;
+     std::condition_variable condition_;
+     size_t max_size_;
++    bool drop_oldest_;
+     std::atomic<bool> stopped_{false};
+ 
+ public:
+-    explicit SafeQueue(size_t max_size = ASYNC_MAX_QUEUE_SIZE) : max_size_(max_size) {}
++    explicit SafeQueue(size_t max_size = ASYNC_MAX_QUEUE_SIZE, bool drop_oldest = false)
++        : max_size_(max_size), drop_oldest_(drop_oldest) {}
+ 
+     bool push(T item) {
+         std::unique_lock<std::mutex> lock(mutex_);
+-        while (queue_.size() >= max_size_ && !stopped_.load(std::memory_order_relaxed)) {
+-            condition_.wait_for(lock, std::chrono::milliseconds(100));
++        if (stopped_.load(std::memory_order_relaxed)) return false;
++
++        if (drop_oldest_ && max_size_ > 0 && queue_.size() >= max_size_) {
++            queue_.pop();
++        } else {
++            while (max_size_ > 0 && queue_.size() >= max_size_ &&
++                   !stopped_.load(std::memory_order_relaxed)) {
++                condition_.wait_for(lock, std::chrono::milliseconds(100));
++            }
+         }
+         if (stopped_.load(std::memory_order_relaxed)) return false;
+         queue_.push(std::move(item));
+@@ -381,112 +390,76 @@ public:
+         int last_job_id = -1;
+         int images_per_loop = is_image ? static_cast<int>(imageFiles.size()) : 0;
+ 
+-        if (is_image) {
+-            int effective_loop_count = (images_per_loop > 0) ? loopTest / images_per_loop : 1;
+-            for (int i = 0; i < loopTest && running_ && !g_interrupted(); ++i) {
+-                int loop_idx = i / images_per_loop;
+-                int img_idx  = i % images_per_loop;
+-                std::string currentImagePath = imageFiles[img_idx];
+-
+-                // Loop banner
+-                if (effective_loop_count > 1 && img_idx == 0 && args.verbose) {
+-                    std::cout << "\n=================================================" << std::endl;
+-                    std::cout << "[DXAPP] [INFO] Loop " << (loop_idx + 1) << "/" << effective_loop_count << std::endl;
+-                    std::cout << "=================================================" << std::endl;
+-                }
+-                if (args.verbose) {
+-                    std::cout << "\n[DXAPP] [INFO] Image " << (img_idx + 1) << "/" << images_per_loop
+-                          << ": " << fs::path(currentImagePath).filename().string() << std::endl;
+-                }
+-
+-                auto t_read_start = std::chrono::high_resolution_clock::now();
+-                cv::Mat img = cv::imread(currentImagePath);
+-                auto t_read_end = std::chrono::high_resolution_clock::now();
+-
+-                if (img.empty()) {
+-                    std::cerr << "[DXAPP] [ERROR] Failed to read image: " << currentImagePath << std::endl;
+-                    continue;
+-                }
+-                if (loop_idx == 0) {
++        // Capture/preprocess/submit runs on its own thread, decoupled from the
++        // main-thread display pump below. cv::imshow()/cv::waitKey() must stay
++        // on the main thread, but they must NEVER gate how fast frames are read
++        // and submitted to the NPU — that coupling was root cause #2 (video
++        // read+submit blocked on the GUI event pump every single frame). This
++        // thread is throttled only by metrics_.waitForSlot() (max_inflight),
++        // exactly like the --no-display path already was.
++        std::atomic<bool> capture_done{false};
++        std::thread captureThr([&]() {
++            if (is_image) {
++                int effective_loop_count = (images_per_loop > 0) ? loopTest / images_per_loop : 1;
++                for (int i = 0; i < loopTest && running_ && !g_interrupted(); ++i) {
++                    int loop_idx = i / images_per_loop;
++                    int img_idx  = i % images_per_loop;
++                    std::string currentImagePath = imageFiles[img_idx];
++
++                    // Loop banner
++                    if (effective_loop_count > 1 && img_idx == 0 && args.verbose) {
++                        std::cout << "\n=================================================" << std::endl;
++                        std::cout << "[DXAPP] [INFO] Loop " << (loop_idx + 1) << "/" << effective_loop_count << std::endl;
++                        std::cout << "=================================================" << std::endl;
++                    }
+                     if (args.verbose) {
+-                        std::cout << "[DXAPP] [INFO] Input image: " << currentImagePath << std::endl;
+-                        std::cout << "[DXAPP] [INFO] Image resolution (WxH): " << img.cols << "x" << img.rows << std::endl;
++                        std::cout << "\n[DXAPP] [INFO] Image " << (img_idx + 1) << "/" << images_per_loop
++                              << ": " << fs::path(currentImagePath).filename().string() << std::endl;
+                     }
+-                }
+-
+-                PreprocessContext ctx;
+-                cv::Mat preprocessed;
+-                // Preprocess original image so ctx.original_* are correct
+-                auto t_pre_start = std::chrono::high_resolution_clock::now();
+-                preprocessor->process(img, preprocessed, ctx);
+-                auto t_pre_end = std::chrono::high_resolution_clock::now();
+-                {
+-                    std::lock_guard<std::mutex> lock(metrics_.metrics_mutex);
+-                    metrics_.sum_read += std::chrono::duration<double, std::milli>(t_read_end - t_read_start).count();
+-                    metrics_.sum_preprocess += std::chrono::duration<double, std::milli>(t_pre_end - t_pre_start).count();
+-                }
+-                // Prepare display image from original
+-                dxapp::displayResize(img, display_image, SHOW_WINDOW_SIZE_W, SHOW_WINDOW_SIZE_H);
+-
+-                // Copy to pre-allocated buffer (convert to float if needed)
+-                auto& buf = input_buffers[buffer_index % ASYNC_BUFFER_SIZE];
+-                copyToInputBuffer(buf, preprocessed, is_float_input, is_nhwc);
+-
+-                // Compute save_path for this image (dedup in loop mode)
+-                std::string save_path = computeImageSavePath(
+-                    image_save_dir, currentImagePath, images_per_loop, saved_files);
+-
+-                // can render using original-pixel coordinates (not the resized display image).
+-                auto ud = std::make_unique<AsyncUserData>(AsyncUserData{img.clone(), ctx, std::move(save_path), {}});
+-
+-                // Back-pressure: wait for available slot
+-                metrics_.waitForSlot();
+-                // Update inflight tracking
+-                updateInflightMetrics();
+-
+-                ud->submit_ts = std::chrono::high_resolution_clock::now();
+-                ud->frame_index = static_cast<uint64_t>(buffer_index);
+-                last_job_id = ie.RunAsync(buf.data(), static_cast<void*>(ud.release()));
+-                buffer_index++;
+-                processCount++;
+-                if (!args.no_display && !pollDisplay()) break;
+-            }
+-        } else {
+-            // Video multi-loop
+-            for (int loop_idx = 0; loop_idx < loopTest && running_ && !g_interrupted(); ++loop_idx) {
+-                if (loopTest > 1 && args.verbose) {
+-                    std::cout << "\n=================================================" << std::endl;
+-                    std::cout << "[DXAPP] [INFO] Loop " << (loop_idx + 1) << "/" << loopTest << std::endl;
+-                    std::cout << "=================================================" << std::endl;
+-                }
+ 
+-                auto readFrame = [&video](cv::Mat& f) { video >> f; return !f.empty(); };
+-                cv::Mat frame;
+-                while (running_ && !g_interrupted()) {
+                     auto t_read_start = std::chrono::high_resolution_clock::now();
+-                    if (!readFrame(frame)) break;
++                    cv::Mat img = cv::imread(currentImagePath);
+                     auto t_read_end = std::chrono::high_resolution_clock::now();
++
++                    if (img.empty()) {
++                        std::cerr << "[DXAPP] [ERROR] Failed to read image: " << currentImagePath << std::endl;
++                        continue;
++                    }
++                    if (loop_idx == 0) {
++                        if (args.verbose) {
++                            std::cout << "[DXAPP] [INFO] Input image: " << currentImagePath << std::endl;
++                            std::cout << "[DXAPP] [INFO] Image resolution (WxH): " << img.cols << "x" << img.rows << std::endl;
++                        }
++                    }
++
+                     PreprocessContext ctx;
+                     cv::Mat preprocessed;
+-                    // Preprocess original video frame so ctx.original_* are correct
++                    // Preprocess original image so ctx.original_* are correct
+                     auto t_pre_start = std::chrono::high_resolution_clock::now();
+-                    preprocessor->process(frame, preprocessed, ctx);
++                    preprocessor->process(img, preprocessed, ctx);
+                     auto t_pre_end = std::chrono::high_resolution_clock::now();
+                     {
+                         std::lock_guard<std::mutex> lock(metrics_.metrics_mutex);
+                         metrics_.sum_read += std::chrono::duration<double, std::milli>(t_read_end - t_read_start).count();
+                         metrics_.sum_preprocess += std::chrono::duration<double, std::milli>(t_pre_end - t_pre_start).count();
+                     }
+-                    // Prepare display image from original frame
+-                    dxapp::displayResize(frame, display_image, SHOW_WINDOW_SIZE_W, SHOW_WINDOW_SIZE_H);
++                    // Prepare display image from original
++                    dxapp::displayResize(img, display_image, SHOW_WINDOW_SIZE_W, SHOW_WINDOW_SIZE_H);
+ 
++                    // Copy to pre-allocated buffer (convert to float if needed)
+                     auto& buf = input_buffers[buffer_index % ASYNC_BUFFER_SIZE];
+                     copyToInputBuffer(buf, preprocessed, is_float_input, is_nhwc);
+ 
+-                    // Use the original video frame (not the resized display image)
+-                    auto ud = std::make_unique<AsyncUserData>(AsyncUserData{frame.clone(), ctx, "", {}});
++                    // Compute save_path for this image (dedup in loop mode)
++                    std::string save_path = computeImageSavePath(
++                        image_save_dir, currentImagePath, images_per_loop, saved_files);
++
++                    // can render using original-pixel coordinates (not the resized display image).
++                    auto ud = std::make_unique<AsyncUserData>(AsyncUserData{img.clone(), ctx, std::move(save_path), {}});
++
+                     // Back-pressure: wait for available slot
+                     metrics_.waitForSlot();
++                    // Update inflight tracking
+                     updateInflightMetrics();
+ 
+                     ud->submit_ts = std::chrono::high_resolution_clock::now();
+@@ -494,74 +467,129 @@ public:
+                     last_job_id = ie.RunAsync(buf.data(), static_cast<void*>(ud.release()));
+                     buffer_index++;
+                     processCount++;
+-                    if (!args.no_display && !pollDisplay()) break;
+                 }
++            } else {
++                // Video multi-loop
++                for (int loop_idx = 0; loop_idx < loopTest && running_ && !g_interrupted(); ++loop_idx) {
++                    if (loopTest > 1 && args.verbose) {
++                        std::cout << "\n=================================================" << std::endl;
++                        std::cout << "[DXAPP] [INFO] Loop " << (loop_idx + 1) << "/" << loopTest << std::endl;
++                        std::cout << "=================================================" << std::endl;
++                    }
+ 
+-                // Reopen video for next loop iteration
+-                if (loop_idx + 1 >= loopTest || args.videoFile.empty()) continue;
+-                video.release();
+-                video.open(args.videoFile);
+-                if (!video.isOpened()) {
+-                    std::cerr << "[DXAPP] [ERROR] Failed to reopen video for loop " << (loop_idx + 2) << std::endl;
+-                    break;
++                    auto readFrame = [&video](cv::Mat& f) { video >> f; return !f.empty(); };
++                    cv::Mat frame;
++                    while (running_ && !g_interrupted()) {
++                        auto t_read_start = std::chrono::high_resolution_clock::now();
++                        if (!readFrame(frame)) break;
++                        auto t_read_end = std::chrono::high_resolution_clock::now();
++                        PreprocessContext ctx;
++                        cv::Mat preprocessed;
++                        // Preprocess original video frame so ctx.original_* are correct
++                        auto t_pre_start = std::chrono::high_resolution_clock::now();
++                        preprocessor->process(frame, preprocessed, ctx);
++                        auto t_pre_end = std::chrono::high_resolution_clock::now();
++                        {
++                            std::lock_guard<std::mutex> lock(metrics_.metrics_mutex);
++                            metrics_.sum_read += std::chrono::duration<double, std::milli>(t_read_end - t_read_start).count();
++                            metrics_.sum_preprocess += std::chrono::duration<double, std::milli>(t_pre_end - t_pre_start).count();
++                        }
++                        // Prepare display image from original frame
++                        dxapp::displayResize(frame, display_image, SHOW_WINDOW_SIZE_W, SHOW_WINDOW_SIZE_H);
++
++                        auto& buf = input_buffers[buffer_index % ASYNC_BUFFER_SIZE];
++                        copyToInputBuffer(buf, preprocessed, is_float_input, is_nhwc);
++
++                        // Use the original video frame (not the resized display image)
++                        auto ud = std::make_unique<AsyncUserData>(AsyncUserData{frame.clone(), ctx, "", {}});
++                        // Back-pressure: wait for available slot
++                        metrics_.waitForSlot();
++                        updateInflightMetrics();
++
++                        ud->submit_ts = std::chrono::high_resolution_clock::now();
++                        ud->frame_index = static_cast<uint64_t>(buffer_index);
++                        last_job_id = ie.RunAsync(buf.data(), static_cast<void*>(ud.release()));
++                        buffer_index++;
++                        processCount++;
++                    }
++
++                    // Reopen video for next loop iteration
++                    if (loop_idx + 1 >= loopTest || args.videoFile.empty()) continue;
++                    video.release();
++                    video.open(args.videoFile);
++                    if (!video.isOpened()) {
++                        std::cerr << "[DXAPP] [ERROR] Failed to reopen video for loop " << (loop_idx + 2) << std::endl;
++                        break;
++                    }
+                 }
+             }
+-        }
+ 
+-        // Wait for inference completion while keeping display responsive
+-        if (last_job_id >= 0) {
+-            if (!running_) display_queue_.shutdown();
+-            std::atomic<bool> inference_done{false};
+-            std::thread waitThread([&ie, last_job_id, &inference_done]() {
+-                ie.Wait(last_job_id);
+-                inference_done.store(true, std::memory_order_release);
+-            });
+-            while (!inference_done.load(std::memory_order_acquire) && running_) {
+-                if (!args.no_display && !pollDisplay()) break;
+-                else std::this_thread::sleep_for(std::chrono::milliseconds(10));
++            // Wait for inference completion. The main thread keeps the display
++            // pumped independently (see below) — this thread just waits.
++            if (last_job_id >= 0) {
++                if (!running_) display_queue_.shutdown();
++                std::atomic<bool> inference_done{false};
++                std::thread waitThread([&ie, last_job_id, &inference_done]() {
++                    ie.Wait(last_job_id);
++                    inference_done.store(true, std::memory_order_release);
++                });
++                while (!inference_done.load(std::memory_order_acquire) && running_) {
++                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
++                }
++                waitThread.join();
+             }
+-            waitThread.join();
+-        }
+-        // For images: keep display alive until user closes window
+-        if (is_image && !args.no_display) {
+-            // Drain remaining rendered frames
+-            while (running_) {
++            // Frames can still be in flight when the reader hits EOF: a completion
++            // callback may not have queued its frame yet, and the display thread may
++            // hold buffered ones. Wait until every submitted frame has been rendered
++            // (and therefore written) before stopping the consumer — otherwise the
++            // tail of a --save video is silently lost. The live-display path never
++            // showed this because frames are rendered as they arrive. Bail out if no
++            // progress is made for 5 s, so a dropped frame cannot hang shutdown.
++            {
++                auto last_progress = std::chrono::steady_clock::now();
++                int last_rendered = -1;
++                while (running_ && !g_interrupted()) {
++                    int rendered;
++                    {
++                        std::lock_guard<std::mutex> lock(metrics_.metrics_mutex);
++                        rendered = metrics_.render_completed;
++                    }
++                    const bool pending = !display_queue_.empty() ||
++                                         (args.saveMode && rendered < processCount);
++                    if (!pending) break;
++                    if (rendered != last_rendered) {
++                        last_rendered = rendered;
++                        last_progress = std::chrono::steady_clock::now();
++                    } else if (std::chrono::steady_clock::now() - last_progress >
++                               std::chrono::seconds(5)) {
++                        std::cerr << "[DXAPP] [WARN] Output frames stopped draining; "
++                                     "saved video may be truncated." << std::endl;
++                        break;
++                    }
++                    std::this_thread::sleep_for(std::chrono::milliseconds(2));
++                }
++            }
++            capture_done.store(true, std::memory_order_release);
++        });
++
++        // Main thread: pure display pump, decoupled from capture/inference speed
++        // — it runs concurrently with captureThr, paced only by its own GUI cost.
++        if (!args.no_display) {
++            while (!(capture_done.load(std::memory_order_acquire) &&
++                     display_queue_.empty() && rendered_queue_.empty())) {
+                 if (!pollDisplay()) break;
+-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+             }
+-        }
+-        // Frames can still be in flight when the reader hits EOF: a completion
+-        // callback may not have queued its frame yet, and the display thread may
+-        // hold buffered ones. Wait until every submitted frame has been rendered
+-        // (and therefore written) before stopping the consumer — otherwise the
+-        // tail of a --save video is silently lost. The live-display path never
+-        // showed this because frames are rendered as they arrive. Bail out if no
+-        // progress is made for 5 s, so a dropped frame cannot hang shutdown.
+-        {
+-            auto last_progress = std::chrono::steady_clock::now();
+-            int last_rendered = -1;
+-            while (running_ && !g_interrupted()) {
+-                int rendered;
+-                {
+-                    std::lock_guard<std::mutex> lock(metrics_.metrics_mutex);
+-                    rendered = metrics_.render_completed;
++            // For images: keep the window open (still pumping quit/close events)
++            // until the user closes it — there is no more data left to wait on.
++            if (is_image && running_) {
++                while (running_) {
++                    if (!pollDisplay()) break;
++                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                 }
+-                const bool pending = !display_queue_.empty() ||
+-                                     (args.saveMode && rendered < processCount);
+-                if (!pending) break;
+-                if (rendered != last_rendered) {
+-                    last_rendered = rendered;
+-                    last_progress = std::chrono::steady_clock::now();
+-                } else if (std::chrono::steady_clock::now() - last_progress >
+-                           std::chrono::seconds(5)) {
+-                    std::cerr << "[DXAPP] [WARN] Output frames stopped draining; "
+-                                 "saved video may be truncated." << std::endl;
+-                    break;
+-                }
+-                if (!args.no_display) pollDisplay();
+-                else std::this_thread::sleep_for(std::chrono::milliseconds(2));
+             }
+         }
++        captureThr.join();
++
+         running_ = false;
+         display_queue_.shutdown();
+         rendered_queue_.shutdown();
+@@ -597,7 +625,9 @@ private:
+     bool window_shown_ = false;
+     bool window_prop_supported_ = true;  // false if backend always returns -1
+     SafeQueue<AsyncDisplayArgs> display_queue_;
+-    SafeQueue<cv::Mat> rendered_queue_;  // Rendered frames for main-thread display
++    // Small drop-oldest buffer: a slow imshow() must never gate capture/inference
++    // (see pollDisplay()/captureThr in run()) — it just skips stale preview frames.
++    SafeQueue<cv::Mat> rendered_queue_{2, /*drop_oldest=*/true};
+     AsyncProfilingMetrics metrics_;
+ 
+     /** Handle async inference completion: postprocess, log, update metrics, enqueue display. */
+@@ -912,7 +942,10 @@ private:
+         cv::Mat frame;
+         if (rendered_queue_.try_pop(frame, std::chrono::milliseconds(1))) {
+             auto display_start = std::chrono::high_resolution_clock::now();
+-            dxapp::showOutput(frame);
++            // pump_events=false: the checks below (waitKey/getWindowProperty)
++            // already pump the GUI event loop once per pollDisplay() call —
++            // letting showOutput() do it too would pump twice per frame.
++            dxapp::showOutput(frame, /*pump_events=*/false);
+             auto display_end = std::chrono::high_resolution_clock::now();
+             {
+                 std::lock_guard<std::mutex> lock(metrics_.metrics_mutex);
+diff --git a/common/utility/common_util.hpp b/common/utility/common_util.hpp
+index 1107465..456abb4 100644
+--- a/common/utility/common_util.hpp
++++ b/common/utility/common_util.hpp
+@@ -365,8 +365,11 @@ inline std::pair<int, int> getScreenResolution() {
+  * On the first frame, detects screen resolution and sets the window to
+  * half-screen width × half-screen height, preserving the frame's aspect ratio.
+  * Subsequent frames reuse the same window without re-querying.
++ * @param frame Frame to display.
++ * @param pump_events Whether this function should service GUI events before
++ *        displaying. Set false when the caller pumps events itself.
+  */
+-inline void showOutput(const cv::Mat& frame) {
++inline void showOutput(const cv::Mat& frame, bool pump_events = true) {
+     if (_displayClosed()) return;
+ 
+     static bool window_ever_opened = false;
+@@ -375,7 +378,7 @@ inline void showOutput(const cv::Mat& frame) {
+     // After the window has been opened at least once, process pending GUI
+     // events (e.g. X-button close) and verify it is still alive BEFORE
+     // calling namedWindow/imshow which would recreate a destroyed window.
+-    if (window_ever_opened) {
++    if (window_ever_opened && pump_events) {
+         int key = -1;
+         try { key = cv::waitKey(1); } catch (const cv::Exception&) {
+             _displayClosed() = true;
+-- 
+2.43.0
+
