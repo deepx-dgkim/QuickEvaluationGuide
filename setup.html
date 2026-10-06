@@ -188,7 +188,7 @@
       </div>
       <div class="dx-code-wrap">
 <pre><code>wget -O - https://apt.releases.deepx.ai/gpg | sudo gpg --dearmor -o /usr/share/keyrings/deepx-archive-keyring.gpg
-echo &quot;deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/deepx-archive-keyring.gpg] https://apt.releases.deepx.ai $(grep -oP &#39;(?&lt;=UBUNTU_CODENAME=).*&#39; /etc/os-release || lsb_release -cs) main&quot; | sudo tee /etc/apt/sources.list.d/deepx.list
+echo &quot;deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/deepx-archive-keyring.gpg] https://apt.releases.deepx.ai $(. /etc/os-release && echo &#39;${UBUNTU_CODENAME:-$VERSION_CODENAME}&#39;) main&quot; | sudo tee /etc/apt/sources.list.d/deepx.list
 sudo apt update</code></pre>
       </div>
     </div>
