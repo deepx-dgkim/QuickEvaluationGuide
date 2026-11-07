@@ -41,7 +41,7 @@
     <h1 data-lang-vi>Thực hành: benchmark toàn bộ quy trình object detection với YOLO26n</h1>
     <p data-lang-en>
       Instead of abstract commands, this guide follows <strong>one real model</strong>
-      — DEEPX's YOLO26n object detector — from download, to a live NPU dashboard
+      — the YOLO26n object detector (an Ultralytics model, compiled for the DEEPX NPU) — from download, to a live NPU dashboard
       with <code>dxtop</code>, to maximum throughput, to a representative 30&nbsp;fps
       deployment test, all the way to a real application and a real video pipeline.
       The results shown in this guide are reference measurements. Exact
@@ -49,19 +49,19 @@
       system configuration.
     </p>
     <p data-lang-ko>
-      추상적인 명령어 나열 대신 <strong>실제 모델 하나</strong>(DEEPX의 YOLO26n 객체 검출 모델)를 따라가며 다운로드, <code>dxtop</code> 실시간 NPU 대시보드, 최대 처리량 측정, 대표적인 30fps 배포 테스트를 거쳐 실제 애플리케이션과 비디오 파이프라인 실행까지 진행합니다. 이 가이드의 결과는 참고용 측정치이며, 정확한 수치는 호스트 시스템, 소프트웨어 버전, 시스템 구성에 따라 달라질 수 있습니다.
+      추상적인 명령어 나열 대신 <strong>실제 모델 하나</strong>(DEEPX NPU용으로 컴파일한 Ultralytics YOLO26n 객체 검출 모델)를 따라가며 다운로드, <code>dxtop</code> 실시간 NPU 대시보드, 최대 처리량 측정, 대표적인 30fps 배포 테스트를 거쳐 실제 애플리케이션과 비디오 파이프라인 실행까지 진행합니다. 이 가이드의 결과는 참고용 측정치이며, 정확한 수치는 호스트 시스템, 소프트웨어 버전, 시스템 구성에 따라 달라질 수 있습니다.
     </p>
-    <p data-lang-zh>本指南不罗列抽象命令，而是以<strong>一个真实模型</strong>（DEEPX 的 YOLO26n 目标检测器）为主线：从下载模型，到用 <code>dxtop</code> 查看实时 NPU 仪表盘，再到测试最大吞吐量、进行有代表性的 30&nbsp;fps 部署测试，最后延伸到真实应用和真实视频流水线。本指南中的结果均为参考测量值，具体数值可能因主机系统、软件版本和系统配置而异。</p>
+    <p data-lang-zh>本指南不罗列抽象命令，而是以<strong>一个真实模型</strong>（Ultralytics 的 YOLO26n 目标检测器，已为 DEEPX NPU 编译）为主线：从下载模型，到用 <code>dxtop</code> 查看实时 NPU 仪表盘，再到测试最大吞吐量、进行有代表性的 30&nbsp;fps 部署测试，最后延伸到真实应用和真实视频流水线。本指南中的结果均为参考测量值，具体数值可能因主机系统、软件版本和系统配置而异。</p>
     <p data-lang-ja>
       本ガイドでは、抽象的なコマンドを並べるのではなく、<strong>1 つの実際のモデル</strong>
-      （DEEPX の YOLO26n 物体検出モデル）を使って、ダウンロードから
+      （DEEPX NPU 向けにコンパイルした Ultralytics の YOLO26n 物体検出モデル）を使って、ダウンロードから
       <code>dxtop</code> によるライブ NPU ダッシュボード、最大スループットの測定、
       代表的な 30&nbsp;fps でのデプロイテスト、さらに実際のアプリケーションと
       ビデオパイプラインまでを順に解説します。本ガイドに示す結果は参考測定値です。
       実際の値はホストシステム、ソフトウェアバージョン、システム構成によって
       異なる場合があります。
     </p>
-    <p data-lang-vi>Thay vì đưa ra các lệnh chung chung, hướng dẫn này đi theo <strong>một model thực tế</strong> là YOLO26n, object detector của DEEPX: từ khâu tải về, theo dõi NPU trực tiếp với <code>dxtop</code>, đo throughput tối đa, kiểm thử triển khai tiêu biểu ở 30&nbsp;fps, cho đến chạy trong một ứng dụng thực tế và một pipeline video thực tế. Kết quả trong hướng dẫn này là số đo tham khảo; giá trị cụ thể có thể khác tùy host system, phiên bản phần mềm và cấu hình hệ thống.</p>
+    <p data-lang-vi>Thay vì đưa ra các lệnh chung chung, hướng dẫn này đi theo <strong>một model thực tế</strong> là YOLO26n, object detector của Ultralytics được biên dịch cho DEEPX NPU: từ khâu tải về, theo dõi NPU trực tiếp với <code>dxtop</code>, đo throughput tối đa, kiểm thử triển khai tiêu biểu ở 30&nbsp;fps, cho đến chạy trong một ứng dụng thực tế và một pipeline video thực tế. Kết quả trong hướng dẫn này là số đo tham khảo; giá trị cụ thể có thể khác tùy host system, phiên bản phần mềm và cấu hình hệ thống.</p>
   </div>
 </header>
 
@@ -285,26 +285,31 @@ sudo systemctl start dxrt.service</code></pre>
     <h2 id="get-model-zh" data-lang-zh>1. 下载案例模型：YOLO26n</h2>
     <h2 id="get-model-ja" data-lang-ja>1. 実習用モデルのダウンロード：YOLO26n</h2>
     <h2 id="get-model-vi" data-lang-vi>1. Tải model dùng cho case study: YOLO26n</h2>
-    <p data-lang-en>
-      We'll use <strong>YOLO26n</strong> — DEEPX's compact "nano" object
-      detector, 640×640 input — as the running example for the rest of this
-      guide. It's also the model <code>dx_stream</code>'s quick demo runs by
-      default (Step 6), so every tool in this walkthrough — <code>dxrun</code>,
-      <code>dxtop</code>, <code>dx_app</code>, and <code>dx_stream</code> —
-      exercises the <strong>exact same model file</strong> end to end.
-    </p>
+    <p data-lang-en> We'll use <strong>YOLO26n</strong> — Ultralytics' compact "nano" object detector, compiled for the DEEPX NPU, 640×640 input — as the running example for the rest of this guide. It's also the model <code>dx_stream</code>'s quick demo runs by default (Step 6), so every tool in this walkthrough — <code>dxrun</code>, <code>dxtop</code>, <code>dx_app</code>, and <code>dx_stream</code> — exercises the <strong>exact same model file</strong> end to end. </p>
     <p data-lang-ko>
-      이 가이드 전체의 실습 모델은 <strong>YOLO26n</strong>(DEEPX의 경량 "nano" 객체 검출 모델, 640×640 입력)입니다. <code>dx_stream</code> 빠른 데모(6단계)의 기본 모델이기도 하므로, 이 가이드에서 사용하는 <code>dxrun</code>, <code>dxtop</code>, <code>dx_app</code>, <code>dx_stream</code> 모두 <strong>동일한 모델 파일</strong>로 처음부터 끝까지 테스트합니다.
+      이 가이드 전체의 실습 모델은 <strong>YOLO26n</strong>(DEEPX NPU용으로 컴파일한 Ultralytics의 경량 "nano" 객체 검출 모델, 640×640 입력)입니다. <code>dx_stream</code> 빠른 데모(6단계)의 기본 모델이기도 하므로, 이 가이드에서 사용하는 <code>dxrun</code>, <code>dxtop</code>, <code>dx_app</code>, <code>dx_stream</code> 모두 <strong>동일한 모델 파일</strong>로 처음부터 끝까지 테스트합니다.
     </p>
-    <p data-lang-zh>本指南后续均以 <strong>YOLO26n</strong>（DEEPX 的轻量级 “nano” 目标检测模型，输入尺寸 640×640）为示例。它也是 <code>dx_stream</code> 快速演示（第 6 步）的默认模型，因此本教程中的每个工具（<code>dxrun</code>、<code>dxtop</code>、<code>dx_app</code> 和 <code>dx_stream</code>）都使用<strong>同一个模型文件</strong>完成端到端测试。</p>
+    <p data-lang-zh>本指南后续均以 <strong>YOLO26n</strong>（Ultralytics 的轻量级 “nano” 目标检测模型，已为 DEEPX NPU 编译，输入尺寸 640×640）为示例。它也是 <code>dx_stream</code> 快速演示（第 6 步）的默认模型，因此本教程中的每个工具（<code>dxrun</code>、<code>dxtop</code>、<code>dx_app</code> 和 <code>dx_stream</code>）都使用<strong>同一个模型文件</strong>完成端到端测试。</p>
     <p data-lang-ja>
-      本ガイドでは以降、<strong>YOLO26n</strong>（DEEPX の軽量な「nano」物体検出モデル、
+      本ガイドでは以降、<strong>YOLO26n</strong>（DEEPX NPU 向けにコンパイルした Ultralytics の軽量な「nano」物体検出モデル、
       入力 640×640）を例として使用します。これは <code>dx_stream</code> のクイックデモ（ステップ 6）が
       デフォルトで実行するモデルでもあるため、本ガイドで使うすべてのツール
       （<code>dxrun</code>、<code>dxtop</code>、<code>dx_app</code>、<code>dx_stream</code>）で、
       最初から最後まで<strong>まったく同じモデルファイル</strong>を使用します。
     </p>
-    <p data-lang-vi>Phần còn lại của hướng dẫn dùng <strong>YOLO26n</strong> làm ví dụ xuyên suốt. Đây là object detector cỡ "nano" nhỏ gọn của DEEPX, input 640×640. Model này cũng là lựa chọn mặc định trong demo nhanh của <code>dx_stream</code> (Step 6), nên mọi công cụ trong hướng dẫn (<code>dxrun</code>, <code>dxtop</code>, <code>dx_app</code> và <code>dx_stream</code>) đều dùng <strong>đúng cùng một file model</strong> từ đầu đến cuối.</p>
+    <p data-lang-vi>Phần còn lại của hướng dẫn dùng <strong>YOLO26n</strong> làm ví dụ xuyên suốt. Đây là object detector cỡ "nano" nhỏ gọn của Ultralytics, được biên dịch cho DEEPX NPU, input 640×640. Model này cũng là lựa chọn mặc định trong demo nhanh của <code>dx_stream</code> (Step 6), nên mọi công cụ trong hướng dẫn (<code>dxrun</code>, <code>dxtop</code>, <code>dx_app</code> và <code>dx_stream</code>) đều dùng <strong>đúng cùng một file model</strong> từ đầu đến cuối.</p>
+    <div class="dx-callout warn">
+      <strong class="dx-callout-title" data-lang-en>Model license &amp; evaluation-only use</strong>
+      <strong class="dx-callout-title" data-lang-ko>모델 라이선스와 평가 용도</strong>
+      <strong class="dx-callout-title" data-lang-zh>模型许可与仅限评估用途</strong>
+      <strong class="dx-callout-title" data-lang-ja>モデルのライセンスと評価目的での利用</strong>
+      <strong class="dx-callout-title" data-lang-vi>Giấy phép model và mục đích đánh giá</strong>
+      <p data-lang-en>YOLO26 is developed by Ultralytics and is available under <a href="https://www.ultralytics.com/license" target="_blank" rel="noopener">AGPL-3.0 or an Ultralytics Enterprise License</a>. Like the other DX-APP / DX-STREAM sample models (<code>.dxnn</code>) and sample images/videos, it is provided for evaluation and development only and is not licensed for commercial deployment. For a product, obtain a license from the original model provider or use your own model. Details: <a href="https://github.com/DEEPX-AI/dx_app/blob/main/docs/source/docs/Appendix_Third_Party_License.md" target="_blank" rel="noopener">DX-APP Third-Party License Notice</a>.</p>
+      <p data-lang-ko>YOLO26은 Ultralytics가 개발한 모델로, <a href="https://www.ultralytics.com/license" target="_blank" rel="noopener">AGPL-3.0 또는 Ultralytics Enterprise License</a>로 제공됩니다. 다른 DX-APP / DX-STREAM 샘플 모델(<code>.dxnn</code>)과 샘플 이미지·비디오와 마찬가지로 평가·개발 용도로만 제공되며, 상업적 배포에는 사용할 수 없습니다. 제품에 쓰려면 원 모델 제공자에게서 라이선스를 받거나 자체 모델을 사용하세요. 자세한 내용: <a href="https://github.com/DEEPX-AI/dx_app/blob/main/docs/source/docs/Appendix_Third_Party_License.md" target="_blank" rel="noopener">DX-APP Third-Party License Notice</a></p>
+      <p data-lang-zh>YOLO26 由 Ultralytics 开发，以 <a href="https://www.ultralytics.com/license" target="_blank" rel="noopener">AGPL-3.0 或 Ultralytics Enterprise License</a> 授权。与其他 DX-APP / DX-STREAM 示例模型（<code>.dxnn</code>）及示例图片、视频一样，仅供评估和开发使用，未获商业部署许可。如需用于产品，请向原模型提供方获取许可，或使用自有模型。详情见 <a href="https://github.com/DEEPX-AI/dx_app/blob/main/docs/source/docs/Appendix_Third_Party_License.md" target="_blank" rel="noopener">DX-APP Third-Party License Notice</a>。</p>
+      <p data-lang-ja>YOLO26 は Ultralytics が開発したモデルで、<a href="https://www.ultralytics.com/license" target="_blank" rel="noopener">AGPL-3.0 または Ultralytics Enterprise License</a> で提供されています。他の DX-APP / DX-STREAM サンプルモデル（<code>.dxnn</code>）やサンプル画像・動画と同様に評価・開発目的に限って提供されており、商用展開のライセンスは付与されていません。製品に使用する場合は、元のモデル提供者からライセンスを取得するか、独自のモデルを使用してください。詳細：<a href="https://github.com/DEEPX-AI/dx_app/blob/main/docs/source/docs/Appendix_Third_Party_License.md" target="_blank" rel="noopener">DX-APP Third-Party License Notice</a></p>
+      <p data-lang-vi>YOLO26 do Ultralytics phát triển và được cấp phép theo <a href="https://www.ultralytics.com/license" target="_blank" rel="noopener">AGPL-3.0 hoặc Ultralytics Enterprise License</a>. Giống các model mẫu (<code>.dxnn</code>) và ảnh/video mẫu khác của DX-APP / DX-STREAM, model này chỉ dùng để đánh giá và phát triển, không được cấp phép triển khai thương mại. Để dùng trong sản phẩm, hãy lấy giấy phép từ nhà cung cấp model gốc hoặc dùng model của riêng bạn. Chi tiết: <a href="https://github.com/DEEPX-AI/dx_app/blob/main/docs/source/docs/Appendix_Third_Party_License.md" target="_blank" rel="noopener">DX-APP Third-Party License Notice</a>.</p>
+    </div>
     <div class="dx-callout">
       <strong class="dx-callout-title" data-lang-en>Working directory: <code>dx_app</code></strong>
       <strong class="dx-callout-title" data-lang-ko>작업 디렉터리: <code>dx_app</code></strong>
@@ -1143,6 +1148,11 @@ cd ../dx_stream     # → dx-all-suite/dx-runtime/dx_stream
   <span data-lang-zh>DEEPX NPU(DX-M1) 快速评估指南 · 适用于 DEEPX NPU 产品。</span>
   <span data-lang-ja>DEEPX NPU(DX-M1) クイック評価ガイド · DEEPX NPU 製品向け</span>
   <span data-lang-vi>Hướng dẫn đánh giá nhanh DEEPX NPU(DX-M1) · Dành cho các sản phẩm DEEPX NPU.</span>
+  <p class="dx-footer-legal" data-lang-en>© DEEPX. All rights reserved. · Validated with DX-AllSuite v2.5.0 (DX-RT v3.5.0). Performance figures are reference measurements, not product specifications. Sample models (including Ultralytics YOLO26, AGPL-3.0) and sample data are for evaluation only and are not licensed for commercial deployment — see the <a href="https://github.com/DEEPX-AI/dx_app/blob/main/docs/source/docs/Appendix_Third_Party_License.md" target="_blank" rel="noopener">third-party license notice</a>.</p>
+  <p class="dx-footer-legal" data-lang-ko>© DEEPX. All rights reserved. · DX-AllSuite v2.5.0(DX-RT v3.5.0) 기준으로 검증했습니다. 성능 수치는 참고용 측정값이며 제품 사양이 아닙니다. 샘플 모델(Ultralytics YOLO26, AGPL-3.0 포함)과 샘플 데이터는 평가 용도로만 제공되며 상업적 배포에 사용할 수 없습니다. <a href="https://github.com/DEEPX-AI/dx_app/blob/main/docs/source/docs/Appendix_Third_Party_License.md" target="_blank" rel="noopener">서드파티 라이선스 고지</a>를 참고하세요.</p>
+  <p class="dx-footer-legal" data-lang-zh>© DEEPX. All rights reserved. · 基于 DX-AllSuite v2.5.0（DX-RT v3.5.0）验证。性能数据为参考测量值，并非产品规格。示例模型（包括 Ultralytics YOLO26，AGPL-3.0）和示例数据仅供评估使用，未获商业部署许可，详见<a href="https://github.com/DEEPX-AI/dx_app/blob/main/docs/source/docs/Appendix_Third_Party_License.md" target="_blank" rel="noopener">第三方许可声明</a>。</p>
+  <p class="dx-footer-legal" data-lang-ja>© DEEPX. All rights reserved. · DX-AllSuite v2.5.0（DX-RT v3.5.0）で検証済み。性能値は参考測定値であり、製品仕様ではありません。サンプルモデル（Ultralytics YOLO26、AGPL-3.0 を含む）とサンプルデータは評価目的に限り提供され、商用展開のライセンスは付与されていません。詳細は<a href="https://github.com/DEEPX-AI/dx_app/blob/main/docs/source/docs/Appendix_Third_Party_License.md" target="_blank" rel="noopener">サードパーティライセンスに関する通知</a>を参照してください。</p>
+  <p class="dx-footer-legal" data-lang-vi>© DEEPX. All rights reserved. · Đã kiểm chứng với DX-AllSuite v2.5.0 (DX-RT v3.5.0). Số liệu hiệu năng là số đo tham khảo, không phải thông số sản phẩm. Model mẫu (bao gồm Ultralytics YOLO26, AGPL-3.0) và dữ liệu mẫu chỉ dùng để đánh giá, không được cấp phép triển khai thương mại — xem <a href="https://github.com/DEEPX-AI/dx_app/blob/main/docs/source/docs/Appendix_Third_Party_License.md" target="_blank" rel="noopener">thông báo giấy phép bên thứ ba</a>.</p>
 </footer>
 
 <script src="assets/script.js"></script>
