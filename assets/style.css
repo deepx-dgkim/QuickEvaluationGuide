@@ -135,6 +135,30 @@ a:hover { text-decoration: underline; }
   color: #fff;
 }
 
+/* Narrow screens: the logo, page links and language toggle no longer fit on one
+   row. Tablet: logo + language toggle on top, page links on a second row.
+   Phone: one row each, and the bar stops being sticky so it doesn't cover the page. */
+@media (max-width: 960px) {
+  .dx-nav__inner { flex-wrap: wrap; row-gap: 10px; padding: 12px 16px; }
+  .dx-logo { order: 1; }
+  .dx-lang-toggle { order: 2; margin-left: auto; }
+  .dx-nav__links {
+    order: 3;
+    flex: 1 1 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 0 -4px;
+  }
+  .dx-nav__links a { white-space: nowrap; }
+}
+@media (max-width: 600px) {
+  .dx-nav { position: static; }
+  .dx-lang-toggle { flex: 1 1 100%; margin-left: 0; }
+  .dx-lang-toggle button { flex: 1 1 auto; padding: 7px 4px; font-size: 12px; white-space: nowrap; }
+  .dx-nav__links { justify-content: space-between; }
+  .dx-nav__links a { padding: 8px 10px; }
+}
+
 /* ---------------------------------------------------------------------- */
 /* Language visibility                                                    */
 /* ---------------------------------------------------------------------- */
@@ -503,6 +527,8 @@ td code { white-space: nowrap; }
   margin-bottom: 4px;
   color: var(--dx-ink);
 }
+/* keep directory / command names in their real case inside uppercase titles */
+.dx-callout strong.dx-callout-title code { text-transform: none; }
 .dx-callout p:last-child { margin-bottom: 0; }
 
 /* Setup method tabs (setup.html) */
@@ -605,6 +631,24 @@ html[data-setup="manual"] [data-method-manual] { display: block; }
   color: var(--dx-ink-soft);
   line-height: 1.6;
 }
+
+/* Setup overview diagram: boxes link to their install step */
+.dx-diag-link { cursor: pointer; }
+.dx-diag-link .dx-diag-box { transition: opacity 0.15s ease; }
+.dx-diag-link:hover .dx-diag-box,
+.dx-diag-link:focus .dx-diag-box { opacity: 0.82; }
+
+/* Grouped TOC (setup page): group label + indented items */
+.dx-toc li.dx-toc-group a {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--dx-navy);
+}
+.dx-toc li.dx-toc-group:not(:first-child) { margin-top: 12px; }
+.dx-toc li.dx-toc-sub a { padding-left: 26px; }
+.dx-toc li a small { font-weight: 500; font-size: 11px; }
 
 /* Decision table on advanced summary */
 .dx-goal-table td:first-child { font-weight: 700; color: var(--dx-navy); white-space: nowrap; }
